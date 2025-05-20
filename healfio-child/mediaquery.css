@@ -1,0 +1,226 @@
+@media screen and (max-width: 1199px) {
+  :root #main-header {
+    margin-bottom: -1px;
+  }
+  .dropdown-menu li {
+    margin-bottom: 0;
+  }
+  #pr-nav.open-pr-nav {
+    position: static !important;
+  }
+  .header-icons {
+    margin-left: 15px;
+    margin-right: 15px;
+    padding-top: 65px;
+    justify-content: space-evenly;
+    padding-bottom: 10px;
+  }
+  #magic-search {
+    width: 94%;
+    position: absolute;
+    top: 0;
+  }
+  .age-gate {
+    margin-top: 5%;
+  }
+  .age-gate__heading-title--logo {
+    margin-bottom: 0;
+    height: 200px;
+    width: auto;
+  }
+  .megaMenu {
+    top: 60px;
+    min-height: 94%;
+    box-shadow: none;
+  }
+  .megaMenu .btnWrapper {
+    background-color: #969F2B;
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 10px;
+    align-items: center;
+    color: black;
+    position: static;
+  }
+  .megaMenu .btnWrapper .backMenu {
+    visibility: visible;
+    opacity: 1;
+  }
+  .megaMenu .btnWrapper .closeMenu {
+    background: transparent;
+  }
+  .megaMenu .colGroup {
+    flex-direction: column;
+  }
+  .megaMenu .colGroup .col {
+    border-right: none;
+    border-bottom: solid 1px #000000;
+  }
+  .megaMenu .colGroup h5:after {
+    width: 40px;
+    height: 27px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    content: '\002B';
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    cursor: pointer;
+  }
+  .megaMenu .colGroup h5.open:after {
+    content: '\002D';
+    font-size: 35px;
+  }
+  .megaMenu .labelGroup {
+    display: none;
+  }
+  .megaMenu .labelGroup h5:after {
+    display: none;
+  }
+  .megaMenu .menuFooter {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 20px;
+  }
+  .megaMenu .menuFooter .selectAll,
+  .megaMenu .menuFooter .sortBtn {
+    width: 48%;
+  }
+  .myProfile h1,
+  .orderHistory h1 {
+    margin-top: 0;
+  }
+  .scriptHistoryWrapper {
+    padding-bottom: 40px;
+  }
+  .innerBanner .caption {
+    min-height: 248px;
+  }
+  .innerBanner.loginBanner {
+    margin-top: -30px;
+  }
+  .account_full_width {
+    padding-top: 0rem;
+  }
+  .ordertrakingWrapper {
+    padding: 20px 0 60px;
+  }
+  .orderDetailWrapper,
+  .woocommerce-customer-details {
+    padding: 25px 0;
+  }
+  .orderDetail {
+    overflow-x: scroll;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+  }
+  .orderDetail table {
+    width: 650px !important;
+  }
+}
+@media screen and (max-width: 967px) {
+  .stepsWrapper:before {
+    top: 205px;
+  }
+  .myProfile p strong {
+    max-width: 160px;
+  }
+  .spacerHide {
+    display: none;
+  }
+}
+@media screen and (max-width: 767px) {
+  .stepsWrapper:before {
+    display: none;
+  }
+  .stepsWrapper .step1,
+  .stepsWrapper .step2,
+  .stepsWrapper .step3,
+  .stepsWrapper .step4 {
+    background-color: #416b29;
+    padding: 10px;
+    margin-top: -20px;
+  }
+  .stepsTitle {
+    font-size: 38px !important;
+    line-height: 28px !important;
+  }
+  .stepsTitle span {
+    font-size: 23px;
+  }
+  .productCategorySlider h2 {
+    line-height: 50px;
+  }
+  .productFilter {
+    padding-bottom: 0;
+  }
+  .productFilter .elementor-widget-container {
+    flex-direction: column;
+  }
+  .productFilter .filterDropdown {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  .productFilter .filterDropdown .toggleBtn {
+    width: 100%;
+  }
+  .productFilter .filterDropdown .dropdown {
+    max-width: 100%;
+  }
+  .featuredWrapper .woocommerce-result-count {
+    top: -440px;
+  }
+  .single-product .backBtn .elementor-button-text {
+    padding-right: 15px;
+    height: 90px;
+    line-height: 160px;
+    background-size: auto;
+  }
+  .single-product .prouductInfo {
+    text-align: left;
+    padding-right: 0;
+  }
+  div[role="tablist"] span:after {
+    display: none;
+  }
+  .related.products h6 {
+    font-size: 35px;
+    margin: 0;
+  }
+  .productDescriptionTab button {
+    background: #f1f8f9 !important;
+  }
+  .productDescriptionTab button[aria-selected="true"] {
+    background: #63a7b6 !important;
+  }
+  .effectsDuration table {
+    font-size: 16px;
+    width: 200%;
+  }
+  .elementor-post__card .elementor-post__title a {
+    font-size: 22px;
+    min-height: auto;
+  }
+  .elementor-post__card .elementor-post__read-more {
+    font-size: 14px;
+  }
+  .registration .elementor-field-option label {
+    font-size: 16px !important;
+  }
+  .registration .elementor-col-20 {
+    white-space: normal;
+  }
+  .registration #registerNow {
+    font-size: 20px;
+  }
+  .productDetails .flexGroup {
+    flex-wrap: wrap;
+  }
+  .productDetails .productPrice {
+    width: 100%;
+    margin-top: 15px;
+  }
+}

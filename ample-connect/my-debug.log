@@ -1,0 +1,935 @@
+[2025-05-12 09:42:01] order webhook received
+[2025-05-12 09:42:01] {
+    "resource_id": 1189,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:41:59.056+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1189",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "applicable_policies.1": {
+            "action": "create",
+            "attributes": {
+                "name": "Veteran's Affairs",
+                "global_policy": true,
+                "archive_at_end_of_registration": false,
+                "enabled": true,
+                "covers_shipping": true,
+                "percentage_discount": 100,
+                "per_gram_limit": 850,
+                "discount_type_id": 2,
+                "is_vac": true
+            }
+        },
+        "applicable_discount_codes.1": {
+            "action": "create",
+            "attributes": {
+                "code": "SUMMER2025",
+                "percentage": 10,
+                "dollar": null,
+                "expiry": null,
+                "description": "promo ",
+                "type": "Compassionate Pricing"
+            }
+        },
+        "applicable_discount_codes.2": {
+            "action": "create",
+            "attributes": {
+                "code": null,
+                "percentage": null,
+                "dollar": 500,
+                "expiry": null,
+                "description": "non-checkout code discount ",
+                "type": "Seniors Discount"
+            }
+        },
+        "verified_by": {
+            "action": "create",
+            "attributes": {
+                "id": null,
+                "name": null,
+                "on": null,
+                "verified": true
+            }
+        },
+        "taxes": {
+            "action": "create",
+            "attributes": {
+                "hst": 0
+            }
+        },
+        "previous_order_shipping": {
+            "action": "create",
+            "attributes": {
+                "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                "mode": "test",
+                "rate": "71.96",
+                "object": "Rate",
+                "carrier": "FedEx",
+                "service": "PRIORITY_OVERNIGHT",
+                "currency": "CAD",
+                "list_rate": "71.96",
+                "created_at": "2025-04-30T11:08:02Z",
+                "updated_at": "2025-04-30T11:08:02Z",
+                "retail_rate": null,
+                "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                "billing_type": "carrier",
+                "delivery_date": "2025-05-01T13:30:00Z",
+                "delivery_days": 1,
+                "list_currency": "CAD",
+                "retail_currency": null,
+                "est_delivery_days": 1,
+                "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                "delivery_date_guaranteed": true
+            }
+        },
+        "order": {
+            "action": "create",
+            "attributes": {
+                "id": 1189,
+                "status": "Order Refused",
+                "prescription_id": 1,
+                "created_at": "2025-05-12T19:39:57.624+10:00",
+                "shipping_tracking_code": null,
+                "paypal_order_id": null,
+                "total_cost": 0,
+                "total_shipping": 0,
+                "total_tax": 0,
+                "total_discounts": 0,
+                "total_grams_purchased": 0,
+                "total_quantity_purchased": 0,
+                "shipping_purchased": false,
+                "purchased": false,
+                "subtotal": 0,
+                "total_policies": 0,
+                "saturday_shipping_enabled": false,
+                "same_day_shipping_enabled": false,
+                "shipping_type": "standard",
+                "total_cost_without_discounts": 0,
+                "final_cost": 0,
+                "final_cost_without_policies": 0,
+                "packing_order_id": null,
+                "shipping_rate": null,
+                "has_confirmation_receipt": false,
+                "has_shipped_receipt": false,
+                "client_name": "Chandan Singh",
+                "carrier": null,
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                },
+                "refill_logs": null,
+                "policy_breakdown": null
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:48:34] order webhook received
+[2025-05-12 09:48:34] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "create",
+    "event_timestamp": "2025-05-12T19:48:32.636+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "applicable_policies.1": {
+            "action": "create",
+            "attributes": {
+                "name": "Veteran's Affairs",
+                "global_policy": true,
+                "archive_at_end_of_registration": false,
+                "enabled": true,
+                "covers_shipping": true,
+                "percentage_discount": 100,
+                "per_gram_limit": 850,
+                "discount_type_id": 2,
+                "is_vac": true
+            }
+        },
+        "applicable_discount_codes.1": {
+            "action": "create",
+            "attributes": {
+                "code": "SUMMER2025",
+                "percentage": 10,
+                "dollar": null,
+                "expiry": null,
+                "description": "promo ",
+                "type": "Compassionate Pricing"
+            }
+        },
+        "applicable_discount_codes.2": {
+            "action": "create",
+            "attributes": {
+                "code": null,
+                "percentage": null,
+                "dollar": 500,
+                "expiry": null,
+                "description": "non-checkout code discount ",
+                "type": "Seniors Discount"
+            }
+        },
+        "verified_by": {
+            "action": "create",
+            "attributes": {
+                "id": null,
+                "name": null,
+                "on": null,
+                "verified": true
+            }
+        },
+        "taxes": {
+            "action": "create",
+            "attributes": {
+                "hst": 0
+            }
+        },
+        "previous_order_shipping": {
+            "action": "create",
+            "attributes": {
+                "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                "mode": "test",
+                "rate": "71.96",
+                "object": "Rate",
+                "carrier": "FedEx",
+                "service": "PRIORITY_OVERNIGHT",
+                "currency": "CAD",
+                "list_rate": "71.96",
+                "created_at": "2025-04-30T11:08:02Z",
+                "updated_at": "2025-04-30T11:08:02Z",
+                "retail_rate": null,
+                "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                "billing_type": "carrier",
+                "delivery_date": "2025-05-01T13:30:00Z",
+                "delivery_days": 1,
+                "list_currency": "CAD",
+                "retail_currency": null,
+                "est_delivery_days": 1,
+                "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                "delivery_date_guaranteed": true
+            }
+        },
+        "order": {
+            "action": "create",
+            "attributes": {
+                "id": 1190,
+                "status": "Open Order",
+                "prescription_id": 1,
+                "created_at": "2025-05-12T19:48:22.054+10:00",
+                "shipping_tracking_code": null,
+                "paypal_order_id": null,
+                "total_cost": 0,
+                "total_shipping": 0,
+                "total_tax": 0,
+                "total_discounts": 0,
+                "total_grams_purchased": 0,
+                "total_quantity_purchased": 0,
+                "shipping_purchased": false,
+                "purchased": false,
+                "subtotal": 0,
+                "total_policies": 0,
+                "saturday_shipping_enabled": false,
+                "same_day_shipping_enabled": false,
+                "shipping_type": "standard",
+                "total_cost_without_discounts": 0,
+                "final_cost": 0,
+                "final_cost_without_policies": 0,
+                "packing_order_id": null,
+                "shipping_rate": null,
+                "has_confirmation_receipt": false,
+                "has_shipped_receipt": false,
+                "client_name": "Chandan Singh",
+                "carrier": null,
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                },
+                "refill_logs": null,
+                "policy_breakdown": null
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:50:57] order webhook received
+[2025-05-12 09:50:57] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:50:55.456+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "order_items.529": {
+            "action": "create",
+            "attributes": {
+                "quantity": 2,
+                "sku_id": 1,
+                "sku_name": "1g Cart",
+                "sku_upc_code": null,
+                "product_id": 4,
+                "product_name": "510 Vape Cartridge",
+                "product_image": "https:\/\/medbox-preview-storage.s3.ca-central-1.amazonaws.com\/public\/uploads\/product\/file\/4\/Vape.png",
+                "product_images": null,
+                "product_tag_names": [],
+                "sku_image": null,
+                "total_cost": 3000,
+                "total_cost_without_discounts": 3000,
+                "unit_price": 1500,
+                "sale_price": 1500,
+                "unit_grams": 1,
+                "strain_type": null,
+                "brand_name": null,
+                "discounts": []
+            }
+        },
+        "taxes": {
+            "action": "update",
+            "attributes": {
+                "hst": 390
+            }
+        },
+        "order": {
+            "action": "update",
+            "attributes": {
+                "total_cost": 3000,
+                "total_tax": 390,
+                "total_grams_purchased": "2.0",
+                "total_quantity_purchased": 2,
+                "subtotal": 3000,
+                "total_cost_without_discounts": 3000,
+                "final_cost": 3390,
+                "final_cost_without_policies": 3390,
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                }
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:50:59] order webhook received
+[2025-05-12 09:50:59] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:50:55.876+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "order": {
+            "action": "update",
+            "attributes": {
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                }
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:51:10] order webhook received
+[2025-05-12 09:51:10] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:50:55.456+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "order_items.529": {
+            "action": "create",
+            "attributes": {
+                "quantity": 2,
+                "sku_id": 1,
+                "sku_name": "1g Cart",
+                "sku_upc_code": null,
+                "product_id": 4,
+                "product_name": "510 Vape Cartridge",
+                "product_image": "https:\/\/medbox-preview-storage.s3.ca-central-1.amazonaws.com\/public\/uploads\/product\/file\/4\/Vape.png",
+                "product_images": null,
+                "product_tag_names": [],
+                "sku_image": null,
+                "total_cost": 3000,
+                "total_cost_without_discounts": 3000,
+                "unit_price": 1500,
+                "sale_price": 1500,
+                "unit_grams": 1,
+                "strain_type": null,
+                "brand_name": null,
+                "discounts": []
+            }
+        },
+        "taxes": {
+            "action": "update",
+            "attributes": {
+                "hst": 390
+            }
+        },
+        "order": {
+            "action": "update",
+            "attributes": {
+                "total_cost": 3000,
+                "total_tax": 390,
+                "total_grams_purchased": "2.0",
+                "total_quantity_purchased": 2,
+                "subtotal": 3000,
+                "total_cost_without_discounts": 3000,
+                "final_cost": 3390,
+                "final_cost_without_policies": 3390,
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                }
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:51:11] order webhook received
+[2025-05-12 09:51:11] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:50:55.876+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "order": {
+            "action": "update",
+            "attributes": {
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                }
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:51:32] order webhook received
+[2025-05-12 09:51:32] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:50:55.456+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "order_items.529": {
+            "action": "create",
+            "attributes": {
+                "quantity": 2,
+                "sku_id": 1,
+                "sku_name": "1g Cart",
+                "sku_upc_code": null,
+                "product_id": 4,
+                "product_name": "510 Vape Cartridge",
+                "product_image": "https:\/\/medbox-preview-storage.s3.ca-central-1.amazonaws.com\/public\/uploads\/product\/file\/4\/Vape.png",
+                "product_images": null,
+                "product_tag_names": [],
+                "sku_image": null,
+                "total_cost": 3000,
+                "total_cost_without_discounts": 3000,
+                "unit_price": 1500,
+                "sale_price": 1500,
+                "unit_grams": 1,
+                "strain_type": null,
+                "brand_name": null,
+                "discounts": []
+            }
+        },
+        "taxes": {
+            "action": "update",
+            "attributes": {
+                "hst": 390
+            }
+        },
+        "order": {
+            "action": "update",
+            "attributes": {
+                "total_cost": 3000,
+                "total_tax": 390,
+                "total_grams_purchased": "2.0",
+                "total_quantity_purchased": 2,
+                "subtotal": 3000,
+                "total_cost_without_discounts": 3000,
+                "final_cost": 3390,
+                "final_cost_without_policies": 3390,
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                }
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:51:34] order webhook received
+[2025-05-12 09:51:34] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:50:55.876+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "order": {
+            "action": "update",
+            "attributes": {
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                }
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:53:07] order webhook received
+[2025-05-12 09:53:07] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:53:04.969+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "order_items.529": {
+            "action": "update",
+            "attributes": {
+                "quantity": 4,
+                "total_cost": 6000,
+                "total_cost_without_discounts": 6000
+            }
+        },
+        "taxes": {
+            "action": "update",
+            "attributes": {
+                "hst": 780
+            }
+        },
+        "order": {
+            "action": "update",
+            "attributes": {
+                "total_cost": 6000,
+                "total_tax": 780,
+                "total_grams_purchased": "4.0",
+                "total_quantity_purchased": 4,
+                "subtotal": 6000,
+                "total_cost_without_discounts": 6000,
+                "final_cost": 6780,
+                "final_cost_without_policies": 6780,
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                }
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:53:08] order webhook received
+[2025-05-12 09:53:08] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:53:05.457+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "order": {
+            "action": "update",
+            "attributes": {
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                }
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:53:19] order webhook received
+[2025-05-12 09:53:19] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:53:04.969+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "order_items.529": {
+            "action": "update",
+            "attributes": {
+                "quantity": 4,
+                "total_cost": 6000,
+                "total_cost_without_discounts": 6000
+            }
+        },
+        "taxes": {
+            "action": "update",
+            "attributes": {
+                "hst": 780
+            }
+        },
+        "order": {
+            "action": "update",
+            "attributes": {
+                "total_cost": 6000,
+                "total_tax": 780,
+                "total_grams_purchased": "4.0",
+                "total_quantity_purchased": 4,
+                "subtotal": 6000,
+                "total_cost_without_discounts": 6000,
+                "final_cost": 6780,
+                "final_cost_without_policies": 6780,
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                }
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:53:21] order webhook received
+[2025-05-12 09:53:21] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:53:05.457+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "order": {
+            "action": "update",
+            "attributes": {
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                }
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:53:42] order webhook received
+[2025-05-12 09:53:42] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:53:04.969+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "order_items.529": {
+            "action": "update",
+            "attributes": {
+                "quantity": 4,
+                "total_cost": 6000,
+                "total_cost_without_discounts": 6000
+            }
+        },
+        "taxes": {
+            "action": "update",
+            "attributes": {
+                "hst": 780
+            }
+        },
+        "order": {
+            "action": "update",
+            "attributes": {
+                "total_cost": 6000,
+                "total_tax": 780,
+                "total_grams_purchased": "4.0",
+                "total_quantity_purchased": 4,
+                "subtotal": 6000,
+                "total_cost_without_discounts": 6000,
+                "final_cost": 6780,
+                "final_cost_without_policies": 6780,
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                }
+            }
+        }
+    },
+    "client_id": 34
+}
+[2025-05-12 09:53:43] order webhook received
+[2025-05-12 09:53:43] {
+    "resource_id": 1190,
+    "resource_type": "Order",
+    "change_type": "update",
+    "event_timestamp": "2025-05-12T19:53:05.457+10:00",
+    "resource_url": "\/integrations\/woocommerce\/orders\/1190",
+    "webhook_signature": "47DDCC7E2DCC99972DCFF60F1A201442AD272FDD7C9A8340601FC2F92237479F",
+    "changes": {
+        "order": {
+            "action": "update",
+            "attributes": {
+                "previous_order_shipping": {
+                    "id": "rate_472af23de143453ba45d1ee9e2bfa26e",
+                    "mode": "test",
+                    "rate": "71.96",
+                    "object": "Rate",
+                    "carrier": "FedEx",
+                    "service": "PRIORITY_OVERNIGHT",
+                    "currency": "CAD",
+                    "list_rate": "71.96",
+                    "created_at": "2025-04-30T11:08:02Z",
+                    "updated_at": "2025-04-30T11:08:02Z",
+                    "retail_rate": null,
+                    "shipment_id": "shp_14fc6f7764c0473d8165fc2e13833446",
+                    "billing_type": "carrier",
+                    "delivery_date": "2025-05-01T13:30:00Z",
+                    "delivery_days": 1,
+                    "list_currency": "CAD",
+                    "retail_currency": null,
+                    "est_delivery_days": 1,
+                    "carrier_account_id": "ca_48892926496d4adb8b3967fd9a2c5fe5",
+                    "delivery_date_guaranteed": true
+                }
+            }
+        }
+    },
+    "client_id": 34
+}
