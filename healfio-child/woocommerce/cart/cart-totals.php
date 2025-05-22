@@ -18,7 +18,7 @@
 defined( 'ABSPATH' ) || exit;
 
 ?>
-<div class="row cart-totals-wrapper" style="display: flex; align-items: center;">
+<div class="row cart-totals-wrapper" style="padding: 0px 32px 0px 32px; display: flex; align-items: center;">
 	<div class="col-md-12">
 		<div class="cart_totals <?php echo ( WC()->customer->has_calculated_shipping() ) ? 'calculated_shipping' : ''; ?>" style="width: 100%;">
 			<?php do_action( 'woocommerce_before_cart_totals' ); ?>

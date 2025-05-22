@@ -986,6 +986,9 @@ body .elementor-button:focus {
 
   ul.products {
     li.product {
+
+      box-shadow: 0px 5px 5px 2px rgba(99, 167, 182, 0.5);
+
       .prodcard-brand {
         label {
           margin-bottom: 0;
@@ -1003,9 +1006,8 @@ body .elementor-button:focus {
     }
   }
 
-  ul.products.columns-3 {
+  ul.products {
     li.product {
-      border-radius: 0;
 
       .price {
         color: white;
@@ -1021,10 +1023,6 @@ body .elementor-button:focus {
         padding: 14px 10px 0;
         min-height: 65px;
         -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        display: -webkit-box;
-        overflow: hidden;
-        word-break: break-word;
         margin-bottom: 0;
         border-bottom: solid 1px #e0edf0;
         border-top: solid 1px #e0edf0;
@@ -1040,10 +1038,6 @@ body .elementor-button:focus {
           color: @white;
           background-color: white;
         }
-      }
-
-      &:hover {
-        transform: none !important;
       }
 
       .cardFooter {
@@ -1742,11 +1736,13 @@ a.button.thankyou-button {
   .single_add_to_cart_button,
   .continue-shopping-button {
     margin-left: 10px !important;
+    font-size: 20px;
+    padding: 8px 10px 8px !important;
   }
 
   .single_add_to_cart_button{
     &.disabled {
-      padding: 10px 10px 8px !important;
+      padding: 8px 10px 8px !important;
     }
   }
 }
@@ -1755,16 +1751,12 @@ a.button.thankyou-button {
 
   display: inline-flex;
   align-items: center;
-
-  // position: absolute;
-  // margin-top: -120px;
-  //right: 42%;
   justify-content: space-between;
-  width: 90px;
+  position: relative;
 
   .btn {
     border-radius: 100%;
-    width: 30px;
+    min-width: 30px;
     height: 30px;
     text-align: center;
     background-color: @secondryGreen;
@@ -2264,12 +2256,12 @@ div[role="tablist"] {
 }
 
 .single_variation_wrap {
-  text-align: right;
-  width: 100%;
-  margin-left: auto;
-  .woocommerce-variation-price {
-    margin-top: -30px;
-    margin-bottom: 5px;
+  display: flex;
+
+  .single_variation {
+    order: 1;
+    min-width: 100px;
+    display: block !important;
   }
 }
 
@@ -2280,10 +2272,7 @@ div[role="tablist"] {
   margin: 0 !important;
   max-height: 30px;
   max-width: 30px;
-
-  position: absolute;
-  top: 0;
-  right: 47%;
+  color: #ffffff;
 }
 
 /* Chrome, Safari, Edge, Opera */
@@ -2382,7 +2371,8 @@ input[type=number] {
     }
   }
 
-  .productPrice {
+  .productPrice,
+  .price {
     height: 35px;
     font-size: 14px;
     color: @black;
@@ -2422,7 +2412,6 @@ input[type=number] {
   }
 
   .productQuantity {
-    position: static;
     margin: 0;
   }
 }
@@ -2471,6 +2460,8 @@ input[type=number] {
       font-size: 20px;
       line-height: 24px;
       letter-spacing: 0;
+      margin: 0;
+      padding: 14px 10px 0;
     }
   }
 }
@@ -2481,118 +2472,88 @@ input[type=number] {
   }
 }
 
+.singleProductContainer {
+  padding: 60px 0;
+  max-width: 1170px;
 
-.woocommerce {
-  ul.products.columns-4 {
-    li.product {
-      .woocommerce-loop-product__title {
-        font-size: 18px;
-        line-height: 24px;
-        margin-top: 0;
-        padding: 14px 10px 0;
-        min-height: 65px;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        display: -webkit-box;
-        overflow: hidden;
-        word-break: break-word;
-        margin-bottom: 0;
-        border-bottom: solid 1px #e0edf0;
-        border-top: solid 1px #e0edf0;
-      }
+  .productTitleWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
 
-      .prodcard-brand,
-      .prodcard-attributes,
-      .prodcard-tags {
-        font-size: 13px;
-      }
+    margin-bottom: 20px;
 
-      .woocommerce-loop-product__buttons {
-        display: none;
-      }
+    .backBtn {
+      background: url(../healfio-child/img/back-arrow.png) left 5px no-repeat;
+      background-size: 35px;
+      height: 70px;
+      line-height: 112px;
+      padding-right: 20px;
+      position: relative;
+      display: inline-block;
+      color: #ffffff;
+      margin-right: 20px;
 
-      .price {
-        width: 100%;
+      &:hover {
         color: #ffffff;
       }
 
-      .cardFooter {
-        width: 100%;
-        display: flex;
-        justify-content: space-around;
-        padding: 5px 0 20px;
-
-        a {
-          color: #000000;
-        }
-
-        .btn {
-          background-color: #63a7b6 !important;
-        }
-
-        input[type="number"] {
-          color: #000000 !important;
-        }
-
-        .addtoCart {
-          display: flex;
-          flex-direction: column;
-
-          label {
-            margin-bottom: 0;
-            font-weight: normal;
-          }
-        }
+      &:after {
+        width: 1px;
+        height: 100%;
+        background-color: #ffffff;
+        position: absolute;
+        top: 0;
+        right: 0;
+        content: '';
       }
     }
-  }
-}
-
-@media (min-width: 1200px) {
-  .primary-menu.navbar {
-    .nav-item:hover {
-      .nav-link {
-        color: @secondryGreen !important;
-        background-color: transparent;
-      }
-    }
-  }
-
-  .primary-menu-inner {
-    max-width: 1170px;
-  }
-
-  .container {
-    max-width: 1170px;
-  }
-
-  .orderStatusBanner {
-    margin-top: -40px;
-  }
-
-  #order-received-section {
-    .orderStatusBanner {
-      margin-top: 0 !important;
-    }
-  }
-
-  .woocommerce ul.products li.product a img {
-    width: auto !important;
-    min-height: 268px !important;
-  }
-
-  .single-product ul.products li.product a img {
-    min-height: 280px !important;
-  }
-
-  .woocommerce-notices-wrapper {
-    max-width: 1170px;
-    margin: 20px auto 0;
-    position: absolute;
-    top: 105px;
-    left: 0;
-    right: 0;
   }
   
+  .product-title {
+    margin: 0;
+    font-family: @Comfortaa;
+    font-size: 45px;
+    font-weight: bold;
+    color: #FFFFFF;
+    line-height: 45px;
+  }
+
+  .subTitle {
+    margin: 0;
+    font-family: @Comfortaa;
+    font-size: 18px;
+    color: #FFFFFF;
+  }
+
 }
 
+.productDetails {
+ .woocommerce-product-rating,
+ .continue-shopping-button,
+ .product_meta,
+ .woocommerce-product-details__short-description {
+  display: none !important;
+ }
+
+ .variations {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+ }
+
+}
+
+
+.woocommerce-tabs {
+  .tabs {
+    background-color: #63a7b6;
+  }
+}
+
+.related.products {
+  h2 {
+    font-size: 45px;
+    color: #FFFFFF;
+  }
+}

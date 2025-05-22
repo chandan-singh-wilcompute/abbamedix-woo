@@ -159,3 +159,14 @@ function custom_cart_collaterals_shortcode() {
 add_shortcode('cart_collaterals', 'custom_cart_collaterals_shortcode');
 
 
+
+
+// Add this in functions.php or a custom plugin
+function my_custom_shortcode_function() {
+    return "<p>This is my custom content from shortcode.</p>";
+}
+add_shortcode('terpene_details', 'my_custom_shortcode_function');
+add_shortcode('potencies', 'my_custom_shortcode_function');
+
+// variation price
+add_filter( 'woocommerce_show_variation_price', '__return_true' );

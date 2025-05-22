@@ -135,7 +135,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 								echo apply_filters( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 									'woocommerce_cart_item_remove_link',
 									sprintf(
-										'<a href="%s" class="remove1" aria-label="%s" data-product_id="%s" data-product_sku="%s"><span class="removeItem">&nbsp;</span>REMOVE</a>',
+										'<a href="%s" class="remove1" aria-label="%s" data-product_id="%s" data-product_sku="%s"><svg xmlns="http://www.w3.org/2000/svg" width="3.92em" height="2em" viewBox="0 0 1408 1536" style="margin-bottom: 3px;"><path fill="black" d="M512 608v576q0 14-9 23t-23 9h-64q-14 0-23-9t-9-23V608q0-14 9-23t23-9h64q14 0 23 9t9 23m256 0v576q0 14-9 23t-23 9h-64q-14 0-23-9t-9-23V608q0-14 9-23t23-9h64q14 0 23 9t9 23m256 0v576q0 14-9 23t-23 9h-64q-14 0-23-9t-9-23V608q0-14 9-23t23-9h64q14 0 23 9t9 23m128 724V384H256v948q0 22 7 40.5t14.5 27t10.5 8.5h832q3 0 10.5-8.5t14.5-27t7-40.5M480 256h448l-48-117q-7-9-17-11H546q-10 2-17 11zm928 32v64q0 14-9 23t-23 9h-96v948q0 83-47 143.5t-113 60.5H288q-66 0-113-58.5T128 1336V384H32q-14 0-23-9t-9-23v-64q0-14 9-23t23-9h309l70-167q15-37 54-63t79-26h320q40 0 79 26t54 63l70 167h309q14 0 23 9t9 23"/></svg> <span><br>REMOVE</span></a>',
 										esc_url( wc_get_cart_remove_url( $cart_item_key ) ),
 										/* translators: %s is the product name */
 										esc_attr( sprintf( __( 'Remove %s from cart', 'woocommerce' ), wp_strip_all_tags( $product_name ) ) ),
@@ -158,15 +158,15 @@ do_action( 'woocommerce_before_cart' ); ?>
 					<div class="skill-main">
 						<div class="skill-wrrap">
 							<div class="skill-bar">
-								<div class="skill-per" data-per="30" data-max="150" style="width:30%"></div>
+								<div class="skill-per" data-per="30" data-max="150"></div>
 							</div>
-							<div class="skill-name"><span class="gr">0&nbsp;gr </span><span class="gr">150&nbsp;gr</span></div>
+							<div class="skill-name">0/ gr <span style="float: inline-end;">150/ gr</span></div>
 						</div>
 					</div>
 				</td>
 			</tr>
 			<tr>
-				<td colspan="6" class="actions" style="border: none!important; padding-left:0; padding-right:0">				
+				<td colspan="6" class="actions" style="border: none!important;">				
 
 					<button type="submit" class="button<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" name="update_cart" value="<?php esc_attr_e( 'Update cart', 'woocommerce' ); ?>"><?php esc_html_e( 'Update cart', 'woocommerce' ); ?></button>
 

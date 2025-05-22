@@ -23,11 +23,14 @@ global $product;
 $currency_symbol = get_woocommerce_currency_symbol();
 ?>
 
+
 <?php
 if ($price_html = $product->get_price_html()) {
     // Create a new DOMDocument object
+    libxml_use_internal_errors(true); // Suppress warnings
     $dom = new DOMDocument();
     $dom->loadHTML($price_html);
+    libxml_clear_errors(); // Clear any collected errors
     $price_elements = $dom->getElementsByTagName('span');
     foreach ($price_elements as $element) {
         if ($element->getAttribute('class') === 'woocommerce-Price-currencySymbol') {
