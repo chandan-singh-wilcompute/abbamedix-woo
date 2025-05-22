@@ -39,103 +39,74 @@ if ( $show_downloads ) {
 	);
 }
 ?>
-<section class="woocommerce-order-details mb-0">
-	<div class="innerBanner orderStatusBanner">
-		<div class="container">
-			<div class="caption">
-				<h1>Order Status</h1>
-			</div>
-		</div>
-	</div>
-
-	<div class="ordertrakingWrapper">
-		<div class="container">
-			<h4>Order Tracking</h4>
-			<div class="orderStatusEstimate">
-				<p>Order Status: <span class="status">Placed</span></p>
-				<p>Estimated Delivery date: 17 Jan - 19 Jan</p>
-			</div>
-
-			<div class="orderStatusProgressbar">
-				<div class="statusBar">
-					<span class="active"><i class="bi bi-check-lg"></i> Order Palced</span>
-					<span><i class="bi bi-truck"></i>Shipped</span>
-					<span><i class="bi bi-house-check"></i>Delivered</span>
-				</div>				
-			</div>
-		</div>
-	</div>
-
-
+<section class="woocommerce-order-details">
 	<?php do_action( 'woocommerce_order_details_before_order_table', $order ); ?>
-	<div class="orderDetailWrapper">
-		<div class="container">
-			<h4 class="woocommerce-order-details__title"><?php esc_html_e( 'Order details', 'healfio' ); ?></h4>
-			<div class="row">
-				<div class="col-md-7 orderDetail">
-					<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
 
-						<tbody>
-							<?php
-							do_action( 'woocommerce_order_details_before_order_table_items', $order );
+	<h4 class="woocommerce-order-details__title"><?php esc_html_e( 'Order details', 'healfio' ); ?></h4>
+	<div class="row" style="margin-right: 0px; margin-left: 0px;">
+		<div class="col-md-7" style="border: 3px solid #007866;">
+			<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
 
-							foreach ( $order_items as $item_id => $item ) {
-								$product = $item->get_product();
+				<tbody>
+					<?php
+					do_action( 'woocommerce_order_details_before_order_table_items', $order );
 
-								wc_get_template(
-									'order/order-details-item.php',
-									array(
-										'order'              => $order,
-										'item_id'            => $item_id,
-										'item'               => $item,
-										'show_purchase_note' => $show_purchase_note,
-										'purchase_note'      => $product ? $product->get_purchase_note() : '',
-										'product'            => $product,
-									)
-								);
-							}
+					foreach ( $order_items as $item_id => $item ) {
+						$product = $item->get_product();
 
-							do_action( 'woocommerce_order_details_after_order_table_items', $order );
+						wc_get_template(
+							'order/order-details-item.php',
+							array(
+								'order'              => $order,
+								'item_id'            => $item_id,
+								'item'               => $item,
+								'show_purchase_note' => $show_purchase_note,
+								'purchase_note'      => $product ? $product->get_purchase_note() : '',
+								'product'            => $product,
+							)
+						);
+					}
+
+					do_action( 'woocommerce_order_details_after_order_table_items', $order );
+					?>
+				</tbody>
+
+				
+			</table>
+		</div>
+		<div class="col-md-4 offset-1" style="border: 3px solid #007866;">
+			<h4>Order Summary</h4> 
+			<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+				<thead>
+				</thead>
+				<tbody>
+					<?php
+						$order_items = $order->get_order_item_totals();
+						$last_item_key = array_key_last($order_items);
+						foreach ( $order_items as $key => $total ) {
+							$last_class = ($key === $last_item_key) ? ' class="order-summary-last-item"' : '';
 							?>
-						</tbody>
+								<tr <?php echo $last_class; ?>>
+									<th scope="row"><?php echo esc_html( $total['label'] ); ?></th>
+									<td><?php echo ( 'payment_method' === $key ) ? esc_html( $total['value'] ) : wp_kses_post( $total['value'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
+								</tr>
+								<?php
+						}
+						?>
+						<?php if ( $order->get_customer_note() ) : ?>
+							<tr>
+								<th><?php esc_html_e( 'Note:', 'healfio' ); ?></th>
+								<td><?php echo wp_kses_post( nl2br( wptexturize( $order->get_customer_note() ) ) ); ?></td>
+							</tr>
+					<?php endif; ?>
+				</tbody>
+			</table>
+			<tfoot>
 
-						
-					</table>
-				</div>
-				<div class="col-md-5 orderSummary">
-					<h4>Order Summary</h4> 
-					<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
-						<thead>
-						</thead>
-						<tbody>
-							<?php
-								$order_items = $order->get_order_item_totals();
-								$last_item_key = array_key_last($order_items);
-								foreach ( $order_items as $key => $total ) {
-									$last_class = ($key === $last_item_key) ? ' class="order-summary-last-item"' : '';
-									?>
-										<tr <?php echo $last_class; ?>>
-											<th scope="row"><?php echo esc_html( $total['label'] ); ?></th>
-											<td><?php echo ( 'payment_method' === $key ) ? esc_html( $total['value'] ) : wp_kses_post( $total['value'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></td>
-										</tr>
-										<?php
-								}
-								?>
-								<?php if ( $order->get_customer_note() ) : ?>
-									<tr>
-										<th><?php esc_html_e( 'Note:', 'healfio' ); ?></th>
-										<td><?php echo wp_kses_post( nl2br( wptexturize( $order->get_customer_note() ) ) ); ?></td>
-									</tr>
-							<?php endif; ?>
-						</tbody>
-					</table>
-					<tfoot>
-
-					</tfoot>
-				</div>
-			</div>
+			</tfoot>
 		</div>
 	</div>
+	
 
 	<?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
 </section>

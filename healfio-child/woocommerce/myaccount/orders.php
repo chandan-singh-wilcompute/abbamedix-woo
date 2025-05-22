@@ -20,73 +20,81 @@
 defined( 'ABSPATH' ) || exit;
 
 do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
-<div class="container orderHistory">
-	<h1>ORDER HISTORY</h1>
-	<?php if ( $has_orders ) : ?>
-	<div class="row">
-		<div class="col-md-9 orderHistoryTable">
-			<div class="wrapper-orders mb-5">		
-				<?php foreach ( $customer_orders->orders as $customer_order ) : 
-						$order      = wc_get_order( $customer_order ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-						$item_count = $order->get_item_count();
-				?>
-				<table class="myacc-order">
-					<tr class="tbhead">
-						<td>Order Id</td>
-						<td>Placed On</td>
-						<td>Items</td>
-						<td>Gram Deduction</td>
-						<td>Status</td>
-						<td>Total</td>			
-					</tr>	
-					<tr class="tbbody">
-						<td><?php echo $order->id;?></td>
-						<td><time datetime="<?php echo esc_attr( $order->get_date_created()->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></time></td>
-						<td><?php echo $item_count;?></td>
-						<td>20g</td>
-						<td><?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?></td>
-						<td><?php echo  $order->get_formatted_order_total(); ?></td>			
-					</tr>
-					<tr class="tbfoot"><td colspan="2">Order Confirmation</td><td colspan="4">Shipped Receipt</td></tr>
-				</table>
-				<?php endforeach; ?>
-			</div>
-		</div>
-		<div class="col-md-3 orderLog">
-			<h4 class="mt-0">ORDER LOG</h4>
-			<p>
-				Access a log of all your orders from within a specific data range
-			</p>
-			<form>
-				<label>Start Date</label>
-				<div class="optionGroup">
-					<select>
-						<option>Year</option>
-						<option>2025</option>
-					</select>
-					<select>
-						<option>Month</option>
-						<option>03</option>		  
-					</select>
-				</div>
-				<label>End Date</label>
-				<div class="optionGroup">
-					<select>
-						<option>Year</option>
-						<option>2025</option>
-					</select>
-					<select>
-						<option>Month</option>
-						<option>03</option>		  
-					</select>
-				</div>
-				<div class="btnsWrapper">
-					<button class="btn-hist-order" type="submit">VIEW</button>
-					<button class="btn-hist-order ml-3" type="reset">RESET</button>
-				</div>
-			</form>
-		</div>
-	</div>
+<h1>
+	ORDER HISTORY
+</h1>
+<?php if ( $has_orders ) : ?>
+<div class="row">
+  <div class="col-md-8">
+	
+
+	 <div class="wrapper-orders">
+	
+
+		<?php foreach ( $customer_orders->orders as $customer_order ) : 
+				$order      = wc_get_order( $customer_order ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$item_count = $order->get_item_count();
+		?>
+		<table class="myacc-order">
+			<tr class="tbhead">
+				<td>Order Id</td>
+				<td>Placed On</td>
+				<td>Items</td>
+				<td>Gram Deduction</td>
+				<td>Status</td>
+				<td>Total</td>			
+			</tr>	
+			<tr class="tbbody">
+				<td><?php echo $order->id;?></td>
+				<td><time datetime="<?php echo esc_attr( $order->get_date_created()->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></time></td>
+				<td><?php echo $item_count;?></td>
+				<td>20g</td>
+				<td><?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?></td>
+				<td><?php echo  $order->get_formatted_order_total(); ?></td>			
+			</tr>
+			<tr class="tbfoot"><td colspan="2">Order Confirmation</td><td colspan="4">Shipped Receipt</td></tr>
+		</table>
+	<?php endforeach; ?>
+   </div>
+  </div>
+  <div class="col-md-4">
+	  <h4 style="    margin-top: 0px;">
+		  ORDER LOG
+	  </h4>
+	  <p>
+		  Access a log of all your orders from within a specific data range
+	  </p>
+	  <form class="orders-hist">
+		  <span>Start Date</span>
+		  <div style="display:flex;margin-bottom:10px">
+			 <select>
+				  <option>Year</option>
+				  <option>2025</option>
+			  </select>
+			  <select>
+				  <option>Month</option>
+				  <option>03</option>		  
+			  </select>
+		  </div>
+		  <span style="padding-top:10px">End Date</span>
+		  <div style="display:flex">
+			 <select>
+				  <option>Year</option>
+				  <option>2025</option>
+			  </select>
+			  <select>
+				  <option>Month</option>
+				  <option>03</option>		  
+			  </select>
+			  
+		  </div>
+		  <div class="row" style="margin-top: 10px;margin-left:0px">
+				  <button class="btn-hist-order" type="submit">VIEW</button>
+				  <button class="btn-hist-order" type="reset" style="margin-left:5px">RESET</button>
+		      </div>
+	  </form>
+  </div>
+</div>
 
 	<table style="display:none" class="woocommerce-orders-table woocommerce-MyAccount-orders shop_table shop_table_responsive my_account_orders account-orders-table">
 		<thead>
@@ -166,21 +174,20 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 			?>
 		</tbody>
 	</table>
-</div>
 
-<?php do_action( 'woocommerce_before_account_orders_pagination' ); ?>
+	<?php do_action( 'woocommerce_before_account_orders_pagination' ); ?>
 
-<?php if ( 1 < $customer_orders->max_num_pages ) : ?>
-	<div class="woocommerce-pagination woocommerce-pagination--without-numbers woocommerce-Pagination">
-		<?php if ( 1 !== $current_page ) : ?>
-			<a class="woocommerce-button woocommerce-button--previous woocommerce-Button woocommerce-Button--previous button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page - 1 ) ); ?>"><?php esc_html_e( 'Previous', 'woocommerce' ); ?></a>
-		<?php endif; ?>
+	<?php if ( 1 < $customer_orders->max_num_pages ) : ?>
+		<div class="woocommerce-pagination woocommerce-pagination--without-numbers woocommerce-Pagination">
+			<?php if ( 1 !== $current_page ) : ?>
+				<a class="woocommerce-button woocommerce-button--previous woocommerce-Button woocommerce-Button--previous button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page - 1 ) ); ?>"><?php esc_html_e( 'Previous', 'woocommerce' ); ?></a>
+			<?php endif; ?>
 
-		<?php if ( intval( $customer_orders->max_num_pages ) !== $current_page ) : ?>
-			<a class="woocommerce-button woocommerce-button--next woocommerce-Button woocommerce-Button--next button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page + 1 ) ); ?>"><?php esc_html_e( 'Next', 'woocommerce' ); ?></a>
-		<?php endif; ?>
-	</div>
-<?php endif; ?>
+			<?php if ( intval( $customer_orders->max_num_pages ) !== $current_page ) : ?>
+				<a class="woocommerce-button woocommerce-button--next woocommerce-Button woocommerce-Button--next button<?php echo esc_attr( $wp_button_class ); ?>" href="<?php echo esc_url( wc_get_endpoint_url( 'orders', $current_page + 1 ) ); ?>"><?php esc_html_e( 'Next', 'woocommerce' ); ?></a>
+			<?php endif; ?>
+		</div>
+	<?php endif; ?>
 
 <?php else : ?>
 

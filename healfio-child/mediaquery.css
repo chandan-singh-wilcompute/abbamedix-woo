@@ -1,3 +1,44 @@
+@media (min-width: 1200px) {
+  .primary-menu.navbar .nav-item:hover .nav-link {
+    color: #9DA632 !important;
+    background-color: transparent;
+  }
+  .primary-menu-inner {
+    max-width: 1170px;
+  }
+  .container {
+    max-width: 1170px;
+  }
+  .orderStatusBanner {
+    margin-top: -40px;
+  }
+  #order-received-section .orderStatusBanner {
+    margin-top: 0 !important;
+  }
+  .woocommerce ul.products li.product a img {
+    width: auto !important;
+    min-height: 268px !important;
+  }
+  .single-product ul.products li.product a img {
+    min-height: 280px !important;
+  }
+  .woocommerce-notices-wrapper {
+    max-width: 1170px;
+    margin: 20px auto 0;
+    position: absolute;
+    top: 105px;
+    left: 0;
+    right: 0;
+  }
+  .container-product,
+  .container-shop {
+    max-width: 1170px;
+    padding: 0 15px;
+  }
+  .woocommerce .container-product div.product div.summary {
+    border: none;
+  }
+}
 @media screen and (max-width: 1199px) {
   :root #main-header {
     margin-bottom: -1px;
