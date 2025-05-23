@@ -536,7 +536,7 @@ td.product-remove a {
 
 .woocommerce .woocommerce-ordering select {
     color: #ffffff !important;
-    padding: 3px 5px;
+    padding: 5px 10px;
     background: #1b5d72 url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat calc(100% - 0.1rem) center;
     background-size: 24px !important;
 }
@@ -675,8 +675,9 @@ a.page-numbers {
 	margin-top: 0px;
 }
 
-.woocommerce ul.products li.product a img {
+.woocommerce ul.products li.product a {
     border-radius: 16px 16px 0 0;
+    overflow: hidden;
 }
 
 .woocommerce ul.products li.product .woocommerce-loop-product__link img {
