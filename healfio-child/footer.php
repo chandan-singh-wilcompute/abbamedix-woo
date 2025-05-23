@@ -89,6 +89,12 @@
 <?php wp_footer(); ?>
 
 <script>
+    // GO Back
+    document.getElementById("goback").addEventListener("click", () => {
+      history.back();
+    });
+    
+    // Quantity
     const qtyInput = document.querySelector('.productQuantity .quantity .qty');
     const increaseBtn = document.querySelector('.productQuantity .increase');
     const decreaseBtn = document.querySelector('.productQuantity .decrease');
@@ -104,7 +110,7 @@
       if (currentValue > min) {
         qtyInput.value = currentValue - 1;
       }
-    });
+    });    
   </script>
 
 </body>
