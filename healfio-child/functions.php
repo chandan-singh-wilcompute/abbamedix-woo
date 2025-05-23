@@ -219,7 +219,7 @@ function product_category_filter_shortcode() {
 
    echo '</div>'; // end .colGroup
    echo '<div class="menuFooter">
-    <button type="button" id="selectAllFeaturedMenu" class="selectAll">Select All</button>
+    <button type="button" id="selectAllProductMenu" class="selectAll">Select All</button>
     <button type="submit" id="sortByBtn" class="sortBtn">Sort By</button>
   </div>';
   echo '</form>';

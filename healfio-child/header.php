@@ -192,8 +192,12 @@
     <i class="bi bi-chevron-left backMenu"></i>
     <i class="bi bi-x closeMenu"></i>
   </div>
-  
+
   <div class="colGroup">
+    <?php echo do_shortcode('[product_category_filter]'); ?>
+  </div>
+  
+  <!-- <div class="colGroup">
     <div class="col">
       <h5>Flower</h5>
       <div class="labelGroup">
@@ -275,7 +279,7 @@
   <div class="menuFooter">
     <button type="button" id="selectAllProductMenu" class="selectAll">Select All</button>
     <a href="https://groiq.ca/ecommerce-test-api/products-2/" id="sortBy" class="sortBtn">Sort By</a>
-  </div>
+  </div> -->
 </div>
 
 <div id="featuredMenu" class="megaMenu featuredMenu">
@@ -283,14 +287,8 @@
     <i class="bi bi-chevron-left backMenu"></i>
     <i class="bi bi-x closeMenu"></i>
   </div>
-
+  
   <div class="colGroup">
-    <?php echo do_shortcode('[product_category_filter]'); ?>
-  </div>
-
-  
-  
-  <!-- <div class="colGroup">
     <div class="col">
       <h5>New Releases</h5>
       <div class="labelGroup">
@@ -334,13 +332,12 @@
       </div>
     </div>
 
-  </div> -->
+  </div>
 
-  <!-- <div class="menuFooter">
-    <button type="button" id="selectAllProductMenu" class="selectAll">Select All</button>
-    <input type="submit" id="sortBy" value="sort by" class="sortBtn">
+  <div class="menuFooter">
+    <button type="button" id="selectAllFeaturedMenu" class="selectAll">Select All</button>
     <a href="https://groiq.ca/ecommerce-test-api/products-2/" id="sortBy" class="sortBtn">Sort By</a>
-  </div> -->
+  </div>
 </div>
 <script  type="text/javascript">
   jQuery(document).on('click', '#menu-item-31065', function() {
@@ -374,32 +371,32 @@
   }
 
   // Select All product menu
-  // const selectAllProductMenu = document.getElementById("selectAllProductMenu");
-  // const checkboxes_ = document.querySelectorAll(".productMenu .inputCheck");
+  const selectAllProductMenu = document.getElementById("selectAllProductMenu");
+  const checkboxes_ = document.querySelectorAll(".productMenu .inputCheck");
 
-  // selectAllProductMenu.addEventListener("click", function() {
-  //   const allChecked = Array.from(checkboxes_).every(checkbox => checkbox.checked);
+  selectAllProductMenu.addEventListener("click", function() {
+    const allChecked = Array.from(checkboxes_).every(checkbox => checkbox.checked);
 
-  //   checkboxes_.forEach(checkbox => {
-  //     checkbox.checked = !allChecked;
-  //   });
-
-  //   selectAllProductMenu.textContent = allChecked ? "Select All" : "Unselect All";
-  // });
-
-  // Select All Featured menu
-  const selectAllFeaturedMenu = document.getElementById("selectAllFeaturedMenu");
-  const checkboxes = document.querySelectorAll(".featuredMenu .inputCheck");
-
-  selectAllFeaturedMenu.addEventListener("click", function() {
-    const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
-
-    checkboxes.forEach(checkbox => {
+    checkboxes_.forEach(checkbox => {
       checkbox.checked = !allChecked;
     });
 
-    selectAllFeaturedMenu.textContent = allChecked ? "Select All" : "Unselect All";
+    selectAllProductMenu.textContent = allChecked ? "Select All" : "Unselect All";
   });
+
+  // Select All Featured menu
+  // const selectAllFeaturedMenu = document.getElementById("selectAllFeaturedMenu");
+  // const checkboxes = document.querySelectorAll(".featuredMenu .inputCheck");
+
+  // selectAllFeaturedMenu.addEventListener("click", function() {
+  //   const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+
+  //   checkboxes.forEach(checkbox => {
+  //     checkbox.checked = !allChecked;
+  //   });
+
+  //   selectAllFeaturedMenu.textContent = allChecked ? "Select All" : "Unselect All";
+  // });
 
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.selectAll').forEach(button => {
