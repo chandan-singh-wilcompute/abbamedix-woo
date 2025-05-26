@@ -1500,13 +1500,17 @@ a.button.thankyou-button {
   padding-top: 25px;
   padding-bottom: 100px;
 
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
   .elementor-widget-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
 
-  .filterDropdown {    
+  .filterDropdown {
     &.selected {
       z-index: 1;
     }
@@ -1688,6 +1692,80 @@ a.button.thankyou-button {
     display: none;
     opacity: 0;
     visibility: hidden;
+  }
+}
+
+.filterDropdown {
+
+  .categoryList {
+    height: 120px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+
+  form {
+
+    br {
+      display: none;
+    }
+
+     label {
+      margin: 0 0 5px;
+      color: @white;
+      font-size: 12px;
+      cursor: pointer;
+      line-height: 20px;
+
+      display: flex !important;
+      align-items: flex-start;
+      justify-content: flex-start;
+      white-space: nowrap;
+
+      input[type="checkbox"] {
+        margin-right: 6px;
+        width: 18px;
+        height: 18px;
+        border: none;
+        background-color: @white;
+        color: white;
+      }
+    }
+
+    input[type=checkbox] {
+      position: relative;
+      border: 2px solid @black;
+      border-radius: 2px;
+      background: none;
+      cursor: pointer;
+      line-height: 0;
+      margin: 0 .6em 0 0;
+      outline: 0;
+      padding: 0 !important;
+      vertical-align: text-top;
+      height: 20px;
+      width: 20px;
+      -webkit-appearance: none;
+      opacity: .6;
+    }
+    
+    input[type=checkbox]:hover {
+      opacity: 1;
+    }
+    
+    input[type=checkbox]:checked {
+      background-color: @black !important;
+      opacity: 1;
+    }
+    
+    input[type=checkbox]:before {
+      content: '\2713';
+      position: absolute;
+      right: 25%;
+      top: 50%;
+      font-size: 13px;
+      transform: rotate(17deg);
+      z-index: 2;
+    }
   }
 }
 
@@ -2573,6 +2651,7 @@ input[type=number] {
 .productFilterResultWrapper {
   background: #0A1106;
   .products {
+    display: grid;
     grid-template-columns: repeat(4,1fr);
     grid-column-gap: 20px;
     grid-row-gap: 40px;
