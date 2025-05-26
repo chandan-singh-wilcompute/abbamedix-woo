@@ -34,7 +34,7 @@
             wp_nav_menu(array(
                 'theme_location' => 'primary',
                 'menu_id' => 'primary-menu',
-                'depth' => 2,
+                'depth' => 3,
                 'container' => false,
                 'menu_class' => 'navbar-nav pl-3 pr-3',
                 'fallback_cb' => 'WP_Bootstrap_Navwalker::fallback',
@@ -138,10 +138,23 @@
 					</svg>
 							</a>
 					</div>
-					<div class="header-profile">
-						<a class="menu-item " href="/ecommerce-test/my-account/">
-						<svg width="" height="22px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#FFFFFFB8"><path d="M16 7.992C16 3.58 12.416 0 8 0S0 3.58 0 7.992c0 2.43 1.104 4.62 2.832 6.09.016.016.032.016.032.032.144.112.288.224.448.336.08.048.144.111.224.175A7.98 7.98 0 0 0 8.016 16a7.98 7.98 0 0 0 4.48-1.375c.08-.048.144-.111.224-.16.144-.111.304-.223.448-.335.016-.016.032-.016.032-.032 1.696-1.487 2.8-3.676 2.8-6.106zm-8 7.001c-1.504 0-2.88-.48-4.016-1.279.016-.128.048-.255.08-.383a4.17 4.17 0 0 1 .416-.991c.176-.304.384-.576.64-.816.24-.24.528-.463.816-.639.304-.176.624-.304.976-.4A4.15 4.15 0 0 1 8 10.342a4.185 4.185 0 0 1 2.928 1.166c.368.368.656.8.864 1.295.112.288.192.592.24.911A7.03 7.03 0 0 1 8 14.993zm-2.448-7.4a2.49 2.49 0 0 1-.208-1.024c0-.351.064-.703.208-1.023.144-.32.336-.607.576-.847.24-.24.528-.431.848-.575.32-.144.672-.208 1.024-.208.368 0 .704.064 1.024.208.32.144.608.336.848.575.24.24.432.528.576.847.144.32.208.672.208 1.023 0 .368-.064.704-.208 1.023a2.84 2.84 0 0 1-.576.848 2.84 2.84 0 0 1-.848.575 2.715 2.715 0 0 1-2.064 0 2.84 2.84 0 0 1-.848-.575 2.526 2.526 0 0 1-.56-.848zm7.424 5.306c0-.032-.016-.048-.016-.08a5.22 5.22 0 0 0-.688-1.406 4.883 4.883 0 0 0-1.088-1.135 5.207 5.207 0 0 0-1.04-.608 2.82 2.82 0 0 0 .464-.383 4.2 4.2 0 0 0 .624-.784 3.624 3.624 0 0 0 .528-1.934 3.71 3.71 0 0 0-.288-1.47 3.799 3.799 0 0 0-.816-1.199 3.845 3.845 0 0 0-1.2-.8 3.72 3.72 0 0 0-1.472-.287 3.72 3.72 0 0 0-1.472.288 3.631 3.631 0 0 0-1.2.815 3.84 3.84 0 0 0-.8 1.199 3.71 3.71 0 0 0-.288 1.47c0 .352.048.688.144 1.007.096.336.224.64.4.927.16.288.384.544.624.784.144.144.304.271.48.383a5.12 5.12 0 0 0-1.04.624c-.416.32-.784.703-1.088 1.119a4.999 4.999 0 0 0-.688 1.406c-.016.032-.016.064-.016.08C1.776 11.636.992 9.91.992 7.992.992 4.14 4.144.991 8 .991s7.008 3.149 7.008 7.001a6.96 6.96 0 0 1-2.032 4.907z"/></svg>
+					<div class="header-profile dropdown">
+						<a class="menu-item " href="/ecommerce-test-api/my-account/">
+						    <svg width="" height="22px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#FFFFFFB8"><path d="M16 7.992C16 3.58 12.416 0 8 0S0 3.58 0 7.992c0 2.43 1.104 4.62 2.832 6.09.016.016.032.016.032.032.144.112.288.224.448.336.08.048.144.111.224.175A7.98 7.98 0 0 0 8.016 16a7.98 7.98 0 0 0 4.48-1.375c.08-.048.144-.111.224-.16.144-.111.304-.223.448-.335.016-.016.032-.016.032-.032 1.696-1.487 2.8-3.676 2.8-6.106zm-8 7.001c-1.504 0-2.88-.48-4.016-1.279.016-.128.048-.255.08-.383a4.17 4.17 0 0 1 .416-.991c.176-.304.384-.576.64-.816.24-.24.528-.463.816-.639.304-.176.624-.304.976-.4A4.15 4.15 0 0 1 8 10.342a4.185 4.185 0 0 1 2.928 1.166c.368.368.656.8.864 1.295.112.288.192.592.24.911A7.03 7.03 0 0 1 8 14.993zm-2.448-7.4a2.49 2.49 0 0 1-.208-1.024c0-.351.064-.703.208-1.023.144-.32.336-.607.576-.847.24-.24.528-.431.848-.575.32-.144.672-.208 1.024-.208.368 0 .704.064 1.024.208.32.144.608.336.848.575.24.24.432.528.576.847.144.32.208.672.208 1.023 0 .368-.064.704-.208 1.023a2.84 2.84 0 0 1-.576.848 2.84 2.84 0 0 1-.848.575 2.715 2.715 0 0 1-2.064 0 2.84 2.84 0 0 1-.848-.575 2.526 2.526 0 0 1-.56-.848zm7.424 5.306c0-.032-.016-.048-.016-.08a5.22 5.22 0 0 0-.688-1.406 4.883 4.883 0 0 0-1.088-1.135 5.207 5.207 0 0 0-1.04-.608 2.82 2.82 0 0 0 .464-.383 4.2 4.2 0 0 0 .624-.784 3.624 3.624 0 0 0 .528-1.934 3.71 3.71 0 0 0-.288-1.47 3.799 3.799 0 0 0-.816-1.199 3.845 3.845 0 0 0-1.2-.8 3.72 3.72 0 0 0-1.472-.287 3.72 3.72 0 0 0-1.472.288 3.631 3.631 0 0 0-1.2.815 3.84 3.84 0 0 0-.8 1.199 3.71 3.71 0 0 0-.288 1.47c0 .352.048.688.144 1.007.096.336.224.64.4.927.16.288.384.544.624.784.144.144.304.271.48.383a5.12 5.12 0 0 0-1.04.624c-.416.32-.784.703-1.088 1.119a4.999 4.999 0 0 0-.688 1.406c-.016.032-.016.064-.016.08C1.776 11.636.992 9.91.992 7.992.992 4.14 4.144.991 8 .991s7.008 3.149 7.008 7.001a6.96 6.96 0 0 1-2.032 4.907z"/></svg>
 						</a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/ecommerce-test-api/my-account/">My Profile</a></li>
+                            <li><a href="/ecommerce-test-api/my-account/orders/">My Order</a></li>
+                            <!-- <li>
+                                <a href="/ecommerce-test-api/my-account/view-order/">My Order Status</a>
+                                <?php //
+                                    //$hreff = esc_url( home_url( '/my-account/view-order/' . $order->id ) );
+                                    //$button_html = '<a href="' . $hreff . '" class="button check-status thankyou-button">' . esc_html__( 'Check Status', 'woocommerce' ) . '</a>';
+                                    //echo $button_html;
+                                ?>
+                            </li> -->
+                            <li><a href="/ecommerce-test-api/my-account/customer-logout/">Logout</a></li>
+                        </ul>
 					</div>
 					<div class="header-cart-icon"><?php woo_cart_but(); ?></div>
 					<div>
@@ -179,20 +192,26 @@
     <i class="bi bi-chevron-left backMenu"></i>
     <i class="bi bi-x closeMenu"></i>
   </div>
-  
+
   <div class="colGroup">
+    <?php echo do_shortcode('[product_category_filter]'); ?>
+  </div>
+  
+  <!-- <div class="colGroup">
     <div class="col">
       <h5>Flower</h5>
       <div class="labelGroup">
-        <label for="driedFlower"><input class="inputCheck" type="checkbox" id="driedFlower" value="Dried Flower">Dried Flower</label>
-        <label for="preRolls"><input class="inputCheck" type="checkbox" id="preRolls" value="Pre-Rolls">Pre-Rolls</label>
-        <label for="shopAllFlower"><input class="inputCheck" type="checkbox" id="shopAllFlower" value="Shop All Flow">Shop All Flower</label>
+        <label for="newdriedFlower"><input class="inputCheck" type="checkbox" id="newdriedFlower" value="dried-flower">Dried Flower</label>
+        <label for="newpreRolls"><input class="inputCheck" type="checkbox" id="newpreRolls" value="pre-rolls">Pre-Rolls</label>
+        <label for="newshopAllFlower"><input class="inputCheck inputCheckAll" type="checkbox" id="newshopAllFlower" value="Shop All Flow">Shop All Flower</label>
+      </div>
+      <div class="labelGroup">
         <h5>Vapes</h5>
-        <label for="disposableVapes"><input class="inputCheck" type="checkbox" id="disposableVapes" value="Disposable Vapes">Disposable Vapes</label>
+        <label for="disposableVapes"><input class="inputCheck" type="checkbox" id="disposableVapes" value="disposable-Vapes">Disposable Vapes</label>
         <label for="510ThreadCartridg"><input class="inputCheck" type="checkbox" id="510ThreadCartridg" value="510 Thread Cartridg">510 Thread Cartridges</label>
-        <label for="paxPods"><input class="inputCheck" type="checkbox" id="paxPods" value="Pax Pods">Pax Pods</label>
-        <label for="closedLoopPods"><input class="inputCheck" type="checkbox" id="closedLoopPods" value="Closed Loop Pods">Closed Loop Pods</label>
-        <label for="shopAllVap"><input class="inputCheck" type="checkbox" id="shopAllVap" value="Shop All Vap">Shop All Vapes</label>
+        <label for="paxPods"><input class="inputCheck" type="checkbox" id="paxPods" value="pax-pods">Pax Pods</label>
+        <label for="closedLoopPods"><input class="inputCheck" type="checkbox" id="closedLoopPods" value="closed-loop-pods">Closed Loop Pods</label>
+        <label for="shopAllVap"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllVap" value="Shop All Vap">Shop All Vapes</label>
       </div>
     </div>
 
@@ -206,30 +225,30 @@
         <label for="wax"><input class="inputCheck" type="checkbox" id="wax" value="Wax">Wax</label>
         <label for="kief"><input class="inputCheck" type="checkbox" id="kief" value="Kief">Kief</label>
         <label for="resin"><input class="inputCheck" type="checkbox" id="resin" value="Resin">Resin</label>
-        <label for="shopAllConcentrates"><input class="inputCheck" type="checkbox" id="shopAllConcentrates" value="Shop All Concentrates">Shop All Concentrates</label>
+        <label for="shopAllConcentrates"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllConcentrates" value="Shop All Concentrates">Shop All Concentrates</label>
       </div>
     </div>
 
     <div class="col">
       <h5>Edibles</h5>
       <div class="labelGroup">
-        <label for="chocalates"><input class="inputCheck" type="checkbox" id="chocalates" value="Chocalates">Chocalates</label>
-        <label for="backedGoods"><input class="inputCheck" type="checkbox" id="backedGoods" value="Backed Goods">Backed Goods</label>
-        <label for="gummies"><input class="inputCheck" type="checkbox" id="gummies" value="Gummies">Gummies</label>
-        <label for="hardEdibles"><input class="inputCheck" type="checkbox" id="hardEdibles" value="Hard Edibles">Hard Edibles</label>
-        <label for="pantry"><input class="inputCheck" type="checkbox" id="pantry" value="Pantry">Pantry</label>
-        <label for="savarySnacks"><input class="inputCheck" type="checkbox" id="savarySnacks" value="Savary Snacks">Savary Snacks</label>
-        <label for="shopAllEdibles"><input class="inputCheck" type="checkbox" id="shopAllEdibles" value="Shop All Edibles">Shop All Edibles</label>
+        <label for="Edibleschocalates"><input class="inputCheck" type="checkbox" id="Edibleschocalates" value="Chocalates">Chocalates</label>
+        <label for="EdiblesbackedGoods"><input class="inputCheck" type="checkbox" id="EdiblesbackedGoods" value="Backed Goods">Backed Goods</label>
+        <label for="Ediblesgummies"><input class="inputCheck" type="checkbox" id="Ediblesgummies" value="Gummies">Gummies</label>
+        <label for="EdibleshardEdibles"><input class="inputCheck" type="checkbox" id="EdibleshardEdibles" value="Hard Edibles">Hard Edibles</label>
+        <label for="Ediblespantry"><input class="inputCheck" type="checkbox" id="Ediblespantry" value="Pantry">Pantry</label>
+        <label for="EdiblessavarySnacks"><input class="inputCheck" type="checkbox" id="EdiblessavarySnacks" value="Savary Snacks">Savary Snacks</label>
+        <label for="EdiblesshopAllEdibles"><input class="inputCheck inputCheckAll" type="checkbox" id="EdiblesshopAllEdibles" value="Shop All Edibles">Shop All Edibles</label>
       </div>
     </div>
 
     <div class="col">
       <h5>Extracts</h5>
       <div class="labelGroup">
-        <label for="oils"><input class="inputCheck" type="checkbox" id="oils" value="Oils">Oils</label>
-        <label for="capsules"><input class="inputCheck" type="checkbox" id="capsules" value="Capsules">Capsules</label>
-        <label for="sublingualStrips"><input class="inputCheck" type="checkbox" id="sublingualStrips" value="Sublingual Strips">Sublingual Strips</label>
-        <label for="shopAllExtracts"><input class="inputCheck" type="checkbox" id="shopAllExtracts" value="Shop All Extracts">Shop All Extracts</label>
+        <label for="extraoils"><input class="inputCheck" type="checkbox" id="extraoils" value="oil">Oils</label>
+        <label for="extracapsules"><input class="inputCheck" type="checkbox" id="extracapsules" value="Capsules">Capsules</label>
+        <label for="extrasublingualStrips"><input class="inputCheck" type="checkbox" id="extrasublingualStrips" value="Sublingual Strips">Sublingual Strips</label>
+        <label for="extrashopAllExtracts"><input class="inputCheck inputCheckAll" type="checkbox" id="extrashopAllExtracts" value="Shop All Extracts">Shop All Extracts</label>
       </div>
     </div>
 
@@ -242,7 +261,7 @@
         <label for="beverageMixers"><input class="inputCheck" type="checkbox" id="beverageMixers" value="Beverage Mixers">Beverage Mixers</label>
         <label for="juices"><input class="inputCheck" type="checkbox" id="juices" value="Juices">Juices</label>
         <label for="dealcoholized"><input class="inputCheck" type="checkbox" id="dealcoholized" value="Dealcoholized">Dealcoholized</label>
-        <label for="shopAllBeverages"><input class="inputCheck" type="checkbox" id="shopAllBeverages" value="Shop All Beverages">Shop All Beverages</label>
+        <label for="shopAllBeverages"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllBeverages" value="Shop All Beverages">Shop All Beverages</label>
       </div>
     </div>
 
@@ -253,41 +272,184 @@
         <label for="bathShower"><input class="inputCheck" type="checkbox" id="bathShower" value="Bath & Shower">Bath & Shower</label>
         <label for="intimacyOils"><input class="inputCheck" type="checkbox" id="intimacyOils" value="Intimacy Oils">Intimacy Oils</label>
         <label for="transdermalGels"><input class="inputCheck" type="checkbox" id="transdermalGels" value="Transdermal Gels">Transdermal Gels</label>
-        <label for="shopAllTopicals"><input class="inputCheck" type="checkbox" id="shopAllTopicals" value="Shop All Topicals">Shop All Topicals</label>
+        <label for="shopAllTopicals"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllTopicals" value="Shop All Topicals">Shop All Topicals</label>
       </div>
     </div>
   </div>
   <div class="menuFooter">
-    <input type="submit" id="sortBy" value="sort by" class="sortBtn">
+    <button type="button" id="selectAllProductMenu" class="selectAll">Select All</button>
+    <a href="https://groiq.ca/ecommerce-test-api/products-2/" id="sortBy" class="sortBtn">Sort By</a>
+  </div> -->
+</div>
+
+<div id="featuredMenu" class="megaMenu featuredMenu">
+  <div class="btnWrapper">
+    <i class="bi bi-chevron-left backMenu"></i>
+    <i class="bi bi-x closeMenu"></i>
+  </div>
+  
+  <div class="colGroup">
+    <div class="col">
+      <h5>New Releases</h5>
+      <div class="labelGroup">
+        <label for="driedFlower"><input class="inputCheck" type="checkbox" id="driedFlower" value="Dried Flower">Dried Flower</label>
+        <label for="preRolls"><input class="inputCheck" type="checkbox" id="preRolls" value="Pre-Rolls">Pre-Rolls</label>
+        <label for="shopAllFlower"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllFlower" value="Shop All Flow">Shop All Flower</label>       
+      </div>
+    </div>
+
+    <div class="col">
+      <h5>Shop by potency</h5>
+      <div class="labelGroup">        
+        <label for="vapes"><input class="inputCheck" type="checkbox" id="vapes" value="vapes">Disposable Vapes</label>
+        <label for="cartridges"><input class="inputCheck" type="checkbox" id="cartridges" value="cartridges">510 Thread Cartridges</label>
+        <label for="paxpods"><input class="inputCheck" type="checkbox" id="paxpods" value="paxpods">Pax Pods</label>
+        <label for="looppods"><input class="inputCheck" type="checkbox" id="looppods" value="looppods">Closed Loop Pods</label>
+        <label for="shopAllVapes"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllVapes" value="Shop All Concentrates">Shop All Vapes</label>
+      </div>
+    </div>
+
+    <div class="col">
+      <h5>Trending</h5>
+      <div class="labelGroup">
+        <label for="chocalates"><input class="inputCheck" type="checkbox" id="chocalates" value="chocalates">Chocalates</label>
+        <label for="backedGoods"><input class="inputCheck" type="checkbox" id="backedGoods" value="Backed Goods">Backed Goods</label>
+        <label for="gummies"><input class="inputCheck" type="checkbox" id="gummies" value="Gummies">Gummies</label>
+        <label for="hardEdibles"><input class="inputCheck" type="checkbox" id="hardEdibles" value="Hard Edibles">Hard Edibles</label>
+        <label for="pantry"><input class="inputCheck" type="checkbox" id="pantry" value="Pantry">Pantry</label>
+        <label for="savarySnacks"><input class="inputCheck" type="checkbox" id="savarySnacks" value="Savary Snacks">Savary Snacks</label>
+        <label for="shopAllEdibles"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllEdibles" value="Shop All Edibles">Shop All Edibles</label>
+      </div>
+    </div>
+
+    <div class="col">
+      <h5>Extracts</h5>
+      <div class="labelGroup">
+        <label for="oils"><input class="inputCheck" type="checkbox" id="oils" value="Oils">Oils</label>
+        <label for="capsules"><input class="inputCheck" type="checkbox" id="capsules" value="Capsules">Capsules</label>
+        <label for="sublingualStrips"><input class="inputCheck" type="checkbox" id="sublingualStrips" value="Sublingual Strips">Sublingual Strips</label>
+        <label for="shopAllExtracts"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllExtracts" value="Shop All Extracts">Shop All Extracts</label>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="menuFooter">
+    <button type="button" id="selectAllFeaturedMenu" class="selectAll">Select All</button>
+    <a href="https://groiq.ca/ecommerce-test-api/products-2/" id="sortBy" class="sortBtn">Sort By</a>
   </div>
 </div>
 <script  type="text/javascript">
   jQuery(document).on('click', '#menu-item-31065', function() {
+    jQuery(this).addClass('active');
     jQuery('#productMenu').toggleClass('open');
+
+    jQuery('#featuredMenu').removeClass('open');
+    jQuery('#featuredMenu').removeClass('active');
+    jQuery('#menu-item-31064').removeClass('active');
+  });
+
+  jQuery(document).on('click', '#menu-item-31064', function() {
+    jQuery(this).addClass('active');
+    jQuery('#featuredMenu').toggleClass('open');
+
+    jQuery('#productMenu').removeClass('open');
+    jQuery('#productMenu').removeClass('active');
+    jQuery('#menu-item-31065').removeClass('active');
   });
 
   jQuery(document).on('click', '.closeMenu, .backMenu', function() {
-    jQuery('#productMenu').removeClass('open');
+    jQuery('.megaMenu').removeClass('open');
+    jQuery('#menu-item-31064, #menu-item-31065').removeClass('active');
   });
 
   if (jQuery(window).width() < 1199) {
-    jQuery(document).on('click', '#productMenu h5', function() {
+    jQuery(document).on('click', '.megaMenu h5', function() {
       jQuery(this).next('.labelGroup').slideToggle();
       jQuery(this).toggleClass('open');
     });
   }
 
-  jQuery('#productMenu input[type=checkbox]').prop('checked', false);
+  // Select All product menu
+  const selectAllProductMenu = document.getElementById("selectAllProductMenu");
+  const checkboxes_ = document.querySelectorAll(".productMenu .inputCheck");
 
-  jQuery(document).on('click', '#productMenu label', function() {
-   
-    if( jQuery(".inputCheck").is(":checked") )
-    {
-      jQuery(this).addClass('active');
-    } 
-    
-    jQuery('.inputCheck').removeClass('active');
+  selectAllProductMenu.addEventListener("click", function() {
+    const allChecked = Array.from(checkboxes_).every(checkbox => checkbox.checked);
+
+    checkboxes_.forEach(checkbox => {
+      checkbox.checked = !allChecked;
+    });
+
+    selectAllProductMenu.textContent = allChecked ? "Select All" : "Unselect All";
   });
+
+  // Select All Featured menu
+  // const selectAllFeaturedMenu = document.getElementById("selectAllFeaturedMenu");
+  // const checkboxes = document.querySelectorAll(".featuredMenu .inputCheck");
+
+  // selectAllFeaturedMenu.addEventListener("click", function() {
+  //   const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+
+  //   checkboxes.forEach(checkbox => {
+  //     checkbox.checked = !allChecked;
+  //   });
+
+  //   selectAllFeaturedMenu.textContent = allChecked ? "Select All" : "Unselect All";
+  // });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.selectAll').forEach(button => {
+      button.addEventListener('click', () => {
+        button.classList.toggle('active');
+      });
+    });
+  });
+
+
+  // ON shop all category
+
+  document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.labelGroup').forEach(labelGroup => {
+    const checkAll = labelGroup.querySelector('.inputCheckAll');
+    const checkboxes = labelGroup.querySelectorAll('.inputCheck');
+
+    if (checkAll && checkboxes.length) {
+      // When "Check All" is toggled
+      checkAll.addEventListener('change', () => {
+        checkboxes.forEach(cb => {
+          cb.checked = checkAll.checked;
+        });
+      });
+
+      // If any individual checkbox changes
+      checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          const allChecked = Array.from(checkboxes).every(box => box.checked);
+          checkAll.checked = allChecked;
+        });
+      });
+    }
+  });
+});
+
+// Category filter 
+const siteBaseURL = "<?php echo esc_url(site_url()); ?>";
+const form = document.getElementById('category-filter-form');
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
+    const checked = Array.from(document.querySelectorAll('input[name="categories[]"]:checked'));
+    if (checked.length === 0) {
+        alert('Please select at least one category.');
+        return;
+    }
+
+    const slugs = checked.map(cb => cb.value).join('+');
+
+    // Redirect to pretty URL
+    window.location.href = `${siteBaseURL}/product-filter/${slugs}/`;
+});
+
 
 </script>
 
