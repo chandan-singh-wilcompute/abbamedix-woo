@@ -74,15 +74,17 @@ if (!empty($package_size_value)) {
 <?php endif; ?>
 
 <?php
-echo '<div class="cardFooter">
-        <div class="addtoCart">
+$link = apply_filters( 'woocommerce_loop_product_link', get_the_permalink(), $product );
+
+echo '<div class="cardFooter">';
+echo '  <div class="addtoCart">
             <label>Add to cart</label>
             <div class="productQuantity">
-                <button type="button" class="btn minusQuntity">−</button>
+                <button type="button" class="btn minusQuantity">−</button>
                 <input type="number" class="quantity" value="1" min="1">
-                <button type="button" class="btn addQuntity">+</button>
+                <button type="button" class="btn addQuantity">+</button>
             </div>
-            </div>
-            <a href="#!">More Info</a>
-      </div>';
+        </div>';
+echo '  <a href="' . esc_url($link) . '">More Info</a>';
+echo '</div>';
 ?>
