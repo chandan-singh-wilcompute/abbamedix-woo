@@ -1,3 +1,8 @@
+@media (min-width: 769px) {
+  .woocommerce ul.products li.product {
+    align-items: initial;
+  }
+}
 @media (min-width: 1200px) {
   .primary-menu.navbar .nav-item:hover .nav-link {
     color: #9DA632 !important;
@@ -30,10 +35,12 @@
     left: 0;
     right: 0;
   }
-  .container-product,
   .container-shop {
     max-width: 1170px;
     padding: 0 15px;
+  }
+  .container-product {
+    max-width: 100%;
   }
   .woocommerce .container-product div.product div.summary {
     border: none;
@@ -62,6 +69,23 @@
     position: absolute;
     content: '';
     background-color: #000000;
+  }
+  .productFilter .filterDropdown {
+    margin-right: 10px;
+  }
+  .productFilter .filterDropdown:last-child {
+    margin-right: 0;
+  }
+  .related.products {
+    padding: 0 50px;
+  }
+  .viewAllProducts .container-fluid {
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+  .productFilterResultWrapper .container-fluid {
+    padding-left: 50px;
+    padding-right: 50px;
   }
 }
 @media screen and (max-width: 1199px) {
@@ -203,6 +227,9 @@
   .productFilterResultWrapper .products {
     grid-template-columns: repeat(2, 1fr);
   }
+  .filteredPosts {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 @media screen and (max-width: 767px) {
   .stepsWrapper:before {
@@ -228,6 +255,7 @@
   }
   .productFilter {
     padding-bottom: 0;
+    flex-direction: column;
   }
   .productFilter .elementor-widget-container {
     flex-direction: column;
@@ -238,9 +266,15 @@
   }
   .productFilter .filterDropdown .toggleBtn {
     width: 100%;
+    justify-content: flex-start;
+    padding-left: 15px;
   }
   .productFilter .filterDropdown .dropdown {
     max-width: 100%;
+  }
+  .featuredWrapper .woocommerce-ordering {
+    width: 100%;
+    margin-right: 0;
   }
   .featuredWrapper .woocommerce-result-count {
     top: -440px;
@@ -296,6 +330,9 @@
     margin-top: 15px;
   }
   .productFilterResultWrapper .products {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .filteredPosts {
     grid-template-columns: repeat(1, 1fr);
   }
 }

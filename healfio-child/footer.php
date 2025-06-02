@@ -90,27 +90,27 @@
 
 <script>
     // GO Back
-    document.getElementById("goback").addEventListener("click", () => {
-      history.back();
-    });
+    // document.getElementById("goback").addEventListener("click", () => {
+    //   history.back();
+    // });
     
     // Quantity
-    const qtyInput = document.querySelector('.productQuantity .quantity .qty');
-    const increaseBtn = document.querySelector('.productQuantity .increase');
-    const decreaseBtn = document.querySelector('.productQuantity .decrease');
+    // const qtyInput = document.querySelector('.productQuantity .quantity .qty');
+    // const increaseBtn = document.querySelector('.productQuantity .increase');
+    // const decreaseBtn = document.querySelector('.productQuantity .decrease');
 
-    increaseBtn.addEventListener('click', () => {
-      const currentValue = parseInt(qtyInput.value) || 0;
-      qtyInput.value = currentValue + 1;
-    });
+    // increaseBtn.addEventListener('click', () => {
+    //   const currentValue = parseInt(qtyInput.value) || 0;
+    //   qtyInput.value = currentValue + 1;
+    // });
 
-    decreaseBtn.addEventListener('click', () => {
-      const currentValue = parseInt(qtyInput.value) || 0;
-      const min = parseInt(qtyInput.min) || 0;
-      if (currentValue > min) {
-        qtyInput.value = currentValue - 1;
-      }
-    });    
+    // decreaseBtn.addEventListener('click', () => {
+    //   const currentValue = parseInt(qtyInput.value) || 0;
+    //   const min = parseInt(qtyInput.min) || 0;
+    //   if (currentValue > min) {
+    //     qtyInput.value = currentValue - 1;
+    //   }
+    // }); 
   </script>
 
 </body>
