@@ -95,8 +95,3 @@ if (post_password_required()) {
 
 <?php do_action('woocommerce_after_single_product'); ?>
 
-<script>
-    document.getElementById("goback").addEventListener("click", () => {
-  history.back();
-});
-</script>

@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 
 get_header('shop'); ?>
     <main>
-        <div class="container-xl container-product">
+        <div class="container-fluid container-product">
             <div class="row">
                 
                 <div class="content-single-product">
@@ -50,7 +50,6 @@ get_header('shop'); ?>
 <?php
 do_action('woocommerce_after_main_content');
 ?>
-
 
 <?php
 get_footer('shop');

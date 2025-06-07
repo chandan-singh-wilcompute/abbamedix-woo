@@ -228,14 +228,15 @@ function product_category_filter_shortcode() {
 }
 add_shortcode('product_category_filter', 'product_category_filter_shortcode');
 
+// Custom products
 function custom_product_filter_results_shortcode() {
   $slug_string = get_query_var('filter_slugs', '');
   $slugs = explode('+', sanitize_text_field($slug_string));
 
   // Debug:
-//   echo '<pre>Filter Slugs: ' . esc_html($slug_string) . '</pre>';
+	// echo '<pre>Filter Slugs: ' . esc_html($slug_string) . '</pre>';
   echo '<div class="titleWrapper">
-            <div class="container">
+            <div class="container-fluid">
                 <a id="goback" class="backBtn">
                 Back
             </a>
@@ -243,13 +244,15 @@ function custom_product_filter_results_shortcode() {
             </div>
         </div>';
 
+
   if (empty($slug_string)) {
     return '<div class="container text-white pt-5 pb-5" style="min-height:500px">Please select a category to view products.</div>';
   }
 
   $query = new WP_Query([
     'post_type'      => 'product',
-    'posts_per_page' => -1,
+    // 'posts_per_page' => -1,
+		'posts_per_page' => 12,
     'tax_query'      => [
       [
         'taxonomy' => 'product_cat',
@@ -262,15 +265,49 @@ function custom_product_filter_results_shortcode() {
 
   ob_start();
 
-  if ($query->have_posts()) {
-    echo '<div class="container">';
+	// Get current page
+    $paged = (isset($_GET['paged']) && is_numeric($_GET['paged'])) ? intval($_GET['paged']) : 1;
+
+    $args = array(
+        'post_type'      => 'product',
+        'posts_per_page' => 12,
+        'paged'          => $paged,
+    );
+
+    $query = new WP_Query($args);
+
+  if ($query->have_posts()) {		
+    echo '<div class="container-fluid">';
+		echo '<p class="product-count">' . $query->found_posts . ' products</p>';
     echo '<ul class="products elementor-grid columns-4">';
     while ($query->have_posts()) {
       $query->the_post();
       wc_get_template_part('content', 'product');
     }
     echo '</ul>';
-    echo '</div>';
+
+		$base_url = 'http://' . $_SERVER['HTTP_HOST'] . '/ecommerce-test-api';
+		// $base_url = 'http://' . $_SERVER['HTTP_HOST'] . '/abbamedix-api';
+		echo '<a href="' . $base_url . '/shop-page" class="viewAllBtn">View All</a>';
+   
+		echo '<nav class="woocommerce-pagination">';
+		echo '<ul class="page-numbers">';
+		 // Pagination
+			$big = 999999999; // an unlikely integer
+			echo paginate_links(array(
+					'base'      => add_query_arg('paged', '%#%'),
+					'format'    => '',
+					'current'   => max(1, $paged),
+					'total'     => $query->max_num_pages,
+					'prev_text' => __('←'),
+					'next_text' => __('→'),
+					'type'      => 'plain'
+			));
+		echo '</ul>';
+		echo '</nav>';
+
+		
+		echo '</div>';
 
   } else {
     echo '<p>No products found for selected categories.</p>';
@@ -280,6 +317,16 @@ function custom_product_filter_results_shortcode() {
   return ob_get_clean();
 }
 add_shortcode('custom_product_filter_results', 'custom_product_filter_results_shortcode');
+
+add_shortcode('custom_products_paginated', 'custom_product_filter_results');
+function fix_shortcode_pagination($query) {
+    if (!is_admin() && $query->is_main_query() && is_page()) {
+        if (get_query_var('paged')) {
+            $query->set('paged', get_query_var('paged'));
+        }
+    }
+}
+add_action('pre_get_posts', 'fix_shortcode_pagination');
 
 // Add rewrite rule for pretty category filters like /product-filter/slug+slug/
 function register_product_filter_rewrite_rule() {
@@ -297,5 +344,366 @@ function add_product_filter_query_var($vars) {
   return $vars;
 }
 add_filter('query_vars', 'add_product_filter_query_var');
+
+
+
+// Add brand filter checkboxes above product listings
+add_action('woocommerce_before_shop_loop', 'add_brand_filter_checkboxes', 15);
+function add_brand_filter_checkboxes() {
+    if (!is_shop() && !is_product_category()) return;
+
+    $brands = get_terms([
+        'taxonomy'   => 'product_brand',
+        'hide_empty' => false,
+    ]);
+
+    if (!empty($brands) && !is_wp_error($brands)) {
+        ?>
+        <form method="GET" id="brand-filter-form">
+            <strong>Filter by Brand:</strong><br>
+            <?php foreach ($brands as $brand): 
+                $checked = (isset($_GET['product_brand']) && in_array($brand->slug, (array) $_GET['product_brand'])) ? 'checked' : '';
+                ?>
+                <label>
+                    <input type="checkbox" name="product_brand[]" value="<?php echo esc_attr($brand->slug); ?>" <?php echo $checked; ?>>
+                    <?php echo esc_html($brand->name); ?>
+                </label><br>
+            <?php endforeach; ?>
+
+            <!-- Preserve other query parameters like orderby, search, etc -->
+            <?php
+            foreach ($_GET as $key => $value) {
+                if ($key === 'product_brand') continue;
+                if (is_array($value)) {
+                    foreach ($value as $v) {
+                        echo '<input type="hidden" name="'.esc_attr($key).'[]" value="'.esc_attr($v).'">';
+                    }
+                } else {
+                    echo '<input type="hidden" name="'.esc_attr($key).'" value="'.esc_attr($value).'">';
+                }
+            }
+            ?>
+
+            <button type="submit">Apply Filter</button>
+        </form>
+        <br>
+        <?php
+    }
+}
+
+
+// Modify WooCommerce product query based on selected brands
+add_action('pre_get_posts', 'filter_products_by_brand');
+function filter_products_by_brand($query) {
+    if (!is_admin() && $query->is_main_query() && (is_shop() || is_product_category())) {
+        if (!empty($_GET['product_brand'])) {
+            $brands = array_map('sanitize_text_field', $_GET['product_brand']);
+
+            $tax_query = $query->get('tax_query');
+            if (!is_array($tax_query)) {
+                $tax_query = [];
+            }
+
+            $tax_query[] = [
+                'taxonomy' => 'product_brand',
+                'field'    => 'slug',
+                'terms'    => $brands,
+            ];
+
+            $query->set('tax_query', $tax_query);
+        }
+    }
+}
+
+
+
+
+// product category
+// Add shortcode to display product categories with checkboxes and apply button
+function abbamedix_product_category_checkbox_list() {
+    // Get all product categories
+    $product_categories = get_terms([
+        'taxonomy'   => 'product_cat',
+        'hide_empty' => false,
+    ]);
+
+    ob_start();
+
+    if (!empty($product_categories) && !is_wp_error($product_categories)) {
+        ?>
+        <form id="product-filter-category" class="productFilterCategory" method="GET" action="">
+					<div class="categoryList">
+            <?php foreach ($product_categories as $category) : ?>
+                <label>
+                    <input type="checkbox" name="product_cat[]" value="<?php echo esc_attr($category->slug); ?>"
+                        <?php if (isset($_GET['product_cat']) && in_array($category->slug, $_GET['product_cat'])) echo 'checked'; ?>>
+                    <?php echo esc_html($category->name); ?>
+                </label>
+            <?php endforeach; ?>
+					</div>
+					<button type="submit" class="btnApply">Apply</button>
+        </form>
+        <?php
+
+        // Optional: Show selected category slugs
+        if (isset($_GET['product_cat'])) {
+            echo '<h4>Selected Categories:</h4>';
+            echo '<ul>';
+            foreach ($_GET['product_cat'] as $selected) {
+                echo '<li>' . esc_html($selected) . '</li>';
+            }
+            echo '</ul>';
+        }
+    }
+
+    return ob_get_clean();
+}
+add_shortcode('product-filter-category', 'abbamedix_product_category_checkbox_list');
+
+
+// custom product filter
+function my_custom_product_filter() {
+    ob_start();
+    ?>
+    <!-- Your Custom HTML Goes Here -->
+		<div class="productFilter">
+			<div class="filterDropdown">
+					<button class="toggleBtn" id="tch">THC</button>
+					<div class="dropdown">
+					<label>TCH Range</label>
+					<div class="slider">
+							<div class="progress"></div>
+					</div>
+					<div class="range-input">
+							<input type="range" class="range-min" min="0.00" max="45.00" step="0.01">
+							<input type="range" class="range-max" min="0.00" max="45.00" step="0.01">
+					</div>
+					<div class="price-input">
+							<div class="field">
+							<input type="number" class="input-min" value="0.00">
+							</div>
+							<div class="separator">To</div>
+							<div class="field">
+							<input type="number" class="input-max" value="45.00">
+							</div>
+					</div>
+					
+					<button type="submit" class="btnApply">Apply</button>
+					</div>
+			</div>
+
+			<div class="filterDropdown">
+					<button class="toggleBtn" id="cbd">CBD</button>
+					<div class="dropdown range-second">
+					<label>CBD</label>
+					<div class="slider">
+							<div class="progress"></div>
+					</div>
+					<div class="range-input">
+							<input type="range" class="range-min range-input-second range-min" step="0.001" min="0.00" max="0.03">
+							<input type="range" class="range-max range-input-second range-max" step="0.001" min="0.00" max="0.03">
+					</div>
+					<div class="price-input">
+							<div class="field">
+							<input type="number" class="input-min price-input-second input-min" step="0.001" min="0.00" max="0.03" value="0.00">
+							</div>
+							<div class="separator">To</div>
+							<div class="field">
+							<input type="number" class="input-max price-input-second input-max" step="0.001" min="0.00" max="0.03" value="0.03">
+							</div>
+					</div>
+					
+					<button type="submit" class="btnApply">Apply</button>
+					</div>
+			</div>
+
+			<div class="filterDropdown">
+					<button class="toggleBtn" id="size">size</button>
+					<div class="dropdown">
+					<label>size</label>
+					<div class="slider">
+							<div class="progress"></div>
+					</div>
+					<div class="range-input">
+							<input type="range" class="range-min" min="0" max="100" value="0" step="1">
+							<input type="range" class="range-max" min="0" max="100" value="100" step="1">
+					</div>
+					<div class="price-input">
+							<div class="field">
+							<input type="number" class="input-min" value="0">
+							</div>
+							<div class="separator">To</div>
+							<div class="field">
+							<input type="number" class="input-max" value="100">
+							</div>
+					</div>
+					
+					<button type="submit" class="btnApply">Apply</button>
+					</div>
+			</div>
+
+			<div class="filterDropdown">
+					<button class="toggleBtn" id="dominance">dominance</button>
+					<div class="dropdown">
+					<label>dominance</label>
+					<div class="slider">
+							<div class="progress"></div>
+					</div>
+					<div class="range-input">
+							<input type="range" class="range-min" min="0" max="100" value="0" step="1">
+							<input type="range" class="range-max" min="0" max="100" value="100" step="1">
+					</div>
+					<div class="price-input">
+							<div class="field">
+							<input type="number" class="input-min" value="0">
+							</div>
+							<div class="separator">To</div>
+							<div class="field">
+							<input type="number" class="input-max" value="100">
+							</div>
+					</div>
+					
+					<button type="submit" class="btnApply">Apply</button>
+					</div>
+			</div>
+
+			<div class="filterDropdown">
+					<button class="toggleBtn" id="terpenes">terpenes</button>
+					<div class="dropdown">
+					<label>terpenes</label>
+					<div class="slider">
+							<div class="progress"></div>
+					</div>
+					<div class="range-input">
+							<input type="range" class="range-min" min="0" max="100" value="0" step="1">
+							<input type="range" class="range-max" min="0" max="100" value="100" step="1">
+					</div>
+					<div class="price-input">
+							<div class="field">
+							<input type="number" class="input-min" value="0">
+							</div>
+							<div class="separator">To</div>
+							<div class="field">
+							<input type="number" class="input-max" value="100">
+							</div>
+					</div>
+					
+					<button type="submit" class="btnApply">Apply</button>
+					</div>
+			</div>
+
+			<div class="filterDropdown">
+					<button class="toggleBtn" id="brand">brand</button>
+					<div class="dropdown">
+					<label>brand</label>
+					<?php
+						// Get all product brands
+						$brands = get_terms([
+								'taxonomy'   => 'product_brand',
+								'hide_empty' => false, // Set to true if you only want brands with products
+						]);
+
+						if (!empty($brands) && !is_wp_error($brands)) {
+								echo '<form id="brand-filter">';
+								foreach ($brands as $brand) {
+										echo '<label>';
+										echo '<input type="checkbox" name="product_brand[]" value="' . esc_attr($brand->slug) . '">';
+										echo esc_html($brand->name);
+										echo '</label>';
+								}
+								echo '<button type="submit" class="btnApply">Apply</button>';
+								echo '</form>';
+						}
+						?>					
+					</div>
+			</div>
+
+			<div class="filterDropdown">
+					<button class="toggleBtn" id="categories">categories</button>
+					<div class="dropdown">
+					<label>categories</label>
+					<?php echo do_shortcode('[product-filter-category]'); ?>
+					</div>
+			</div>
+		</div>
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('my_custom_filter', 'my_custom_product_filter');
+
+
+// Post category dropdown
+function post_category_dropdown_shortcode() {
+    $args = array(
+        'show_option_all' => 'Category',
+        'name'            => 'category',
+        'class'           => 'post-category-dropdown',
+        'id'              => 'category-filter',
+        'taxonomy'        => 'category',
+        'echo'            => 0
+    );
+    return wp_dropdown_categories($args);
+}
+add_shortcode('post_category_dropdown', 'post_category_dropdown_shortcode');
+
+
+// Filter Posts by category 
+function filter_posts_by_category() {
+    $category_id = intval($_POST['category']);
+    $offset = isset($_POST['offset']) ? intval($_POST['offset']) : 0;
+
+    $args = array(
+        'post_type'      => 'post',
+        'posts_per_page' => 9,
+        'offset'         => $offset,
+    );
+
+    if ($category_id > 0) {
+        $args['cat'] = $category_id;
+    }
+
+    $query = new WP_Query($args);
+
+    if ($query->have_posts()) :
+        while ($query->have_posts()) : $query->the_post(); ?>
+            <div class="filtered-post filteredpostItem">
+                <?php if (has_post_thumbnail()) : ?>
+                    <div class="post-thumbnail">
+                        <a href="<?php the_permalink(); ?>">
+                            <?php the_post_thumbnail('medium'); ?>
+                        </a>
+                    </div>
+                <?php endif; ?>
+								<p>
+                    <span class="postAuthor"><?php the_author(); ?> |</span>
+                    <span class="postDate"><?php the_time('F j, Y'); ?></span>
+                </p>
+                <h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
+								<a href="<?php the_permalink(); ?>" class="readMoreBtn">Read More »</a>
+                	
+                <!-- <div><?php //the_excerpt(); ?></div> -->
+            </div>
+        <?php endwhile;
+    else :
+        echo ''; // Let JS decide whether to hide the button
+    endif;
+
+    wp_reset_postdata();
+    wp_die();
+}
+
+
+add_action('wp_ajax_filter_posts_by_category', 'filter_posts_by_category');
+add_action('wp_ajax_nopriv_filter_posts_by_category', 'filter_posts_by_category');
+
+function enqueue_ajax_filter_script() {
+    ?>
+    <script type="text/javascript">
+        window.ajaxurl = "<?php echo admin_url('admin-ajax.php'); ?>";
+    </script>
+    <?php
+}
+add_action('wp_head', 'enqueue_ajax_filter_script');
+
 
 
