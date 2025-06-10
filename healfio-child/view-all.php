@@ -32,7 +32,8 @@
 		
   </section>
 
-	<script src="<?php echo get_stylesheet_directory_uri(); ?>/js/product-filter.js"></script>
+	<script src="<?php echo get_stylesheet_directory_uri(); ?>/js/product-filter-dropdown.js"></script>
+
 	<?php
 	get_footer();
 

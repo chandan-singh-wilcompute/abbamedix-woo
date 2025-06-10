@@ -193,93 +193,94 @@
     <i class="bi bi-x closeMenu"></i>
   </div>
 
-  <div class="colGroup">
-    <?php echo do_shortcode('[product_category_filter]'); ?>
-  </div>
-  
   <!-- <div class="colGroup">
-    <div class="col">
-      <h5>Flower</h5>
-      <div class="labelGroup">
-        <label for="newdriedFlower"><input class="inputCheck" type="checkbox" id="newdriedFlower" value="dried-flower">Dried Flower</label>
-        <label for="newpreRolls"><input class="inputCheck" type="checkbox" id="newpreRolls" value="pre-rolls">Pre-Rolls</label>
-        <label for="newshopAllFlower"><input class="inputCheck inputCheckAll" type="checkbox" id="newshopAllFlower" value="Shop All Flow">Shop All Flower</label>
-      </div>
-      <div class="labelGroup">
-        <h5>Vapes</h5>
-        <label for="disposableVapes"><input class="inputCheck" type="checkbox" id="disposableVapes" value="disposable-Vapes">Disposable Vapes</label>
-        <label for="510ThreadCartridg"><input class="inputCheck" type="checkbox" id="510ThreadCartridg" value="510 Thread Cartridg">510 Thread Cartridges</label>
-        <label for="paxPods"><input class="inputCheck" type="checkbox" id="paxPods" value="pax-pods">Pax Pods</label>
-        <label for="closedLoopPods"><input class="inputCheck" type="checkbox" id="closedLoopPods" value="closed-loop-pods">Closed Loop Pods</label>
-        <label for="shopAllVap"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllVap" value="Shop All Vap">Shop All Vapes</label>
-      </div>
-    </div>
-
-    <div class="col">
-      <h5>Concentrates</h5>
-      <div class="labelGroup">
-        <label for="infusedFlower"><input class="inputCheck" type="checkbox" id="infusedFlower" value="Infused Pre-Rolls & Flower">Infused Pre-Rolls & Flower</label>
-        <label for="hash"><input class="inputCheck" type="checkbox" id="hash" value="Hash">Hash</label>
-        <label for="shatter"><input class="inputCheck" type="checkbox" id="shatter" value="Shatter">Shatter</label>
-        <label for="rosin"><input class="inputCheck" type="checkbox" id="rosin" value="Rosin">Rosin</label>
-        <label for="wax"><input class="inputCheck" type="checkbox" id="wax" value="Wax">Wax</label>
-        <label for="kief"><input class="inputCheck" type="checkbox" id="kief" value="Kief">Kief</label>
-        <label for="resin"><input class="inputCheck" type="checkbox" id="resin" value="Resin">Resin</label>
-        <label for="shopAllConcentrates"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllConcentrates" value="Shop All Concentrates">Shop All Concentrates</label>
-      </div>
-    </div>
-
-    <div class="col">
-      <h5>Edibles</h5>
-      <div class="labelGroup">
-        <label for="Edibleschocalates"><input class="inputCheck" type="checkbox" id="Edibleschocalates" value="Chocalates">Chocalates</label>
-        <label for="EdiblesbackedGoods"><input class="inputCheck" type="checkbox" id="EdiblesbackedGoods" value="Backed Goods">Backed Goods</label>
-        <label for="Ediblesgummies"><input class="inputCheck" type="checkbox" id="Ediblesgummies" value="Gummies">Gummies</label>
-        <label for="EdibleshardEdibles"><input class="inputCheck" type="checkbox" id="EdibleshardEdibles" value="Hard Edibles">Hard Edibles</label>
-        <label for="Ediblespantry"><input class="inputCheck" type="checkbox" id="Ediblespantry" value="Pantry">Pantry</label>
-        <label for="EdiblessavarySnacks"><input class="inputCheck" type="checkbox" id="EdiblessavarySnacks" value="Savary Snacks">Savary Snacks</label>
-        <label for="EdiblesshopAllEdibles"><input class="inputCheck inputCheckAll" type="checkbox" id="EdiblesshopAllEdibles" value="Shop All Edibles">Shop All Edibles</label>
-      </div>
-    </div>
-
-    <div class="col">
-      <h5>Extracts</h5>
-      <div class="labelGroup">
-        <label for="extraoils"><input class="inputCheck" type="checkbox" id="extraoils" value="oil">Oils</label>
-        <label for="extracapsules"><input class="inputCheck" type="checkbox" id="extracapsules" value="Capsules">Capsules</label>
-        <label for="extrasublingualStrips"><input class="inputCheck" type="checkbox" id="extrasublingualStrips" value="Sublingual Strips">Sublingual Strips</label>
-        <label for="extrashopAllExtracts"><input class="inputCheck inputCheckAll" type="checkbox" id="extrashopAllExtracts" value="Shop All Extracts">Shop All Extracts</label>
-      </div>
-    </div>
-
-    <div class="col">
-      <h5>Beverages</h5>
-      <div class="labelGroup">
-        <label for="coffeesTeas"><input class="inputCheck" type="checkbox" id="coffeesTeas" value="Coffees & Teas">Coffees & Teas</label>
-        <label for="softDrinks"><input class="inputCheck" type="checkbox" id="softDrinks" value="Soft Drinks">Soft Drinks</label>
-        <label for="sparklingWaters"><input class="inputCheck" type="checkbox" id="sparklingWaters" value="Sparkling Waters">Sparkling Waters</label>
-        <label for="beverageMixers"><input class="inputCheck" type="checkbox" id="beverageMixers" value="Beverage Mixers">Beverage Mixers</label>
-        <label for="juices"><input class="inputCheck" type="checkbox" id="juices" value="Juices">Juices</label>
-        <label for="dealcoholized"><input class="inputCheck" type="checkbox" id="dealcoholized" value="Dealcoholized">Dealcoholized</label>
-        <label for="shopAllBeverages"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllBeverages" value="Shop All Beverages">Shop All Beverages</label>
-      </div>
-    </div>
-
-    <div class="col">
-      <h5>Topicals</h5>
-      <div class="labelGroup">
-        <label for="creams"><input class="inputCheck" type="checkbox" id="creams" value="Creams & Lations">Creams & Lations</label>
-        <label for="bathShower"><input class="inputCheck" type="checkbox" id="bathShower" value="Bath & Shower">Bath & Shower</label>
-        <label for="intimacyOils"><input class="inputCheck" type="checkbox" id="intimacyOils" value="Intimacy Oils">Intimacy Oils</label>
-        <label for="transdermalGels"><input class="inputCheck" type="checkbox" id="transdermalGels" value="Transdermal Gels">Transdermal Gels</label>
-        <label for="shopAllTopicals"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllTopicals" value="Shop All Topicals">Shop All Topicals</label>
-      </div>
-    </div>
-  </div>
-  <div class="menuFooter">
-    <button type="button" id="selectAllProductMenu" class="selectAll">Select All</button>
-    <a href="https://groiq.ca/ecommerce-test-api/products-2/" id="sortBy" class="sortBtn">Sort By</a>
+    <?php //echo do_shortcode('[product_category_filter]'); ?> 
   </div> -->
+  <form id="category-filter-form" class="categoryFilterForm" method="get">
+    <div class="colGroup">
+      <div class="col">
+        <h5>Flower</h5>
+        <div class="labelGroup">
+          <label for="newdriedFlower"><input class="inputCheck" type="checkbox" id="newdriedFlower" value="dried-flower">Dried Flower</label>
+          <label for="newpreRolls"><input class="inputCheck" type="checkbox" id="newpreRolls" value="pre-rolls">Pre-Rolls</label>
+          <label for="newshopAllFlower"><input class="inputCheck inputCheckAll" type="checkbox" id="newshopAllFlower" value="Shop All Flow">Shop All Flower</label>
+        </div>
+        <div class="labelGroup">
+          <h5>Vapes</h5>
+          <label for="disposableVapes"><input class="inputCheck" type="checkbox" id="disposableVapes" value="disposable-Vapes">Disposable Vapes</label>
+          <label for="510ThreadCartridg"><input class="inputCheck" type="checkbox" id="510ThreadCartridg" value="510 Thread Cartridg">510 Thread Cartridges</label>
+          <label for="paxPods"><input class="inputCheck" type="checkbox" id="paxPods" value="pax-pods">Pax Pods</label>
+          <label for="closedLoopPods"><input class="inputCheck" type="checkbox" id="closedLoopPods" value="closed-loop-pods">Closed Loop Pods</label>
+          <label for="shopAllVap"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllVap" value="Shop All Vap">Shop All Vapes</label>
+        </div>
+      </div>
+
+      <div class="col">
+        <h5>Concentrates</h5>
+        <div class="labelGroup">
+          <label for="infusedFlower"><input class="inputCheck" type="checkbox" id="infusedFlower" value="Infused Pre-Rolls & Flower">Infused Pre-Rolls & Flower</label>
+          <label for="hash"><input class="inputCheck" type="checkbox" id="hash" value="Hash">Hash</label>
+          <label for="shatter"><input class="inputCheck" type="checkbox" id="shatter" value="Shatter">Shatter</label>
+          <label for="rosin"><input class="inputCheck" type="checkbox" id="rosin" value="Rosin">Rosin</label>
+          <label for="wax"><input class="inputCheck" type="checkbox" id="wax" value="Wax">Wax</label>
+          <label for="kief"><input class="inputCheck" type="checkbox" id="kief" value="Kief">Kief</label>
+          <label for="resin"><input class="inputCheck" type="checkbox" id="resin" value="Resin">Resin</label>
+          <label for="shopAllConcentrates"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllConcentrates" value="Shop All Concentrates">Shop All Concentrates</label>
+        </div>
+      </div>
+
+      <div class="col">
+        <h5>Edibles</h5>
+        <div class="labelGroup">
+          <label for="Edibleschocalates"><input class="inputCheck" type="checkbox" id="Edibleschocalates" value="Chocalates">Chocalates</label>
+          <label for="EdiblesbackedGoods"><input class="inputCheck" type="checkbox" id="EdiblesbackedGoods" value="Backed Goods">Backed Goods</label>
+          <label for="Ediblesgummies"><input class="inputCheck" type="checkbox" id="Ediblesgummies" value="Gummies">Gummies</label>
+          <label for="EdibleshardEdibles"><input class="inputCheck" type="checkbox" id="EdibleshardEdibles" value="Hard Edibles">Hard Edibles</label>
+          <label for="Ediblespantry"><input class="inputCheck" type="checkbox" id="Ediblespantry" value="Pantry">Pantry</label>
+          <label for="EdiblessavarySnacks"><input class="inputCheck" type="checkbox" id="EdiblessavarySnacks" value="Savary Snacks">Savary Snacks</label>
+          <label for="EdiblesshopAllEdibles"><input class="inputCheck inputCheckAll" type="checkbox" id="EdiblesshopAllEdibles" value="Shop All Edibles">Shop All Edibles</label>
+        </div>
+      </div>
+
+      <div class="col">
+        <h5>Extracts</h5>
+        <div class="labelGroup">
+          <label for="extraoils"><input class="inputCheck" type="checkbox" id="extraoils" value="oil">Oils</label>
+          <label for="extracapsules"><input class="inputCheck" type="checkbox" id="extracapsules" value="Capsules">Capsules</label>
+          <label for="extrasublingualStrips"><input class="inputCheck" type="checkbox" id="extrasublingualStrips" value="Sublingual Strips">Sublingual Strips</label>
+          <label for="extrashopAllExtracts"><input class="inputCheck inputCheckAll" type="checkbox" id="extrashopAllExtracts" value="Shop All Extracts">Shop All Extracts</label>
+        </div>
+      </div>
+
+      <div class="col">
+        <h5>Beverages</h5>
+        <div class="labelGroup">
+          <label for="coffeesTeas"><input class="inputCheck" type="checkbox" id="coffeesTeas" value="Coffees & Teas">Coffees & Teas</label>
+          <label for="softDrinks"><input class="inputCheck" type="checkbox" id="softDrinks" value="Soft Drinks">Soft Drinks</label>
+          <label for="sparklingWaters"><input class="inputCheck" type="checkbox" id="sparklingWaters" value="Sparkling Waters">Sparkling Waters</label>
+          <label for="beverageMixers"><input class="inputCheck" type="checkbox" id="beverageMixers" value="Beverage Mixers">Beverage Mixers</label>
+          <label for="juices"><input class="inputCheck" type="checkbox" id="juices" value="Juices">Juices</label>
+          <label for="dealcoholized"><input class="inputCheck" type="checkbox" id="dealcoholized" value="Dealcoholized">Dealcoholized</label>
+          <label for="shopAllBeverages"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllBeverages" value="Shop All Beverages">Shop All Beverages</label>
+        </div>
+      </div>
+
+      <div class="col">
+        <h5>Topicals</h5>
+        <div class="labelGroup">
+          <label for="creams"><input class="inputCheck" type="checkbox" id="creams" value="Creams & Lations">Creams & Lations</label>
+          <label for="bathShower"><input class="inputCheck" type="checkbox" id="bathShower" value="Bath & Shower">Bath & Shower</label>
+          <label for="intimacyOils"><input class="inputCheck" type="checkbox" id="intimacyOils" value="Intimacy Oils">Intimacy Oils</label>
+          <label for="transdermalGels"><input class="inputCheck" type="checkbox" id="transdermalGels" value="Transdermal Gels">Transdermal Gels</label>
+          <label for="shopAllTopicals"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllTopicals" value="Shop All Topicals">Shop All Topicals</label>
+        </div>
+      </div>
+    </div>
+    <div class="menuFooter">
+      <button type="button" id="selectAllProductMenu" class="selectAll">Select All</button>
+      <button type="submit" id="sortByBtn" class="sortBtn">Sort By</button>
+    </div>
+  </form>
 </div>
 
 <div id="featuredMenu" class="megaMenu featuredMenu">
@@ -313,7 +314,7 @@
       <h5>Trending</h5>
       <div class="labelGroup">
         <label for="chocalates"><input class="inputCheck" type="checkbox" id="chocalates" value="chocalates">Chocalates</label>
-        <label for="backedGoods"><input class="inputCheck" type="checkbox" id="backedGoods" value="Backed Goods">Backed Goods</label>
+        <label for="bakedGoods"><input class="inputCheck" type="checkbox" id="bakedGoods" value="Baked Goods">Baked Goods</label>
         <label for="gummies"><input class="inputCheck" type="checkbox" id="gummies" value="Gummies">Gummies</label>
         <label for="hardEdibles"><input class="inputCheck" type="checkbox" id="hardEdibles" value="Hard Edibles">Hard Edibles</label>
         <label for="pantry"><input class="inputCheck" type="checkbox" id="pantry" value="Pantry">Pantry</label>
@@ -336,7 +337,7 @@
 
   <div class="menuFooter">
     <button type="button" id="selectAllFeaturedMenu" class="selectAll">Select All</button>
-    <a href="https://groiq.ca/ecommerce-test-api/products-2/" id="sortBy" class="sortBtn">Sort By</a>
+    <a href="https://groiq.ca/ecommerce-test-api/products" id="sortBy" class="sortBtn">Sort By</a>
   </div>
 </div>
 <script  type="text/javascript">
@@ -385,18 +386,18 @@
   });
 
   // Select All Featured menu
-  // const selectAllFeaturedMenu = document.getElementById("selectAllFeaturedMenu");
-  // const checkboxes = document.querySelectorAll(".featuredMenu .inputCheck");
+  const selectAllFeaturedMenu = document.getElementById("selectAllFeaturedMenu");
+  const checkboxes = document.querySelectorAll(".featuredMenu .inputCheck");
 
-  // selectAllFeaturedMenu.addEventListener("click", function() {
-  //   const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+  selectAllFeaturedMenu.addEventListener("click", function() {
+    const allChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
 
-  //   checkboxes.forEach(checkbox => {
-  //     checkbox.checked = !allChecked;
-  //   });
+    checkboxes.forEach(checkbox => {
+      checkbox.checked = !allChecked;
+    });
 
-  //   selectAllFeaturedMenu.textContent = allChecked ? "Select All" : "Unselect All";
-  // });
+    selectAllFeaturedMenu.textContent = allChecked ? "Select All" : "Unselect All";
+  });
 
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.selectAll').forEach(button => {
@@ -438,7 +439,8 @@ const siteBaseURL = "<?php echo esc_url(site_url()); ?>";
 const form = document.getElementById('category-filter-form');
 form.addEventListener('submit', function (e) {
   e.preventDefault();
-    const checked = Array.from(document.querySelectorAll('input[name="categories[]"]:checked'));
+    // const checked = Array.from(document.querySelectorAll('input[name="categories[]"]:checked'));
+    const checked = Array.from(document.querySelectorAll('input:checked'));
     if (checked.length === 0) {
         alert('Please select at least one category.');
         return;

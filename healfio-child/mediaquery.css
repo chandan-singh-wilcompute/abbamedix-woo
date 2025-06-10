@@ -55,20 +55,6 @@
     width: 20%;
     max-width: 20%;
     flex: 20%;
-    border: 0;
-    padding-bottom: 0;
-  }
-  .megaMenu .categoryFilterForm .colGroup .col:last-child {
-    padding-bottom: 20px;
-  }
-  .megaMenu .categoryFilterForm .colGroup .col:after {
-    width: 1px;
-    right: 0;
-    top: 0;
-    height: 250%;
-    position: absolute;
-    content: '';
-    background-color: #000000;
   }
   .productFilter .filterDropdown {
     margin-right: 10px;
@@ -231,9 +217,6 @@
   .filteredPosts {
     grid-template-columns: repeat(2, 1fr);
   }
-  .filteredPosts {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 @media screen and (max-width: 767px) {
   .stepsWrapper:before {
@@ -335,9 +318,6 @@
   }
   .productFilterResultWrapper .products,
   .viewAllProducts .products {
-    grid-template-columns: repeat(1, 1fr);
-  }
-  .filteredPosts {
     grid-template-columns: repeat(1, 1fr);
   }
   .filteredPosts {

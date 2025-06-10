@@ -706,4 +706,47 @@ function enqueue_ajax_filter_script() {
 add_action('wp_head', 'enqueue_ajax_filter_script');
 
 
+// WooCommerce Ordering Dropdown Shortcode
+function wc_ordering_dropdown_shortcode() {
+	if ( ! function_exists( 'wc_get_catalog_ordering_options' ) ) {
+		return ''; // WooCommerce not available
+	}
 
+	ob_start();
+
+	$catalog_orderby_options = wc_get_catalog_ordering_options();
+	$catalog_orderby_options = apply_filters( 'woocommerce_catalog_orderby', $catalog_orderby_options );
+
+	$orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : get_option( 'woocommerce_default_catalog_orderby' );
+	$id_suffix = uniqid();
+	$use_label = true;
+	?>
+
+	<form class="woocommerce-ordering" method="get">
+		<?php if ( $use_label ) : ?>
+			<label for="woocommerce-orderby-<?php echo esc_attr( $id_suffix ); ?>">
+				<?php esc_html_e( 'Sort by', 'woocommerce' ); ?>
+			</label>
+		<?php endif; ?>
+		<select name="orderby" class="orderby"
+			<?php if ( $use_label ) : ?>
+				id="woocommerce-orderby-<?php echo esc_attr( $id_suffix ); ?>"
+			<?php else : ?>
+				aria-label="<?php esc_attr_e( 'Shop order', 'woocommerce' ); ?>"
+			<?php endif; ?>
+		>
+			<?php foreach ( $catalog_orderby_options as $id => $name ) : ?>
+				<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $orderby, $id ); ?>>
+					<?php echo esc_html( $name ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+
+		<input type="hidden" name="paged" value="1" />
+		<?php wc_query_string_form_fields( null, array( 'orderby', 'submit', 'paged', 'product-page' ) ); ?>
+	</form>
+
+	<?php
+	return ob_get_clean();
+}
+add_shortcode( 'wc_ordering_dropdown', 'wc_ordering_dropdown_shortcode' );
