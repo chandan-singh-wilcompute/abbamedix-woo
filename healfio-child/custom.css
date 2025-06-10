@@ -2177,6 +2177,7 @@ input[type=number] {
 .viewAllProducts .viewAllBtn:hover {
   color: #9DA632;
 }
+
 .productFilterResultWrapper .products,
 .viewAllProducts .products {
   display: grid;
@@ -2246,6 +2247,7 @@ input[type=number] {
   color: #FFFFFF;
   line-height: 45px;
 }
+
 .productFilterResultWrapper .productFilter {
   max-width: 1458px;
   margin: 0 auto;

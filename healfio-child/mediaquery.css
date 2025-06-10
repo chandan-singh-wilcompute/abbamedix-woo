@@ -231,6 +231,9 @@
   .filteredPosts {
     grid-template-columns: repeat(2, 1fr);
   }
+  .filteredPosts {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 @media screen and (max-width: 767px) {
   .stepsWrapper:before {
@@ -332,6 +335,9 @@
   }
   .productFilterResultWrapper .products,
   .viewAllProducts .products {
+    grid-template-columns: repeat(1, 1fr);
+  }
+  .filteredPosts {
     grid-template-columns: repeat(1, 1fr);
   }
   .filteredPosts {

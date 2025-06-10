@@ -33,7 +33,6 @@
   </section>
 
 	<script src="<?php echo get_stylesheet_directory_uri(); ?>/js/product-filter.js"></script>
-
 	<?php
 	get_footer();
 
