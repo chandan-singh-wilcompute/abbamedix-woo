@@ -405,29 +405,32 @@ td.product-remove a {
 .prodcard-attributes {
     background-color: #e0edf0;
     color: black;
-    padding: 5px 10px;
-    font-weight: 500;
+    padding: 5px 15px;
+    font-weight: 600;
 }
 
-.product-list-attribute {
+.product-list-attribute:first-child {
     padding-right: 10px
 }
 
 .prodcard-brand {
     color: black;
-    padding: 10px;
+    padding: 5px 15px;
 }
 
 .prodcard-attributes {
     display: flex;
     justify-content: space-evenly;
     align-items: center;
-    min-height: 58px;
+    min-height: 30px;
 }
 
 .prodcard-tags {
     color: black;
-    padding: 5px 10px;
+    padding: 5px 15px;		
+		letter-spacing: 0.1px;
+		line-height: 16px;
+		font-weight: 600;
 }
 
 .prodcard-price {
@@ -648,19 +651,38 @@ a.page-numbers {
     background: transparent !important;
 } 
 
+.woocommerce ul.products li.product {
+	/* box-shadow: 1px 1px 12px rgba(99, 167, 182, 0.8) !important; */
+	box-shadow: 1px 1px 10px 5px rgba(157, 166, 50, 0.2) !important;
+	transition: box-shadow .25s; 
+}
+
 /* Apply zoom-in effect on product image hover */
 .woocommerce ul.products li.product .woocommerce-loop-product__link img:hover {
-    transform: scale(1.1); /* Adjust the scale value as needed */
-    transition: transform 0.3s ease; /* Smooth transition */
+    /* Adjust the scale value as needed */
+		/* transform: scale(1.1);  */
+    transition: transform 0.3s ease; 
+		/* Smooth transition */
 }
 /* Apply zoom-in effect on product card hover */
 .woocommerce ul.products li.product:hover {
-    transform: scale(1.1); /* Adjust the scale value as needed */
-    transition: transform 0.3s ease; /* Smooth transition */
+    /* Adjust the scale value as needed */
+		/* transform: scale(1.1);  */
+    /* transition: transform 0.3s ease;  */
+		/* Smooth transition */
+
+		box-shadow: 1px 1px 10px 5px rgba(157, 166, 50, 1) !important;
 }
+
+.woocommerce ul.products li.product .price {
+	padding-top: 5px;
+	padding-bottom: 5px;
+	line-height: 20px;
+}
+
 /* Make product title all uppercase */
 .woocommerce ul.products li.product .woocommerce-loop-product__title {
-    text-transform: uppercase;
+    text-transform: capitalize;
 }
 /* Apply gradient color to product title */
 .single-product .product_title {
@@ -688,6 +710,7 @@ a.page-numbers {
     border-radius: 16px 16px 0 0;
     overflow: hidden;
 		font-size: 14px;
+		font-weight: 600;
 }
 
 .woocommerce ul.products li.product .woocommerce-loop-product__link img {

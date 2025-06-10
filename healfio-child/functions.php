@@ -234,7 +234,7 @@ function custom_product_filter_results_shortcode() {
   $slugs = explode('+', sanitize_text_field($slug_string));
 
   // Debug:
-//   echo '<pre>Filter Slugs: ' . esc_html($slug_string) . '</pre>';
+	// echo '<pre>Filter Slugs: ' . esc_html($slug_string) . '</pre>';
   echo '<div class="titleWrapper">
             <div class="container-fluid">
                 <a id="goback" class="backBtn">
@@ -243,6 +243,7 @@ function custom_product_filter_results_shortcode() {
             <h5>' . esc_html($slug_string) . '</h5>
             </div>
         </div>';
+
 
   if (empty($slug_string)) {
     return '<div class="container text-white pt-5 pb-5" style="min-height:500px">Please select a category to view products.</div>';

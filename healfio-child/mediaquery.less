@@ -34,11 +34,11 @@
 
   .woocommerce ul.products li.product a img {
     width: auto !important;
-    min-height: 268px !important;
+    min-height: 290px !important;
   }
 
   .single-product ul.products li.product a img {
-    min-height: 280px !important;
+    min-height: 290px !important;
   }
 
   .woocommerce-notices-wrapper {
@@ -108,20 +108,19 @@
   }
 
   .related.products {
-    padding: 0 50px;
+    max-width: 1488px;
+    margin: 0 auto;
   }
 
   .viewAllProducts {
     .container-fluid {
-      padding-left: 50px;
-      padding-right: 50px;
+      max-width: 1488px;
     }
   }
 
   .productFilterResultWrapper {
      .container-fluid {
-      padding-left: 50px;
-      padding-right: 50px;
+      max-width: 1488px;
     }
   }
 
@@ -296,7 +295,8 @@
     }
   }
 
-  .productFilterResultWrapper {
+  .productFilterResultWrapper,
+  .viewAllProducts {
     .products {
       grid-template-columns: repeat(3,1fr);
     }
@@ -323,7 +323,8 @@
     display: none;
   }
 
-  .productFilterResultWrapper {
+  .productFilterResultWrapper,
+  .viewAllProducts {
     .products {
       grid-template-columns: repeat(2,1fr);
     }
@@ -480,7 +481,8 @@
     }
   }
 
-  .productFilterResultWrapper {
+  .productFilterResultWrapper,
+  .viewAllProducts {
     .products {
       grid-template-columns: repeat(1,1fr);
     }
