@@ -123,13 +123,17 @@ body .elementor-button:focus {
     }
   }
 
-  .colGroup {
+  .categoryFilterForm {
     display: flex;
     justify-content: flex-start;
     align-items: stretch;
     box-sizing: border-box;
     flex-wrap: wrap;
+  }
 
+  .colGroup {
+    display: flex;
+    width: 100%;
     h5 {
       text-transform: uppercase;
       color: @black;
@@ -183,6 +187,7 @@ body .elementor-button:focus {
     justify-content: flex-end;
     align-items: center;
     border-top: solid 2px @black;
+    width: 100%;
    
     .selectAll,
     .sortBtn {
@@ -300,6 +305,15 @@ body .elementor-button:focus {
     // transform: rotate(45deg) translate(-50%, -50%);
   }
 
+}
+
+.featuredMenu {
+  .colGroup {
+    display: flex;
+    justify-content: flex-start;
+    align-items: stretch;
+    box-sizing: border-box;
+  }
 }
 
 .header-icons {
@@ -1058,6 +1072,7 @@ body .elementor-button:focus {
         justify-content: space-around;
         width: 100%;
         padding: 5px 0 10px;
+
         position: relative;
         z-index: 1;
 
@@ -1483,7 +1498,7 @@ a.button.thankyou-button {
     text-decoration: underline;
 
     position: absolute;
-    left: 150px;
+    left: 200px;
     top: -12px;
   }
 
@@ -2702,6 +2717,10 @@ input[type=number] {
   background: #0A1106;
   padding-bottom: 50px;
 
+   .productFilter {
+      padding-bottom: 115px;
+    }
+
   .product-count {
     color: #ffffff;
     text-transform: uppercase;
@@ -2735,6 +2754,7 @@ input[type=number] {
     grid-template-columns: repeat(4,1fr);
     grid-column-gap: 48px;
     grid-row-gap: 80px;
+
     padding: 30px 0 !important;
 
     &:before,
@@ -2808,6 +2828,7 @@ input[type=number] {
   }
 }
 
+.productFilterResultWrapper,
 .viewAllProducts {
   padding-top: 0px;
 
@@ -2909,6 +2930,17 @@ input[type=number] {
     }
   }
 
+}
+
+.woocommerce-ordering {
+  &:before {
+    content: 'SORT BY :';
+    margin-right: 10px;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    font-weight: bold;
+  }
+}
 
  .loadMoreBtn {
     background-color: #9DA632;

@@ -128,12 +128,16 @@ body .elementor-button:focus {
   align-items: center;
   justify-content: center;
 }
-.megaMenu .colGroup {
+.megaMenu .categoryFilterForm {
   display: flex;
   justify-content: flex-start;
   align-items: stretch;
   box-sizing: border-box;
   flex-wrap: wrap;
+}
+.megaMenu .colGroup {
+  display: flex;
+  width: 100%;
 }
 .megaMenu .colGroup h5 {
   text-transform: uppercase;
@@ -180,6 +184,7 @@ body .elementor-button:focus {
   justify-content: flex-end;
   align-items: center;
   border-top: solid 2px #000000;
+  width: 100%;
 }
 .megaMenu .menuFooter .selectAll,
 .megaMenu .menuFooter .sortBtn {
@@ -276,6 +281,12 @@ body .elementor-button:focus {
   font-size: 13px;
   transform: rotate(17deg);
   z-index: 2;
+}
+.featuredMenu .colGroup {
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  box-sizing: border-box;
 }
 .header-icons:after {
   position: absolute;
@@ -1179,7 +1190,7 @@ a.button.thankyou-button {
   border: 0;
   text-decoration: underline;
   position: absolute;
-  left: 150px;
+  left: 200px;
   top: -12px;
 }
 .featuredWrapper .viewAllBtn {
@@ -2150,6 +2161,10 @@ input[type=number] {
   background: #0A1106;
   padding-bottom: 50px;
 }
+.productFilterResultWrapper .productFilter,
+.viewAllProducts .productFilter {
+  padding-bottom: 115px;
+}
 .productFilterResultWrapper .product-count,
 .viewAllProducts .product-count {
   color: #ffffff;
@@ -2177,7 +2192,6 @@ input[type=number] {
 .viewAllProducts .viewAllBtn:hover {
   color: #9DA632;
 }
-
 .productFilterResultWrapper .products,
 .viewAllProducts .products {
   display: grid;
@@ -2247,14 +2261,15 @@ input[type=number] {
   color: #FFFFFF;
   line-height: 45px;
 }
-
 .productFilterResultWrapper .productFilter {
   max-width: 1458px;
   margin: 0 auto;
 }
+.productFilterResultWrapper,
 .viewAllProducts {
   padding-top: 0px;
 }
+.productFilterResultWrapper .woocommerce-result-count,
 .viewAllProducts .woocommerce-result-count {
   color: #ffffff;
   text-transform: uppercase;
@@ -2263,9 +2278,11 @@ input[type=number] {
   padding: 0;
   font-weight: bold;
 }
+.productFilterResultWrapper .woocommerce-result-count::before,
 .viewAllProducts .woocommerce-result-count::before {
   display: none;
 }
+.productFilterResultWrapper .woocommerce-ordering,
 .viewAllProducts .woocommerce-ordering {
   margin-bottom: 0;
 }
@@ -2337,6 +2354,13 @@ input[type=number] {
   color: #ffffff;
   border: 0;
   display: inline-block;
+}
+.woocommerce-ordering:before {
+  content: 'SORT BY :';
+  margin-right: 10px;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  font-weight: bold;
 }
 .loadMoreBtn {
   background-color: #9DA632;
