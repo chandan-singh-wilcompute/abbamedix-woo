@@ -16,6 +16,38 @@ class WC_Products {
 
     }
 
+    public function clean_product_categories() {
+        if (!current_user_can('manage_woocommerce')) {
+            return;
+        }
+
+        // 1. Delete all products (including variations)
+        $product_args = [
+            'post_type'      => ['product', 'product_variation'],
+            'post_status'    => ['any'],
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+        ];
+
+        $product_ids = get_posts($product_args);
+
+        foreach ($product_ids as $product_id) {
+            wp_delete_post($product_id, true); // true = force delete
+        }
+
+        // 2. Delete all product categories and subcategories
+        $terms = get_terms([
+            'taxonomy'   => 'product_cat',
+            'hide_empty' => false,
+        ]);
+
+        foreach ($terms as $term) {
+            wp_delete_term($term->term_id, 'product_cat');
+        }
+
+        return 1;
+    }
+
     public function add_custom_variable_product($productData) {
         if (empty($productData['skus'])) return;
 
@@ -23,29 +55,49 @@ class WC_Products {
         $parent_category = $productData['product_type_name'];
         $child_category = $productData['product_type_subclass'];
 
-        // Create or get parent category
-        $parent_term = term_exists($parent_category, 'product_cat');
-        if (!$parent_term) {
-            $parent_term = wp_insert_term($parent_category, 'product_cat');
+        if (stripos($parent_category, '(discrete units)') !== false) {
+            $parent_category = preg_replace('/\s*\(discrete units\)/i', '', $parent_category);
+        }
+        if (stripos($child_category, '(discrete units)') !== false) {
+            $child_category = preg_replace('/\s*\(discrete units\)/i', '', $child_category);
         }
 
-        // Create or get child category
-        $child_term = term_exists($child_category, 'product_cat');
-        if (!$child_term) {
-            $child_term = wp_insert_term($child_category, 'product_cat', [
-                'parent' => is_array($parent_term) ? $parent_term['term_id'] : $parent_term
-            ]);
-        }
+        $parent_category = trim($parent_category);
+        $child_category = trim($child_category);
 
-        $category_ids = [
-            is_array($parent_term) ? $parent_term['term_id'] : $parent_term,
-            is_array($child_term) ? $child_term['term_id'] : $child_term,
-        ];
+        // // Create or get parent category
+        // $parent_term = term_exists($parent_category, 'product_cat');
+        // if (!$parent_term) {
+        //     $parent_term = wp_insert_term($parent_category, 'product_cat');
+        // }
+
+        // // Create or get child category
+        // $child_term = term_exists($child_category, 'product_cat');
+        // if (!$child_term) {
+        //     $child_term = wp_insert_term($child_category, 'product_cat', [
+        //         'parent' => is_array($parent_term) ? $parent_term['term_id'] : $parent_term
+        //     ]);
+        // }
+
+        // $category_ids = [
+        //     is_array($parent_term) ? $parent_term['term_id'] : $parent_term,
+        //     is_array($child_term) ? $child_term['term_id'] : $child_term,
+        // ];
 
         // === 2. Create Variable Product ===
         $sku = 'sku-' . $productData['id'];
 
-        $product = new WC_Product_Variable();
+        $existing_id = get_product_id_by_sku( $sku );
+
+        if ( $existing_id ) {
+            // Update existing product
+            $product = wc_get_product( $existing_id );
+        } else {
+            // Create new product
+            $product = new WC_Product_Variable();
+        }
+
+        
         $product->set_name($productData['name']);
         $product->set_status('publish');
         $product->set_catalog_visibility('visible');
@@ -57,7 +109,7 @@ class WC_Products {
         $product->set_sku($sku);
         $product->set_manage_stock(true);
         $product->set_stock_status('instock');
-        $product->set_category_ids($category_ids);
+        // $product->set_category_ids($category_ids);
         $product->set_attributes($attributes);
 
         $product->save();
@@ -122,7 +174,11 @@ class WC_Products {
         // Add cannabinoid attributes (as range values)
         foreach ($cannabinoid_values as $cannabinoid => $units) {
             $parts = [];
+            $count = 1;
             foreach ($units as $unit => $values) {
+                if ($count > 1) 
+                    break;
+
                 $min = min($values);
                 $max = max($values);
                 if ($min == $max) {
@@ -130,6 +186,7 @@ class WC_Products {
                 } else {
                     $parts[] = "{$min} - {$max} {$unit}";
                 }
+                $count += 1;
             }
 
             $attribute = new WC_Product_Attribute();
@@ -145,15 +202,23 @@ class WC_Products {
 
         // Create variations
         foreach ($productData['skus'] as $sku_data) {
-            $variation = new WC_Product_Variation();
-            $variation->set_parent_id($product_id);
+
+            $var_sku = $sku_data['product_id'] . '-' . $sku_data['id'];
+            $existing_var_id = get_product_id_by_sku( $var_sku );
+
+            if ( $existing_var_id ) {
+                $variation = new WC_Product_Variation( $existing_var_id );
+            } else {
+                $variation = new WC_Product_Variation();
+                $variation->set_parent_id( $product_id );
+            }
 
             $net_weight = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
             $variation->set_attributes(['package-size' => "{$net_weight}g"]);
             $variation->set_weight($net_weight);
 
             $variation->set_regular_price($sku_data['unit_price'] ? $sku_data['unit_price'] / 100 : '0');
-            $variation->set_sku($sku_data['product_id'] . '-' . $sku_data['id']);
+            // $variation->set_sku($sku_data['product_id'] . '-' . $sku_data['id']);
             $variation->set_manage_stock(true);
 
             // Add cannabinoid meta fields to variation
@@ -208,7 +273,41 @@ class WC_Products {
 
         }
     
+        $this->assign_product_to_dynamic_category($product_id, $parent_category, $child_category);
         return $product_id;
+    }
+
+    private function assign_product_to_dynamic_category($product_id, $product_type, $sub_class) {
+        // Step 1: Get or create the parent category (Product Type)
+        $parent_term = get_term_by('name', $product_type, 'product_cat');
+        if (!$parent_term) {
+            $parent_term = wp_insert_term($product_type, 'product_cat');
+            if (is_wp_error($parent_term)) return; // Bail if insert failed
+            $parent_id = $parent_term['term_id'];
+        } else {
+            $parent_id = $parent_term->term_id;
+        }
+
+        // Step 2: Check if the Sub Class already exists under *this* parent
+        $existing_sub_terms = get_terms([
+            'taxonomy'   => 'product_cat',
+            'name'       => $sub_class,
+            'hide_empty' => false,
+            'parent'     => $parent_id,
+        ]);
+
+        if (!empty($existing_sub_terms) && !is_wp_error($existing_sub_terms)) {
+            // Use the existing one under the correct parent
+            $sub_term_id = $existing_sub_terms[0]->term_id;
+        } else {
+            // Create a new subcategory under the current parent
+            $new_sub_term = wp_insert_term($sub_class, 'product_cat', ['parent' => $parent_id]);
+            if (is_wp_error($new_sub_term)) return; // Bail if insert failed
+            $sub_term_id = $new_sub_term['term_id'];
+        }
+
+        // Step 3: Assign product to the subcategory (which implicitly relates it to the parent)
+        wp_set_object_terms($product_id, [$sub_term_id], 'product_cat');
     }
 
 
@@ -386,4 +485,12 @@ class WC_Products {
         ];
     }   
     
+}
+
+function get_product_id_by_sku( $sku ) {
+    global $wpdb;
+
+    $product_id = wc_get_product_id_by_sku( $sku );
+
+    return $product_id ? intval( $product_id ) : false;
 }

@@ -58,7 +58,7 @@ class WC_Product_Sync {
         <div class="wrap">
             <h1>Ample Product Sync</h1>
             
-            <?php if (isset($_GET['sync_success']) && $_GET['sync_success'] === 'true') : ?>
+            <!-- <?php if (isset($_GET['sync_success']) && $_GET['sync_success'] === 'true') : ?>
                 <div class="notice notice-success is-dismissible">
                     <p>Products successfully synced!</p>
                 </div>
@@ -67,21 +67,27 @@ class WC_Product_Sync {
             <form action="<?php echo admin_url('admin-post.php'); ?>" method="post">
                 <input type="hidden" name="action" value="sync_products">
                 <?php submit_button('Sync Products'); ?>
-            </form>
+            </form> -->
+            <button id="product_fetch_and_sync" class="button-
+            
+            
+            primary">Sync Products</button>
         </div>
         <?php
     }
 
+
     public function sync_products() {
         // Ensure the WooCommerce client is initialized
+        // $api_url = AMPLE_CONNECT_API_BASE_URL . '/v3/products/public_listing';
+        $api_url = 'https://abbamedix.onample.com/api/v3/products/public_listing';
+        // $this->save_api_products_to_temp_file($api_url);
 
-        $api_url = AMPLE_CONNECT_API_BASE_URL . '/v3/products/public_listing';
 
-        $products = ample_request($api_url);
         $woo_client = new WC_Products();
+        $woo_client->clean_product_categories();
         foreach ($products as $product) {   
             $result = $woo_client->add_custom_variable_product($product); 
-            
         }
 
         wp_redirect(add_query_arg('sync_success', 'true', admin_url('admin.php?page=ample-product-sync')));
