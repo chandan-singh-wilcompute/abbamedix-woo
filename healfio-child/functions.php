@@ -230,91 +230,130 @@ add_shortcode('product_category_filter', 'product_category_filter_shortcode');
 
 // Custom products
 function custom_product_filter_results_shortcode() {
-  $slug_string = get_query_var('filter_slugs', '');
-  $slugs = explode('+', sanitize_text_field($slug_string));
 
-  // Debug:
-	// echo '<pre>Filter Slugs: ' . esc_html($slug_string) . '</pre>';
-  echo '<div class="titleWrapper">
-            <div class="container-fluid">
-                <a id="goback" class="backBtn">
-                Back
-            </a>
-            <h5>' . esc_html($slug_string) . '</h5>
-            </div>
-        </div>';
+    $search_term = get_query_var('filter_slugs');
+    $search_term = sanitize_text_field($search_term);
+    $search_terms = explode('+', $search_term);
+    $search_terms = array_filter(array_map('trim', $search_terms));
+    $paged = get_query_var('paged') ? intval(get_query_var('paged')) : 1;
+    $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
 
+    echo '<div class="titleWrapper">
+                <div class="container-fluid">
+                    <a id="goback" class="backBtn">
+                    Back
+                </a>
+                <h5>' . esc_html(implode(', ', array_map('ucwords', $search_terms))) . '</h5>
+                </div>
+            </div>';
 
-  if (empty($slug_string)) {
-    return '<div class="container text-white pt-5 pb-5" style="min-height:500px">Please select a category to view products.</div>';
-  }
+    if (empty($search_term)) {
+        return '<div class="container text-white pt-5 pb-5" style="min-height:500px">Please select a category to view products.</div>';
+    }
 
-  $query = new WP_Query([
-    'post_type'      => 'product',
-    // 'posts_per_page' => -1,
-		'posts_per_page' => 12,
-    'tax_query'      => [
-      [
-        'taxonomy' => 'product_cat',
-        'field'    => 'slug',
-        'terms'    => $slugs,
-        'operator' => 'IN',
-      ]
-    ]
-  ]);
+    $matched_ids = [];
 
-  ob_start();
+    // 1. Match by product title (using your custom posts_where filter)
+    $title_query = new WP_Query([
+        'post_type'           => 'product',
+        'posts_per_page'      => -1,
+        'post_status'         => 'publish',
+        'fields'              => 'ids',
+        'suppress_filters'    => false, // Needed for your custom title filter
+        'filter_title_terms' => $search_terms,
+    ]);
+    $matched_ids = $title_query->posts;
 
-	// Get current page
-    $paged = (isset($_GET['paged']) && is_numeric($_GET['paged'])) ? intval($_GET['paged']) : 1;
+    // 2. Match by category/subcategory name
+    $term_ids = [];
+    foreach ($search_terms as $term) {
+        $matched_terms = get_terms([
+            'taxonomy'   => 'product_cat',
+            'name__like' => $term,
+            'fields'     => 'ids',
+            'hide_empty' => false,
+        ]);
+        $term_ids = array_merge($term_ids, $matched_terms);
+    }
+    $term_ids = array_unique($term_ids);
 
-    $args = array(
+    if (!empty($term_ids)) {
+        $category_query = new WP_Query([
+            'post_type'      => 'product',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'fields'         => 'ids',
+            'tax_query'      => [
+                [
+                    'taxonomy' => 'product_cat',
+                    'field'    => 'term_id',
+                    'terms'    => $term_ids,
+                    'operator' => 'IN',
+                ]
+            ],
+        ]);
+        $matched_ids = array_unique(array_merge($matched_ids, $category_query->posts));
+    }
+
+    // 3. Final filtered paginated query
+    $args = [
         'post_type'      => 'product',
-        'posts_per_page' => 12,
-        'paged'          => $paged,
-    );
+        'posts_per_page' => $view_all ? -1 : 12,
+        'paged'          => $view_all ? 1 : $paged,
+        'post_status'    => 'publish',
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+        'post__in'       => $matched_ids,
+    ];
 
     $query = new WP_Query($args);
 
-  if ($query->have_posts()) {		
-    echo '<div class="container-fluid">';
-		echo '<p class="product-count">' . $query->found_posts . ' products</p>';
-    echo '<ul class="products elementor-grid columns-4">';
-    while ($query->have_posts()) {
-      $query->the_post();
-      wc_get_template_part('content', 'product');
+    ob_start();
+
+    if ($query->have_posts()) {		
+        echo '<div class="container-fluid">';
+        echo '<p class="product-count">' . $query->post_count . ' of ' . $query->found_posts . ' products</p>';
+        echo '<ul class="products elementor-grid columns-4">';
+        while ($query->have_posts()) {
+            $query->the_post();
+            wc_get_template_part('content', 'product');
+        }
+        echo '</ul>';
+        global $wp;
+        $current_url = home_url(add_query_arg([], $wp->request));
+        $view_all_url = esc_url(add_query_arg('view', 'all', $current_url));
+        $paginate_url = esc_url(remove_query_arg('view', $current_url));
+        if ($view_all) {
+            echo '<a href="' . $paginate_url . '" class="viewAllBtn">Show Paginated</a>';
+        } else {
+            echo '<a href="' . $view_all_url . '" class="viewAllBtn">View All</a>';
+        }
+
+        if (!$view_all && $query->max_num_pages > 1) {
+            echo '<nav class="woocommerce-pagination">';
+            echo '<ul class="page-numbers">';
+            echo paginate_links(array(
+                'base'      => trailingslashit(get_pagenum_link(1)) . 'page/%#%/',
+                'format'    => '',
+                'current'   => $paged,
+                'total'     => $query->max_num_pages,
+                'prev_text' => __('←'),
+                'next_text' => __('→'),
+                'type'      => 'list',
+            ));
+
+            echo '</ul>';
+            echo '</nav>';
+        }
+            
+        echo '</div>';
+
+    } else {
+        echo '<p>No products found for selected categories.</p>';
     }
-    echo '</ul>';
 
-		$base_url = 'http://' . $_SERVER['HTTP_HOST'] . '/ecommerce-test-api';
-		// $base_url = 'http://' . $_SERVER['HTTP_HOST'] . '/abbamedix-api';
-		echo '<a href="' . $base_url . '/shop-page" class="viewAllBtn">View All</a>';
-   
-		echo '<nav class="woocommerce-pagination">';
-		echo '<ul class="page-numbers">';
-		 // Pagination
-			$big = 999999999; // an unlikely integer
-			echo paginate_links(array(
-					'base'      => add_query_arg('paged', '%#%'),
-					'format'    => '',
-					'current'   => max(1, $paged),
-					'total'     => $query->max_num_pages,
-					'prev_text' => __('←'),
-					'next_text' => __('→'),
-					'type'      => 'plain'
-			));
-		echo '</ul>';
-		echo '</nav>';
-
-		
-		echo '</div>';
-
-  } else {
-    echo '<p>No products found for selected categories.</p>';
-  }
-
-  wp_reset_postdata();
-  return ob_get_clean();
+    wp_reset_postdata();
+    return ob_get_clean();
 }
 add_shortcode('custom_product_filter_results', 'custom_product_filter_results_shortcode');
 
@@ -335,6 +374,13 @@ function register_product_filter_rewrite_rule() {
     'index.php?pagename=product-filter&filter_slugs=$matches[1]',
     'top'
   );
+
+  // Match: /product-filter/Strawberry/page/2/
+    add_rewrite_rule(
+        '^product-filter/([^/]+)/page/([0-9]+)/?$',
+        'index.php?pagename=product-filter&filter_slugs=$matches[1]&paged=$matches[2]',
+        'top'
+    );
 }
 add_action('init', 'register_product_filter_rewrite_rule');
 
@@ -345,6 +391,24 @@ function add_product_filter_query_var($vars) {
 }
 add_filter('query_vars', 'add_product_filter_query_var');
 
+function filter_products_by_multiple_keywords($where, $query) {
+    if (!is_admin() && $query->get('filter_title_terms')) {
+        global $wpdb;
+        $terms = $query->get('filter_title_terms');
+        $title_conditions = [];
+
+        foreach ($terms as $term) {
+            $title_conditions[] = $wpdb->prepare("{$wpdb->posts}.post_title LIKE %s", '%' . $wpdb->esc_like($term) . '%');
+        }
+
+        if (!empty($title_conditions)) {
+            $where .= ' AND (' . implode(' OR ', $title_conditions) . ')';
+        }
+    }
+
+    return $where;
+}
+add_filter('posts_where', 'filter_products_by_multiple_keywords', 10, 2);
 
 
 // Add brand filter checkboxes above product listings
