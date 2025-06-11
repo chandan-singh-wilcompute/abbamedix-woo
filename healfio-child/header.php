@@ -203,29 +203,29 @@
         <div class="labelGroup">
           <label for="newdriedFlower"><input class="inputCheck" type="checkbox" id="newdriedFlower" value="dried-flower">Dried Flower</label>
           <label for="newpreRolls"><input class="inputCheck" type="checkbox" id="newpreRolls" value="pre-rolls">Pre-Rolls</label>
-          <label for="newshopAllFlower"><input class="inputCheck inputCheckAll" type="checkbox" id="newshopAllFlower" value="Shop All Flow">Shop All Flower</label>
+          <label for="newshopAllFlower"><input class="inputCheck inputCheckAll" type="checkbox" id="newshopAllFlower" value="Flow">Shop All Flower</label>
         </div>
         <div class="labelGroup">
           <h5>Vapes</h5>
           <label for="disposableVapes"><input class="inputCheck" type="checkbox" id="disposableVapes" value="disposable-Vapes">Disposable Vapes</label>
-          <label for="510ThreadCartridg"><input class="inputCheck" type="checkbox" id="510ThreadCartridg" value="510 Thread Cartridg">510 Thread Cartridges</label>
+          <label for="510ThreadCartridg"><input class="inputCheck" type="checkbox" id="510ThreadCartridg" value="510-Thread-Cartridg">510 Thread Cartridges</label>
           <label for="paxPods"><input class="inputCheck" type="checkbox" id="paxPods" value="pax-pods">Pax Pods</label>
           <label for="closedLoopPods"><input class="inputCheck" type="checkbox" id="closedLoopPods" value="closed-loop-pods">Closed Loop Pods</label>
-          <label for="shopAllVap"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllVap" value="Shop All Vap">Shop All Vapes</label>
+          <label for="shopAllVap"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllVap" value="Vap">Shop All Vapes</label>
         </div>
       </div>
 
       <div class="col">
         <h5>Concentrates</h5>
         <div class="labelGroup">
-          <label for="infusedFlower"><input class="inputCheck" type="checkbox" id="infusedFlower" value="Infused Pre-Rolls & Flower">Infused Pre-Rolls & Flower</label>
+          <label for="infusedFlower"><input class="inputCheck" type="checkbox" id="infusedFlower" value="Infused-Pre-Rolls-Flower">Infused Pre-Rolls & Flower</label>
           <label for="hash"><input class="inputCheck" type="checkbox" id="hash" value="Hash">Hash</label>
           <label for="shatter"><input class="inputCheck" type="checkbox" id="shatter" value="Shatter">Shatter</label>
           <label for="rosin"><input class="inputCheck" type="checkbox" id="rosin" value="Rosin">Rosin</label>
           <label for="wax"><input class="inputCheck" type="checkbox" id="wax" value="Wax">Wax</label>
           <label for="kief"><input class="inputCheck" type="checkbox" id="kief" value="Kief">Kief</label>
           <label for="resin"><input class="inputCheck" type="checkbox" id="resin" value="Resin">Resin</label>
-          <label for="shopAllConcentrates"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllConcentrates" value="Shop All Concentrates">Shop All Concentrates</label>
+          <label for="shopAllConcentrates"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllConcentrates" value="Concentrates">Shop All Concentrates</label>
         </div>
       </div>
 
@@ -233,12 +233,12 @@
         <h5>Edibles</h5>
         <div class="labelGroup">
           <label for="Edibleschocalates"><input class="inputCheck" type="checkbox" id="Edibleschocalates" value="Chocalates">Chocalates</label>
-          <label for="EdiblesbackedGoods"><input class="inputCheck" type="checkbox" id="EdiblesbackedGoods" value="Backed Goods">Backed Goods</label>
+          <label for="EdiblesbackedGoods"><input class="inputCheck" type="checkbox" id="EdiblesbackedGoods" value="Baked-Goods">Baked Goods</label>
           <label for="Ediblesgummies"><input class="inputCheck" type="checkbox" id="Ediblesgummies" value="Gummies">Gummies</label>
-          <label for="EdibleshardEdibles"><input class="inputCheck" type="checkbox" id="EdibleshardEdibles" value="Hard Edibles">Hard Edibles</label>
+          <label for="EdibleshardEdibles"><input class="inputCheck" type="checkbox" id="EdibleshardEdibles" value="Hard-Edibles">Hard Edibles</label>
           <label for="Ediblespantry"><input class="inputCheck" type="checkbox" id="Ediblespantry" value="Pantry">Pantry</label>
-          <label for="EdiblessavarySnacks"><input class="inputCheck" type="checkbox" id="EdiblessavarySnacks" value="Savary Snacks">Savary Snacks</label>
-          <label for="EdiblesshopAllEdibles"><input class="inputCheck inputCheckAll" type="checkbox" id="EdiblesshopAllEdibles" value="Shop All Edibles">Shop All Edibles</label>
+          <label for="EdiblessavarySnacks"><input class="inputCheck" type="checkbox" id="EdiblessavarySnacks" value="Savary-Snacks">Savary Snacks</label>
+          <label for="EdiblesshopAllEdibles"><input class="inputCheck inputCheckAll" type="checkbox" id="EdiblesshopAllEdibles" value="Edibles">Shop All Edibles</label>
         </div>
       </div>
 
@@ -247,32 +247,32 @@
         <div class="labelGroup">
           <label for="extraoils"><input class="inputCheck" type="checkbox" id="extraoils" value="oil">Oils</label>
           <label for="extracapsules"><input class="inputCheck" type="checkbox" id="extracapsules" value="Capsules">Capsules</label>
-          <label for="extrasublingualStrips"><input class="inputCheck" type="checkbox" id="extrasublingualStrips" value="Sublingual Strips">Sublingual Strips</label>
-          <label for="extrashopAllExtracts"><input class="inputCheck inputCheckAll" type="checkbox" id="extrashopAllExtracts" value="Shop All Extracts">Shop All Extracts</label>
+          <label for="extrasublingualStrips"><input class="inputCheck" type="checkbox" id="extrasublingualStrips" value="Sublingual-Strips">Sublingual Strips</label>
+          <label for="extrashopAllExtracts"><input class="inputCheck inputCheckAll" type="checkbox" id="extrashopAllExtracts" value="Extracts">Shop All Extracts</label>
         </div>
       </div>
 
       <div class="col">
         <h5>Beverages</h5>
         <div class="labelGroup">
-          <label for="coffeesTeas"><input class="inputCheck" type="checkbox" id="coffeesTeas" value="Coffees & Teas">Coffees & Teas</label>
-          <label for="softDrinks"><input class="inputCheck" type="checkbox" id="softDrinks" value="Soft Drinks">Soft Drinks</label>
-          <label for="sparklingWaters"><input class="inputCheck" type="checkbox" id="sparklingWaters" value="Sparkling Waters">Sparkling Waters</label>
-          <label for="beverageMixers"><input class="inputCheck" type="checkbox" id="beverageMixers" value="Beverage Mixers">Beverage Mixers</label>
+          <label for="coffeesTeas"><input class="inputCheck" type="checkbox" id="coffeesTeas" value="Coffees-Teas">Coffees & Teas</label>
+          <label for="softDrinks"><input class="inputCheck" type="checkbox" id="softDrinks" value="Soft-Drinks">Soft Drinks</label>
+          <label for="sparklingWaters"><input class="inputCheck" type="checkbox" id="sparklingWaters" value="Sparkling-Waters">Sparkling Waters</label>
+          <label for="beverageMixers"><input class="inputCheck" type="checkbox" id="beverageMixers" value="Beverage-Mixers">Beverage Mixers</label>
           <label for="juices"><input class="inputCheck" type="checkbox" id="juices" value="Juices">Juices</label>
           <label for="dealcoholized"><input class="inputCheck" type="checkbox" id="dealcoholized" value="Dealcoholized">Dealcoholized</label>
-          <label for="shopAllBeverages"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllBeverages" value="Shop All Beverages">Shop All Beverages</label>
+          <label for="shopAllBeverages"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllBeverages" value="Beverages">Shop All Beverages</label>
         </div>
       </div>
 
       <div class="col">
         <h5>Topicals</h5>
         <div class="labelGroup">
-          <label for="creams"><input class="inputCheck" type="checkbox" id="creams" value="Creams & Lations">Creams & Lations</label>
-          <label for="bathShower"><input class="inputCheck" type="checkbox" id="bathShower" value="Bath & Shower">Bath & Shower</label>
-          <label for="intimacyOils"><input class="inputCheck" type="checkbox" id="intimacyOils" value="Intimacy Oils">Intimacy Oils</label>
-          <label for="transdermalGels"><input class="inputCheck" type="checkbox" id="transdermalGels" value="Transdermal Gels">Transdermal Gels</label>
-          <label for="shopAllTopicals"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllTopicals" value="Shop All Topicals">Shop All Topicals</label>
+          <label for="creams"><input class="inputCheck" type="checkbox" id="creams" value="Creams-Lotions">Creams & Lotions</label>
+          <label for="bathShower"><input class="inputCheck" type="checkbox" id="bathShower" value="Bath-Shower">Bath & Shower</label>
+          <label for="intimacyOils"><input class="inputCheck" type="checkbox" id="intimacyOils" value="Intimacy-Oils">Intimacy Oils</label>
+          <label for="transdermalGels"><input class="inputCheck" type="checkbox" id="transdermalGels" value="Transdermal-Gels">Transdermal Gels</label>
+          <label for="shopAllTopicals"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllTopicals" value="Topicals">Shop All Topicals</label>
         </div>
       </div>
     </div>
