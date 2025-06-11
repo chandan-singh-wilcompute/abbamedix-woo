@@ -89,7 +89,7 @@ function handle_orders_webhook(WP_REST_Request $request) {
                         // $variation_slug = get_variation_attribute_slugs($variation_id);
                         // return new WP_REST_Response(array("message" => "Product details are as follows!", "products" => ["product_id" => $product_id, "variation_id" => $variation_id, "quantity" => $quantity, "variation_data" => $variation_data, "variation_slug" => $variation_slug]), 200);
 
-                        $result = custom_add_product_to_cart($user_id, $itemId, $product_id, $quantity, $variation_id, $variation_data);
+                        $result = custom_add_product_to_cart($user_id, $itemAttr, $itemId, $product_id, $quantity, $variation_id, $variation_data);
 
                         // Code to debug
                         /*
@@ -100,6 +100,31 @@ function handle_orders_webhook(WP_REST_Request $request) {
                             return new WP_REST_Response(array("message" => "Product added to the cart!"), 200);
                         } else {
                             return new WP_REST_Response(array("message" => "Product couldn't add to the cart!"), 404);
+                        }
+                    } else if ($itemData["action"] == "update") {
+                        $match = find_cart_item_by_custom_id( $itemId );
+
+                        if ( $match ) {
+                            $cart_item_key = $match['key'];
+                            wp_set_current_user($user_id);
+                            WC()->session = new WC_Session_Handler();
+                            WC()->session->init();
+                            WC()->customer = new WC_Customer($user->ID);
+                            WC()->cart = new WC_Cart();
+                            WC()->cart->get_cart(); // Load cart items
+
+                            WC()->cart->set_quantity( $cart_item_key, $itemAttr['quantity'], true );
+
+                            if ($itemAttr['total_cost'] != $itemAttr['total_cost_without_discounts']) {
+                                $discounted_price_per_unit = ($itemAttr['total_cost'] / 100) / $itemAttr['quantity'];
+                                $match['item']['data']->set_price( $discounted_price_per_unit );
+                            }
+
+                            WC()->cart->calculate_totals();
+                            return new WP_REST_Response(array("message" => "Product updated to the cart!"), 200);
+
+                        } else {
+                            return new WP_REST_Response(array("message" => "No such product in the cart!"), 200);
                         }
                     }
                 }
@@ -154,8 +179,18 @@ function check_for_order_item ($changes) {
     return $orderItemsData;
 }
 
+// Function to find an cart item from cart-item-id
+function find_cart_item_by_cart_item_id( $item_id ) {
+    foreach ( WC()->cart->get_cart() as $key => $item ) {
+        if ( isset( $item['cart_item_id'] ) && $item['cart_item_id'] === $item_id ) {
+            return [ 'key' => $key, 'item' => $item ];
+        }
+    }
+    return false;
+}
+
 // Function to add an item to the cart
-function custom_add_product_to_cart($user_id, $itemId, $product_id, $quantity = 1, $variation_id = 0, $variation_data = array() ) {    
+function custom_add_product_to_cart($user_id, $itemAttr, $itemId, $product_id, $quantity = 1, $variation_id = 0, $variation_data = array() ) {    
     // 1. Switch to the user's session
     wp_set_current_user($user_id);
     WC()->session = new WC_Session_Handler();
@@ -164,14 +199,18 @@ function custom_add_product_to_cart($user_id, $itemId, $product_id, $quantity = 
     WC()->cart = new WC_Cart();
     WC()->cart->get_cart(); // Load cart items
 
-    // 2. Clear cart if not empty
-    if (!WC()->cart->is_empty()) {
-        WC()->cart->empty_cart();
-    }
+    // // 2. Clear cart if not empty
+    // if (!WC()->cart->is_empty()) {
+    //     WC()->cart->empty_cart();
+    // }
 
     // 3. Add product to cart
-    $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity, $variation_id, $variation_data, ['item_id' => $itemId]);
-
+    $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity, $variation_id, $variation_data, ['cart_item_id' => $itemId]);
+    if ($itemAttr['total_cost'] != $itemAttr['total_cost_without_discounts']) {
+        $discounted_price_per_unit = ($itemAttr['total_cost']/100) / $itemAttr['quantity'];
+        WC()->cart->cart_contents[ $cart_item_key ]['data']->set_price( $discounted_price_per_unit );
+    }
+    WC()->cart->calculate_totals();
     // 4. Save the cart
     WC()->session->save_data();
 
