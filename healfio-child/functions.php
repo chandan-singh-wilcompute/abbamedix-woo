@@ -233,8 +233,20 @@ function custom_product_filter_results_shortcode() {
 
     $search_term = get_query_var('filter_slugs');
     $search_term = sanitize_text_field($search_term);
-    $search_terms = explode('+', $search_term);
-    $search_terms = array_filter(array_map('trim', $search_terms));
+    $search_termms = explode('+', $search_term);
+    $search_termms = array_filter(array_map('trim', $search_termms));
+    $search_terms = [];
+
+    foreach ($search_termms as $term) {
+        // Split on dash if present
+        $parts = preg_split('/[\s\-]+/', $term);
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if (!empty($part)) {
+                $search_terms[] = strtolower($part);
+            }
+        }
+    }
     $paged = get_query_var('paged') ? intval(get_query_var('paged')) : 1;
     $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
 
@@ -262,22 +274,26 @@ function custom_product_filter_results_shortcode() {
         'suppress_filters'    => false, // Needed for your custom title filter
         'filter_title_terms' => $search_terms,
     ]);
-    $matched_ids = $title_query->posts;
+    $matched_ids = $title_query->posts ?: [];
 
-    // 2. Match by category/subcategory name
-    $term_ids = [];
+    $matching_term_ids = [];
     foreach ($search_terms as $term) {
-        $matched_terms = get_terms([
+        $matching_terms = get_terms([
             'taxonomy'   => 'product_cat',
-            'name__like' => $term,
-            'fields'     => 'ids',
             'hide_empty' => false,
+            'name__like' => $term,
         ]);
-        $term_ids = array_merge($term_ids, $matched_terms);
-    }
-    $term_ids = array_unique($term_ids);
 
-    if (!empty($term_ids)) {
+        foreach ($matching_terms as $matched_term) {
+            $matching_term_ids[] = $matched_term->term_id;
+        }
+    }
+
+    $matching_term_ids = array_unique($matching_term_ids);
+
+    // Now do a proper tax_query using term IDs
+    $category_ids = [];
+    if (!empty($matching_term_ids)) {
         $category_query = new WP_Query([
             'post_type'      => 'product',
             'posts_per_page' => -1,
@@ -287,14 +303,16 @@ function custom_product_filter_results_shortcode() {
                 [
                     'taxonomy' => 'product_cat',
                     'field'    => 'term_id',
-                    'terms'    => $term_ids,
+                    'terms'    => $matching_term_ids,
                     'operator' => 'IN',
-                ]
+                ],
             ],
         ]);
-        $matched_ids = array_unique(array_merge($matched_ids, $category_query->posts));
+        $category_ids = $category_query->posts ?: [];
     }
 
+    $matched_ids = array_unique(array_merge($matched_ids, $category_ids));
+    
     // 3. Final filtered paginated query
     $args = [
         'post_type'      => 'product',
@@ -303,11 +321,11 @@ function custom_product_filter_results_shortcode() {
         'post_status'    => 'publish',
         'orderby'        => 'title',
         'order'          => 'ASC',
+        'suppress_filters'    => false,
         'post__in'       => $matched_ids,
     ];
 
     $query = new WP_Query($args);
-
     ob_start();
 
     if ($query->have_posts()) {		
