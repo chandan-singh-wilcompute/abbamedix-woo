@@ -250,12 +250,22 @@ function custom_product_filter_results_shortcode() {
     $paged = get_query_var('paged') ? intval(get_query_var('paged')) : 1;
     $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
 
+    $max_terms = 5;
+    $total_terms = count($search_terms);
+
+    $display_terms = array_slice($search_terms, 0, $max_terms);
+    $formatted = implode(', ', array_map('ucwords', $display_terms));
+
+    if ($total_terms > $max_terms) {
+        $formatted .= '.....';
+    }
+
     echo '<div class="titleWrapper">
                 <div class="container-fluid">
                     <a id="goback" class="backBtn">
                     Back
                 </a>
-                <h5>' . esc_html(implode(', ', array_map('ucwords', $search_terms))) . '</h5>
+                <h5>' . esc_html($formatted) . '</h5>
                 </div>
             </div>';
 
@@ -275,6 +285,7 @@ function custom_product_filter_results_shortcode() {
         'filter_title_terms' => $search_terms,
     ]);
     $matched_ids = $title_query->posts ?: [];
+    // echo '<pre>Matched by title: ' . implode(', ', $matched_ids) . '</pre>';
 
     $matching_term_ids = [];
     foreach ($search_terms as $term) {
@@ -310,8 +321,16 @@ function custom_product_filter_results_shortcode() {
         ]);
         $category_ids = $category_query->posts ?: [];
     }
-
+    // echo '<pre>Matched by category: ' . implode(', ', $category_ids) . '</pre>';
     $matched_ids = array_unique(array_merge($matched_ids, $category_ids));
+
+    // 3. Prevent match-all fallback
+    if (empty($matched_ids)) {
+        // echo '<pre>No matches found. Setting matched_ids = [0]</pre>';
+        $matched_ids = [0];
+    } else {
+        // echo '<pre>Final Matched IDs: ' . implode(', ', $matched_ids) . '</pre>';
+    }
     
     // 3. Final filtered paginated query
     $args = [
@@ -328,8 +347,9 @@ function custom_product_filter_results_shortcode() {
     $query = new WP_Query($args);
     ob_start();
 
+    echo '<div class="container-fluid">';
     if ($query->have_posts()) {		
-        echo '<div class="container-fluid">';
+        
         echo '<p class="product-count">' . $query->post_count . ' of ' . $query->found_posts . ' products</p>';
         echo '<ul class="products elementor-grid columns-4">';
         while ($query->have_posts()) {
@@ -364,11 +384,13 @@ function custom_product_filter_results_shortcode() {
             echo '</nav>';
         }
             
-        echo '</div>';
+        
 
     } else {
-        echo '<p>No products found for selected categories.</p>';
+        echo '<p class="product-count">No products found of this type.</p>';
     }
+
+    echo '</div>';
 
     wp_reset_postdata();
     return ob_get_clean();
