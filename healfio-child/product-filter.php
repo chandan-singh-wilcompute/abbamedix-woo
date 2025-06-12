@@ -9,13 +9,13 @@
 
 	get_header(); ?>
 
-  <!-- <section class="woocommerce productFilterResultWrapper">
+<!-- <section class="woocommerce productFilterResultWrapper">
 		<?php //echo do_shortcode('[my_custom_filter]'); ?>
 
 		<?php //echo do_shortcode('[wc_ordering_dropdown]'); ?>
 
 		<?php //echo do_shortcode('[custom_product_filter_results]'); ?>
-  </section> -->
+</section> -->
 
 	<section class="woocommerce productFilterResultWrapper">
 		<?php echo do_shortcode('[my_custom_filter]');?>
@@ -31,12 +31,9 @@
 	<script>
 		jQuery(document).ready(function ($) {
 			$('.productFilter').insertAfter('.titleWrapper');
-  	});
+		});
 
 	</script>
 
 	<?php
 	get_footer();
-
-
-  

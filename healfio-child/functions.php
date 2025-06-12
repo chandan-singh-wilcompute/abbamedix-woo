@@ -249,6 +249,8 @@ function custom_product_filter_results_shortcode() {
     }
     $paged = get_query_var('paged') ? intval(get_query_var('paged')) : 1;
     $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
+    $orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
+    $order_args = WC()->query->get_catalog_ordering_args( $orderby );
 
     $max_terms = 5;
     $total_terms = count($search_terms);
@@ -344,6 +346,13 @@ function custom_product_filter_results_shortcode() {
         'post__in'       => $matched_ids,
     ];
 
+    $args['orderby'] = $order_args['orderby'];
+    $args['order']   = $order_args['order'];
+
+    if ( ! empty( $order_args['meta_key'] ) ) {
+        $args['meta_key'] = $order_args['meta_key'];
+    }
+
     $query = new WP_Query($args);
     ob_start();
 
@@ -351,6 +360,42 @@ function custom_product_filter_results_shortcode() {
     if ($query->have_posts()) {		
         
         echo '<p class="product-count">' . $query->post_count . ' of ' . $query->found_posts . ' products</p>';
+
+        echo '<form class="woocommerce-ordering" method="get">
+            <select name="orderby" class="orderby" onchange="this.form.submit()">';
+                
+                $orderby_options = apply_filters( 'woocommerce_catalog_orderby', [
+                    'menu_order' => __( 'Default sorting', 'woocommerce' ),
+                    'popularity' => __( 'Sort by popularity', 'woocommerce' ),
+                    'rating'     => __( 'Sort by average rating', 'woocommerce' ),
+                    'date'       => __( 'Sort by latest', 'woocommerce' ),
+                    'price'      => __( 'Sort by price: low to high', 'woocommerce' ),
+                    'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
+                ] );
+
+                $current_orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
+
+                foreach ( $orderby_options as $id => $label ) {
+                    echo '<option value="' . esc_attr( $id ) . '" ' . selected( $current_orderby, $id, false ) . '>' . esc_html( $label ) . '</option>';
+                }
+                
+            echo '</select>';
+
+            // Preserve all other GET parameters (filters, search, paged, etc)
+            foreach ( $_GET as $key => $value ) {
+                if ( 'orderby' === $key ) {
+                    continue;
+                }
+                if ( is_array( $value ) ) {
+                    foreach ( $value as $val ) {
+                        echo '<input type="hidden" name="' . esc_attr( $key ) . '[]" value="' . esc_attr( $val ) . '">';
+                    }
+                } else {
+                    echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '">';
+                }
+            }
+
+        echo '</form>';
         echo '<ul class="products elementor-grid columns-4">';
         while ($query->have_posts()) {
             $query->the_post();
@@ -808,49 +853,3 @@ function enqueue_ajax_filter_script() {
     <?php
 }
 add_action('wp_head', 'enqueue_ajax_filter_script');
-
-
-// WooCommerce Ordering Dropdown Shortcode
-function wc_ordering_dropdown_shortcode() {
-	if ( ! function_exists( 'wc_get_catalog_ordering_options' ) ) {
-		return ''; // WooCommerce not available
-	}
-
-	ob_start();
-
-	$catalog_orderby_options = wc_get_catalog_ordering_options();
-	$catalog_orderby_options = apply_filters( 'woocommerce_catalog_orderby', $catalog_orderby_options );
-
-	$orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : get_option( 'woocommerce_default_catalog_orderby' );
-	$id_suffix = uniqid();
-	$use_label = true;
-	?>
-
-	<form class="woocommerce-ordering" method="get">
-		<?php if ( $use_label ) : ?>
-			<label for="woocommerce-orderby-<?php echo esc_attr( $id_suffix ); ?>">
-				<?php esc_html_e( 'Sort by', 'woocommerce' ); ?>
-			</label>
-		<?php endif; ?>
-		<select name="orderby" class="orderby"
-			<?php if ( $use_label ) : ?>
-				id="woocommerce-orderby-<?php echo esc_attr( $id_suffix ); ?>"
-			<?php else : ?>
-				aria-label="<?php esc_attr_e( 'Shop order', 'woocommerce' ); ?>"
-			<?php endif; ?>
-		>
-			<?php foreach ( $catalog_orderby_options as $id => $name ) : ?>
-				<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $orderby, $id ); ?>>
-					<?php echo esc_html( $name ); ?>
-				</option>
-			<?php endforeach; ?>
-		</select>
-
-		<input type="hidden" name="paged" value="1" />
-		<?php wc_query_string_form_fields( null, array( 'orderby', 'submit', 'paged', 'product-page' ) ); ?>
-	</form>
-
-	<?php
-	return ob_get_clean();
-}
-add_shortcode( 'wc_ordering_dropdown', 'wc_ordering_dropdown_shortcode' );

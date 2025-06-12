@@ -45,25 +45,58 @@ class WC_Products {
             wp_delete_term($term->term_id, 'product_cat');
         }
 
+        $category_dictionary = [
+            'Dried'                 => 'Dried Flower',
+            'Edibles - Solids'      => 'Edibles',
+            'Extracts - Ingested'   => 'Extracts',
+            'Edibles - Non-solids'  => 'Beverages',
+            'Topicals'              => 'Topicals',
+            'Extracts - Inhaled'    => 'Vapes',
+            'Extracts - Other'      => 'Concentrates',
+            'Accessories'           => 'Accessories'
+        ];
+
+        foreach ($category_dictionary as $key => $value) {
+            // Check if a category with this name already exists
+            if (!term_exists($value, 'product_cat')) {
+                // Create product category
+                wp_insert_term($value, 'product_cat');
+            } 
+        }
+
         return 1;
     }
 
     public function add_custom_variable_product($productData) {
         if (empty($productData['skus'])) return;
 
-        // === 1. Define Category and Subcategory ===
-        $parent_category = $productData['product_type_name'];
-        $child_category = $productData['product_type_subclass'];
+        $category_dictionary = [
+            'Dried'                 => 'Dried Flower',
+            'Edibles - Solids'      => 'Edibles',
+            'Extracts - Ingested'   => 'Extracts',
+            'Edibles - Non-solids'  => 'Beverages',
+            'Topicals'              => 'Topicals',
+            'Extracts - Inhaled'    => 'Vapes',
+            'Extracts - Other'      => 'Concentrates',
+            'Accessories'           => 'Accessories'
+        ];
 
-        if (stripos($parent_category, '(discrete units)') !== false) {
-            $parent_category = preg_replace('/\s*\(discrete units\)/i', '', $parent_category);
-        }
+        // === 1. Define Category and Subcategory ===
+        $parent_category = $productData['product_type_subclass'];
+        $child_category = $productData['product_type_name'];
+
+        
+        // if (stripos($parent_category, '(discrete units)') !== false) {
+        //     $parent_category = preg_replace('/\s*\(discrete units\)/i', '', $parent_category);
+        // }
         if (stripos($child_category, '(discrete units)') !== false) {
             $child_category = preg_replace('/\s*\(discrete units\)/i', '', $child_category);
         }
 
         $parent_category = trim($parent_category);
         $child_category = trim($child_category);
+
+        $parent_category = isset($category_dictionary[$parent_category]) ? $category_dictionary[$parent_category] : $parent_category;
 
         // // Create or get parent category
         // $parent_term = term_exists($parent_category, 'product_cat');
