@@ -841,6 +841,12 @@ a.page-numbers {
 	background: transparent;
 }
 
+.woocommerce-message {
+	margin: 20px auto 0;
+	width: 100%;
+	max-width: 1170px;
+}
+
 
 @media screen and (min-width: 1200px) {
   .primary-menu.navbar .dropdown-menu {

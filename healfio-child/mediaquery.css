@@ -45,16 +45,27 @@
   .woocommerce .container-product div.product div.summary {
     border: none;
   }
-  .megaMenu .categoryFilterForm {
+  .megaMenu .productCategoryFilterForm {
     width: 100%;
   }
-  .megaMenu .categoryFilterForm .colGroup {
+  .megaMenu .productCategoryFilterForm .colGroup {
     overflow: hidden;
   }
-  .megaMenu .categoryFilterForm .colGroup .col {
+  .megaMenu .productCategoryFilterForm .colGroup .col {
     width: 20%;
     max-width: 20%;
     flex: 20%;
+  }
+  .megaMenu .featuredCategoryFilterForm {
+    width: 100%;
+  }
+  .megaMenu .featuredCategoryFilterForm .colGroup {
+    overflow: hidden;
+  }
+  .megaMenu .featuredCategoryFilterForm .colGroup .col {
+    width: 25%;
+    max-width: 25%;
+    flex: 25%;
   }
   .productFilter .filterDropdown {
     margin-right: 10px;
