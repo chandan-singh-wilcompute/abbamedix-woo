@@ -196,7 +196,7 @@
   <!-- <div class="colGroup">
     <?php //echo do_shortcode('[product_category_filter]'); ?> 
   </div> -->
-  <form id="category-filter-form" class="categoryFilterForm" method="get">
+  <form id="product-category-filter-form" class="productCategoryFilterForm" method="get">
     <div class="colGroup">
       <div class="col">
         <h5>Flower</h5>
@@ -289,56 +289,58 @@
     <i class="bi bi-x closeMenu"></i>
   </div>
   
-  <div class="colGroup">
-    <div class="col">
-      <h5>New Releases</h5>
-      <div class="labelGroup">
-        <label for="driedFlower"><input class="inputCheck" type="checkbox" id="driedFlower" value="Dried Flower">Dried Flower</label>
-        <label for="preRolls"><input class="inputCheck" type="checkbox" id="preRolls" value="Pre-Rolls">Pre-Rolls</label>
-        <label for="shopAllFlower"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllFlower" value="Shop All Flow">Shop All Flower</label>       
+  <form id="featured-category-filter-form" class="featuredCategoryFilterForm" method="get">
+    <div class="colGroup">
+      <div class="col">
+        <h5>New Releases</h5>
+        <div class="labelGroup">
+          <label for="driedFlower"><input class="inputCheck" type="checkbox" id="driedFlower" value="Dried Flower">Dried Flower</label>
+          <label for="preRolls"><input class="inputCheck" type="checkbox" id="preRolls" value="Pre-Rolls">Pre-Rolls</label>
+          <label for="shopAllFlower"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllFlower" value="Shop All Flow">Shop All Flower</label>       
+        </div>
       </div>
+
+      <div class="col">
+        <h5>Shop by potency</h5>
+        <div class="labelGroup">        
+          <label for="vapes"><input class="inputCheck" type="checkbox" id="vapes" value="vapes">Disposable Vapes</label>
+          <label for="cartridges"><input class="inputCheck" type="checkbox" id="cartridges" value="cartridges">510 Thread Cartridges</label>
+          <label for="paxpods"><input class="inputCheck" type="checkbox" id="paxpods" value="paxpods">Pax Pods</label>
+          <label for="looppods"><input class="inputCheck" type="checkbox" id="looppods" value="looppods">Closed Loop Pods</label>
+          <label for="shopAllVapes"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllVapes" value="Shop All Concentrates">Shop All Vapes</label>
+        </div>
+      </div>
+
+      <div class="col">
+        <h5>Trending</h5>
+        <div class="labelGroup">
+          <label for="chocalates"><input class="inputCheck" type="checkbox" id="chocalates" value="chocalates">Chocalates</label>
+          <label for="bakedGoods"><input class="inputCheck" type="checkbox" id="bakedGoods" value="Baked Goods">Baked Goods</label>
+          <label for="gummies"><input class="inputCheck" type="checkbox" id="gummies" value="Gummies">Gummies</label>
+          <label for="hardEdibles"><input class="inputCheck" type="checkbox" id="hardEdibles" value="Hard Edibles">Hard Edibles</label>
+          <label for="pantry"><input class="inputCheck" type="checkbox" id="pantry" value="Pantry">Pantry</label>
+          <label for="savarySnacks"><input class="inputCheck" type="checkbox" id="savarySnacks" value="Savary Snacks">Savary Snacks</label>
+          <label for="shopAllEdibles"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllEdibles" value="Shop All Edibles">Shop All Edibles</label>
+        </div>
+      </div>
+
+      <div class="col">
+        <h5>Extracts</h5>
+        <div class="labelGroup">
+          <label for="oils"><input class="inputCheck" type="checkbox" id="oils" value="Oils">Oils</label>
+          <label for="capsules"><input class="inputCheck" type="checkbox" id="capsules" value="Capsules">Capsules</label>
+          <label for="sublingualStrips"><input class="inputCheck" type="checkbox" id="sublingualStrips" value="Sublingual Strips">Sublingual Strips</label>
+          <label for="shopAllExtracts"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllExtracts" value="Shop All Extracts">Shop All Extracts</label>
+        </div>
+      </div>
+
     </div>
 
-    <div class="col">
-      <h5>Shop by potency</h5>
-      <div class="labelGroup">        
-        <label for="vapes"><input class="inputCheck" type="checkbox" id="vapes" value="vapes">Disposable Vapes</label>
-        <label for="cartridges"><input class="inputCheck" type="checkbox" id="cartridges" value="cartridges">510 Thread Cartridges</label>
-        <label for="paxpods"><input class="inputCheck" type="checkbox" id="paxpods" value="paxpods">Pax Pods</label>
-        <label for="looppods"><input class="inputCheck" type="checkbox" id="looppods" value="looppods">Closed Loop Pods</label>
-        <label for="shopAllVapes"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllVapes" value="Shop All Concentrates">Shop All Vapes</label>
-      </div>
+    <div class="menuFooter">
+      <button type="button" id="selectAllFeaturedMenu" class="selectAll">Select All</button>
+      <button type="submit" id="sortBy" class="sortBtn">Sort By</button>
     </div>
-
-    <div class="col">
-      <h5>Trending</h5>
-      <div class="labelGroup">
-        <label for="chocalates"><input class="inputCheck" type="checkbox" id="chocalates" value="chocalates">Chocalates</label>
-        <label for="bakedGoods"><input class="inputCheck" type="checkbox" id="bakedGoods" value="Baked Goods">Baked Goods</label>
-        <label for="gummies"><input class="inputCheck" type="checkbox" id="gummies" value="Gummies">Gummies</label>
-        <label for="hardEdibles"><input class="inputCheck" type="checkbox" id="hardEdibles" value="Hard Edibles">Hard Edibles</label>
-        <label for="pantry"><input class="inputCheck" type="checkbox" id="pantry" value="Pantry">Pantry</label>
-        <label for="savarySnacks"><input class="inputCheck" type="checkbox" id="savarySnacks" value="Savary Snacks">Savary Snacks</label>
-        <label for="shopAllEdibles"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllEdibles" value="Shop All Edibles">Shop All Edibles</label>
-      </div>
-    </div>
-
-    <div class="col">
-      <h5>Extracts</h5>
-      <div class="labelGroup">
-        <label for="oils"><input class="inputCheck" type="checkbox" id="oils" value="Oils">Oils</label>
-        <label for="capsules"><input class="inputCheck" type="checkbox" id="capsules" value="Capsules">Capsules</label>
-        <label for="sublingualStrips"><input class="inputCheck" type="checkbox" id="sublingualStrips" value="Sublingual Strips">Sublingual Strips</label>
-        <label for="shopAllExtracts"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllExtracts" value="Shop All Extracts">Shop All Extracts</label>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="menuFooter">
-    <button type="button" id="selectAllFeaturedMenu" class="selectAll">Select All</button>
-    <a href="https://groiq.ca/ecommerce-test-api/products" id="sortBy" class="sortBtn">Sort By</a>
-  </div>
+  </form>
 </div>
 <script  type="text/javascript">
   jQuery(document).on('click', '#menu-item-31065', function() {
@@ -434,9 +436,9 @@
   });
 });
 
-// Category filter 
+// Product Category filter Form
 const siteBaseURL = "<?php echo esc_url(site_url()); ?>";
-const form = document.getElementById('category-filter-form');
+const form = document.getElementById('product-category-filter-form');
 form.addEventListener('submit', function (e) {
   e.preventDefault();
     // const checked = Array.from(document.querySelectorAll('input[name="categories[]"]:checked'));
@@ -451,6 +453,35 @@ form.addEventListener('submit', function (e) {
     // Redirect to pretty URL
     window.location.href = `${siteBaseURL}/product-filter/${slugs}/`;
 });
+
+
+// Featured Category filter form
+(function () {
+  // Only set if not already defined
+  window.siteBaseURL = window.siteBaseURL || "<?php echo esc_url(site_url()); ?>";
+
+  const form = document.getElementById('featured-category-filter-form');
+
+  // Only proceed if form exists
+  if (!form) return;
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const checked = Array.from(document.querySelectorAll('input:checked'));
+
+    if (checked.length === 0) {
+      alert('Please select at least one category.');
+      return;
+    }
+
+    const slugs = checked.map(cb => cb.value).join('+');
+
+    window.location.href = `${siteBaseURL}/product-filter/${slugs}/`;
+  });
+})();
+
+
 
 
 </script>

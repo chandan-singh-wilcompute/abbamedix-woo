@@ -123,7 +123,8 @@ body .elementor-button:focus {
     }
   }
 
-  .categoryFilterForm {
+  .productCategoryFilterForm,
+  .featuredCategoryFilterForm {
     display: flex;
     justify-content: flex-start;
     align-items: stretch;
@@ -1514,7 +1515,7 @@ a.button.thankyou-button {
     top: -83px;
     right: 0;
     left: 0;
-    width: 100px;
+    width: 200px;
     margin: 0 auto;
 
     &:hover {
@@ -1590,6 +1591,10 @@ a.button.thankyou-button {
       margin-top: 5px;
       display: none;
       position: absolute;
+
+      &.show {
+        display: block;
+      }
 
       label {
         display: block;
@@ -1725,7 +1730,8 @@ a.button.thankyou-button {
 
 .filterDropdown {
 
-  .categoryList {
+  .categoryList,
+  .terpene-checkboxes {
     height: 120px;
     overflow-y: auto;
     margin-bottom: 10px;
@@ -2712,6 +2718,7 @@ input[type=number] {
   width: 100%;
 }
 
+.featuredFilterResultWrapper,
 .productFilterResultWrapper,
 .viewAllProducts {
   background: #0A1106;
@@ -2738,7 +2745,7 @@ input[type=number] {
     border: 0;
     display: inherit;
 
-    width: 100px;
+    width: 200px;
     text-align: center;
     margin: 0 auto -20px;
     position: relative;
@@ -2821,6 +2828,7 @@ input[type=number] {
   }
 }
 
+.featuredFilterResultWrapper,
 .productFilterResultWrapper {
   .productFilter {
     max-width: 1458px;
@@ -2828,6 +2836,7 @@ input[type=number] {
   }
 }
 
+.featuredFilterResultWrapper,
 .productFilterResultWrapper,
 .viewAllProducts {
   padding-top: 0px;
@@ -2972,3 +2981,73 @@ input[type=number] {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+
+.shop-variation-swatches {
+ position: relative;
+ z-index: 1; 
+}
+
+.shop-variation-swatches  {
+  border-radius: 0 0 16px 16px;
+  padding-top: 10px;
+  overflow: hidden;
+  height: 115px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .variation-stock {
+    font-size: 12px;
+    color: red;
+  }
+
+  .swatch-group {
+    margin-bottom: 5px;
+  }
+
+	.swatch-item {
+    min-width: 55px;
+    height: 34px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    color: #000000;
+    border: solid 1px #000000;
+    font-size: 14px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-left: 10px;
+    background: transparent;
+    cursor: pointer;
+
+    &:first-child {
+      margin-left: 0;
+    }
+
+    &:hover,
+    &.active {
+      border-color: #63a7b6;
+      color: #63a7b6;
+    }
+  }
+
+  button {
+    width: 100%;
+    margin: 0 !important;
+  }
+
+  form {
+    margin-bottom: 0;
+  }
+}
+
+.noProductFound {
+  min-height: 320px;
+}
+
+.popularBrands .e-grid .elementor-widget {
+  width: 90%;
+}
+ 

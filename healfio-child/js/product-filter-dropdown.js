@@ -16,8 +16,54 @@
         parent.classList.add('selected');
       }
     });
+
+    // Close all dropdowns on any click outside a filterDropdown
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.filterDropdown')) {
+        closeAllDropdowns();
+      }
+    });
+
   });
 
+
+  const buttons = document.querySelectorAll('.filterDropdown .toggle-btn');
+
+    buttons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent event from bubbling to document
+        const dropdown = button.nextElementSibling;
+        const parent = button.closest('.filterDropdown');
+        const isOpen = dropdown.style.display === 'block';
+
+        // Close all dropdowns
+        closeAllDropdowns();
+
+        // If the clicked one was closed, open it
+        if (!isOpen) {
+          dropdown.style.display = 'block';
+          button.classList.add('active');
+          parent.classList.add('selected');
+        }
+      });
+    });
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.filterDropdown')) {
+        closeAllDropdowns();
+      }
+    });
+
+    function closeAllDropdowns() {
+      document.querySelectorAll('.filterDropdown .dropdown').forEach(d => d.style.display = 'none');
+      document.querySelectorAll('.filterDropdown .toggle-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.filterDropdown').forEach(fd => fd.classList.remove('selected'));
+    }
+
+
+
+  // THC / CBD Range slider
   const rangeInput = document.querySelectorAll(".range-input input"),
   priceInput = document.querySelectorAll(".price-input input"),
   range = document.querySelector(".slider .progress");

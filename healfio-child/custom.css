@@ -128,7 +128,8 @@ body .elementor-button:focus {
   align-items: center;
   justify-content: center;
 }
-.megaMenu .categoryFilterForm {
+.megaMenu .productCategoryFilterForm,
+.megaMenu .featuredCategoryFilterForm {
   display: flex;
   justify-content: flex-start;
   align-items: stretch;
@@ -1204,7 +1205,7 @@ a.button.thankyou-button {
   top: -83px;
   right: 0;
   left: 0;
-  width: 100px;
+  width: 200px;
   margin: 0 auto;
 }
 .featuredWrapper .viewAllBtn:hover {
@@ -1266,6 +1267,9 @@ a.button.thankyou-button {
   margin-top: 5px;
   display: none;
   position: absolute;
+}
+.productFilter .filterDropdown .dropdown.show {
+  display: block;
 }
 .productFilter .filterDropdown .dropdown label {
   display: block;
@@ -1377,7 +1381,8 @@ a.button.thankyou-button {
   opacity: 0;
   visibility: hidden;
 }
-.filterDropdown .categoryList {
+.filterDropdown .categoryList,
+.filterDropdown .terpene-checkboxes {
   height: 120px;
   overflow-y: auto;
   margin-bottom: 10px;
@@ -2156,15 +2161,18 @@ input[type=number] {
 .content-single-product {
   width: 100%;
 }
+.featuredFilterResultWrapper,
 .productFilterResultWrapper,
 .viewAllProducts {
   background: #0A1106;
   padding-bottom: 50px;
 }
+.featuredFilterResultWrapper .productFilter,
 .productFilterResultWrapper .productFilter,
 .viewAllProducts .productFilter {
   padding-bottom: 115px;
 }
+.featuredFilterResultWrapper .product-count,
 .productFilterResultWrapper .product-count,
 .viewAllProducts .product-count {
   color: #ffffff;
@@ -2173,6 +2181,7 @@ input[type=number] {
   margin-bottom: 0;
   font-weight: bold;
 }
+.featuredFilterResultWrapper .viewAllBtn,
 .productFilterResultWrapper .viewAllBtn,
 .viewAllProducts .viewAllBtn {
   background: transparent;
@@ -2182,16 +2191,18 @@ input[type=number] {
   font-family: "Comfortaa", sans-serif;
   border: 0;
   display: inherit;
-  width: 100px;
+  width: 200px;
   text-align: center;
   margin: 0 auto -20px;
   position: relative;
   z-index: 1;
 }
+.featuredFilterResultWrapper .viewAllBtn:hover,
 .productFilterResultWrapper .viewAllBtn:hover,
 .viewAllProducts .viewAllBtn:hover {
   color: #9DA632;
 }
+.featuredFilterResultWrapper .products,
 .productFilterResultWrapper .products,
 .viewAllProducts .products {
   display: grid;
@@ -2200,12 +2211,15 @@ input[type=number] {
   grid-row-gap: 80px;
   padding: 30px 0 !important;
 }
+.featuredFilterResultWrapper .products:before,
 .productFilterResultWrapper .products:before,
 .viewAllProducts .products:before,
+.featuredFilterResultWrapper .products:after,
 .productFilterResultWrapper .products:after,
 .viewAllProducts .products:after {
   display: none !important;
 }
+.featuredFilterResultWrapper .products li,
 .productFilterResultWrapper .products li,
 .viewAllProducts .products li {
   margin: 0 !important;
@@ -2213,18 +2227,21 @@ input[type=number] {
   width: auto !important;
   padding: 0 !important;
 }
+.featuredFilterResultWrapper .titleWrapper,
 .productFilterResultWrapper .titleWrapper,
 .viewAllProducts .titleWrapper {
   background-color: #1b5d72;
   margin-bottom: 20px;
   padding: 15px 0;
 }
+.featuredFilterResultWrapper .titleWrapper .container-fluid,
 .productFilterResultWrapper .titleWrapper .container-fluid,
 .viewAllProducts .titleWrapper .container-fluid {
   display: flex;
   align-items: center;
   justify-content: flex-start;
 }
+.featuredFilterResultWrapper .titleWrapper .backBtn,
 .productFilterResultWrapper .titleWrapper .backBtn,
 .viewAllProducts .titleWrapper .backBtn {
   background: url(../healfio-child/img/back-arrow.png) left 5px no-repeat;
@@ -2237,10 +2254,12 @@ input[type=number] {
   color: #ffffff;
   margin-right: 20px;
 }
+.featuredFilterResultWrapper .titleWrapper .backBtn:hover,
 .productFilterResultWrapper .titleWrapper .backBtn:hover,
 .viewAllProducts .titleWrapper .backBtn:hover {
   color: #ffffff;
 }
+.featuredFilterResultWrapper .titleWrapper .backBtn:after,
 .productFilterResultWrapper .titleWrapper .backBtn:after,
 .viewAllProducts .titleWrapper .backBtn:after {
   width: 1px;
@@ -2251,6 +2270,7 @@ input[type=number] {
   right: 0;
   content: '';
 }
+.featuredFilterResultWrapper .titleWrapper h5,
 .productFilterResultWrapper .titleWrapper h5,
 .viewAllProducts .titleWrapper h5 {
   text-transform: capitalize;
@@ -2261,14 +2281,17 @@ input[type=number] {
   color: #FFFFFF;
   line-height: 45px;
 }
+.featuredFilterResultWrapper .productFilter,
 .productFilterResultWrapper .productFilter {
   max-width: 1458px;
   margin: 0 auto;
 }
+.featuredFilterResultWrapper,
 .productFilterResultWrapper,
 .viewAllProducts {
   padding-top: 0px;
 }
+.featuredFilterResultWrapper .woocommerce-result-count,
 .productFilterResultWrapper .woocommerce-result-count,
 .viewAllProducts .woocommerce-result-count {
   color: #ffffff;
@@ -2278,10 +2301,12 @@ input[type=number] {
   padding: 0;
   font-weight: bold;
 }
+.featuredFilterResultWrapper .woocommerce-result-count::before,
 .productFilterResultWrapper .woocommerce-result-count::before,
 .viewAllProducts .woocommerce-result-count::before {
   display: none;
 }
+.featuredFilterResultWrapper .woocommerce-ordering,
 .productFilterResultWrapper .woocommerce-ordering,
 .viewAllProducts .woocommerce-ordering {
   margin-bottom: 0;
@@ -2391,4 +2416,59 @@ input[type=number] {
   100% {
     transform: rotate(360deg);
   }
+}
+.shop-variation-swatches {
+  position: relative;
+  z-index: 1;
+}
+.shop-variation-swatches {
+  border-radius: 0 0 16px 16px;
+  padding-top: 10px;
+  overflow: hidden;
+  height: 115px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.shop-variation-swatches .variation-stock {
+  font-size: 12px;
+  color: red;
+}
+.shop-variation-swatches .swatch-group {
+  margin-bottom: 5px;
+}
+.shop-variation-swatches .swatch-item {
+  min-width: 55px;
+  height: 34px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  color: #000000;
+  border: solid 1px #000000;
+  font-size: 14px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-left: 10px;
+  background: transparent;
+  cursor: pointer;
+}
+.shop-variation-swatches .swatch-item:first-child {
+  margin-left: 0;
+}
+.shop-variation-swatches .swatch-item:hover,
+.shop-variation-swatches .swatch-item.active {
+  border-color: #63a7b6;
+  color: #63a7b6;
+}
+.shop-variation-swatches button {
+  width: 100%;
+  margin: 0 !important;
+}
+.shop-variation-swatches form {
+  margin-bottom: 0;
+}
+.noProductFound {
+  min-height: 320px;
+}
+.popularBrands .e-grid .elementor-widget {
+  width: 90%;
 }

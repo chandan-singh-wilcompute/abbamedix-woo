@@ -170,7 +170,7 @@ add_shortcode('potencies', 'my_custom_shortcode_function');
 add_filter( 'woocommerce_show_variation_price', '__return_true' );
 
 
-// product category
+// product category 
 function product_category_filter_shortcode() {
   ob_start();
   echo '<form id="category-filter-form" class="categoryFilterForm" method="get">';
@@ -228,7 +228,7 @@ function product_category_filter_shortcode() {
 }
 add_shortcode('product_category_filter', 'product_category_filter_shortcode');
 
-// Custom products
+// Custom products menu filter
 function custom_product_filter_results_shortcode() {
 
     $search_term = get_query_var('filter_slugs');
@@ -432,7 +432,7 @@ function custom_product_filter_results_shortcode() {
         
 
     } else {
-        echo '<p class="product-count">No products found of this type.</p>';
+        echo '<div class="noProductFound"><div class="alert alert-danger" role="alert">No products found of this type.</div></div>';				
     }
 
     echo '</div>';
@@ -441,6 +441,222 @@ function custom_product_filter_results_shortcode() {
     return ob_get_clean();
 }
 add_shortcode('custom_product_filter_results', 'custom_product_filter_results_shortcode');
+
+
+// Custom Featured menu filter 
+function custom_featured_filter_results_shortcode() {
+
+    $search_term = get_query_var('filter_slugs');
+    $search_term = sanitize_text_field($search_term);
+    $search_termms = explode('+', $search_term);
+    $search_termms = array_filter(array_map('trim', $search_termms));
+    $search_terms = [];
+
+    foreach ($search_termms as $term) {
+        // Split on dash if present
+        $parts = preg_split('/[\s\-]+/', $term);
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if (!empty($part)) {
+                $search_terms[] = strtolower($part);
+            }
+        }
+    }
+    $paged = get_query_var('paged') ? intval(get_query_var('paged')) : 1;
+    $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
+    $orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
+    $order_args = WC()->query->get_catalog_ordering_args( $orderby );
+
+    $max_terms = 5;
+    $total_terms = count($search_terms);
+
+    $display_terms = array_slice($search_terms, 0, $max_terms);
+    $formatted = implode(', ', array_map('ucwords', $display_terms));
+
+    if ($total_terms > $max_terms) {
+        $formatted .= '.....';
+    }
+
+    echo '<div class="titleWrapper">
+                <div class="container-fluid">
+                    <a id="goback" class="backBtn">
+                    Back
+                </a>
+                <h5>' . esc_html($formatted) . '</h5>
+                </div>
+            </div>';
+
+    if (empty($search_term)) {
+        return '<div class="container text-white pt-5 pb-5" style="min-height:500px">Please select a category to view products.</div>';
+    }
+
+    $matched_ids = [];
+
+    // 1. Match by product title (using your custom posts_where filter)
+    $title_query = new WP_Query([
+        'post_type'           => 'product',
+        'posts_per_page'      => -1,
+        'post_status'         => 'publish',
+        'fields'              => 'ids',
+        'suppress_filters'    => false, // Needed for your custom title filter
+        'filter_title_terms' => $search_terms,
+    ]);
+    $matched_ids = $title_query->posts ?: [];
+    // echo '<pre>Matched by title: ' . implode(', ', $matched_ids) . '</pre>';
+
+    $matching_term_ids = [];
+    foreach ($search_terms as $term) {
+        $matching_terms = get_terms([
+            'taxonomy'   => 'product_cat',
+            'hide_empty' => false,
+            'name__like' => $term,
+        ]);
+
+        foreach ($matching_terms as $matched_term) {
+            $matching_term_ids[] = $matched_term->term_id;
+        }
+    }
+
+    $matching_term_ids = array_unique($matching_term_ids);
+
+    // Now do a proper tax_query using term IDs
+    $category_ids = [];
+    if (!empty($matching_term_ids)) {
+        $category_query = new WP_Query([
+            'post_type'      => 'product',
+            'posts_per_page' => -1,
+            'post_status'    => 'publish',
+            'fields'         => 'ids',
+            'tax_query'      => [
+                [
+                    'taxonomy' => 'product_cat',
+                    'field'    => 'term_id',
+                    'terms'    => $matching_term_ids,
+                    'operator' => 'IN',
+                ],
+            ],
+        ]);
+        $category_ids = $category_query->posts ?: [];
+    }
+    // echo '<pre>Matched by category: ' . implode(', ', $category_ids) . '</pre>';
+    $matched_ids = array_unique(array_merge($matched_ids, $category_ids));
+
+    // 3. Prevent match-all fallback
+    if (empty($matched_ids)) {
+        // echo '<pre>No matches found. Setting matched_ids = [0]</pre>';
+        $matched_ids = [0];
+    } else {
+        // echo '<pre>Final Matched IDs: ' . implode(', ', $matched_ids) . '</pre>';
+    }
+    
+    // 3. Final filtered paginated query
+    $args = [
+        'post_type'      => 'product',
+        'posts_per_page' => $view_all ? -1 : 12,
+        'paged'          => $view_all ? 1 : $paged,
+        'post_status'    => 'publish',
+        'orderby'        => 'title',
+        'order'          => 'ASC',
+        'suppress_filters'    => false,
+        'post__in'       => $matched_ids,
+    ];
+
+    $args['orderby'] = $order_args['orderby'];
+    $args['order']   = $order_args['order'];
+
+    if ( ! empty( $order_args['meta_key'] ) ) {
+        $args['meta_key'] = $order_args['meta_key'];
+    }
+
+    $query = new WP_Query($args);
+    ob_start();
+
+    echo '<div class="container-fluid">';
+    if ($query->have_posts()) {		
+        
+        echo '<p class="product-count">' . $query->post_count . ' of ' . $query->found_posts . ' products</p>';
+
+        echo '<form class="woocommerce-ordering" method="get">
+            <select name="orderby" class="orderby" onchange="this.form.submit()">';
+                
+                $orderby_options = apply_filters( 'woocommerce_catalog_orderby', [
+                    'menu_order' => __( 'Default sorting', 'woocommerce' ),
+                    'popularity' => __( 'Sort by popularity', 'woocommerce' ),
+                    'rating'     => __( 'Sort by average rating', 'woocommerce' ),
+                    'date'       => __( 'Sort by latest', 'woocommerce' ),
+                    'price'      => __( 'Sort by price: low to high', 'woocommerce' ),
+                    'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
+                ] );
+
+                $current_orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
+
+                foreach ( $orderby_options as $id => $label ) {
+                    echo '<option value="' . esc_attr( $id ) . '" ' . selected( $current_orderby, $id, false ) . '>' . esc_html( $label ) . '</option>';
+                }
+                
+            echo '</select>';
+
+            // Preserve all other GET parameters (filters, search, paged, etc)
+            foreach ( $_GET as $key => $value ) {
+                if ( 'orderby' === $key ) {
+                    continue;
+                }
+                if ( is_array( $value ) ) {
+                    foreach ( $value as $val ) {
+                        echo '<input type="hidden" name="' . esc_attr( $key ) . '[]" value="' . esc_attr( $val ) . '">';
+                    }
+                } else {
+                    echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '">';
+                }
+            }
+
+        echo '</form>';
+        echo '<ul class="products elementor-grid columns-4">';
+        while ($query->have_posts()) {
+            $query->the_post();
+            wc_get_template_part('content', 'product');
+        }
+        echo '</ul>';
+        global $wp;
+        $current_url = home_url(add_query_arg([], $wp->request));
+        $view_all_url = esc_url(add_query_arg('view', 'all', $current_url));
+        $paginate_url = esc_url(remove_query_arg('view', $current_url));
+        if ($view_all) {
+            echo '<a href="' . $paginate_url . '" class="viewAllBtn">Show Paginated</a>';
+        } else {
+            echo '<a href="' . $view_all_url . '" class="viewAllBtn">View All</a>';
+        }
+
+        if (!$view_all && $query->max_num_pages > 1) {
+            echo '<nav class="woocommerce-pagination">';
+            echo '<ul class="page-numbers">';
+            echo paginate_links(array(
+                'base'      => trailingslashit(get_pagenum_link(1)) . 'page/%#%/',
+                'format'    => '',
+                'current'   => $paged,
+                'total'     => $query->max_num_pages,
+                'prev_text' => __('←'),
+                'next_text' => __('→'),
+                'type'      => 'list',
+            ));
+
+            echo '</ul>';
+            echo '</nav>';
+        }
+            
+        
+
+    } else {
+        echo '<div class="noProductFound"><div class="alert alert-danger" role="alert">No products found of this type.</div></div>';				
+    }
+
+    echo '</div>';
+
+    wp_reset_postdata();
+    return ob_get_clean();
+}
+add_shortcode('custom_featured_filter_results', 'custom_product_filter_results_shortcode');
+
 
 add_shortcode('custom_products_paginated', 'custom_product_filter_results');
 function fix_shortcode_pagination($query) {
@@ -462,12 +678,30 @@ function register_product_filter_rewrite_rule() {
 
   // Match: /product-filter/Strawberry/page/2/
     add_rewrite_rule(
-        '^product-filter/([^/]+)/page/([0-9]+)/?$',
-        'index.php?pagename=product-filter&filter_slugs=$matches[1]&paged=$matches[2]',
-        'top'
+			'^product-filter/([^/]+)/page/([0-9]+)/?$',
+			'index.php?pagename=product-filter&filter_slugs=$matches[1]&paged=$matches[2]',
+			'top'
     );
 }
+
 add_action('init', 'register_product_filter_rewrite_rule');
+
+// Add rewrite rule for pretty category filters like /featured-filter/slug+slug/
+function register_featured_filter_rewrite_rule() {
+  add_rewrite_rule(
+    '^featured-filter/([^/]+)/?$',
+    'index.php?pagename=featured-filter&filter_slugs=$matches[1]',
+    'top'
+  );
+
+  // Match: /featured-filter/Strawberry/page/2/
+    add_rewrite_rule(
+			'^featured-filter/([^/]+)/page/([0-9]+)/?$',
+			'index.php?pagename=featured-filter&filter_slugs=$matches[1]&paged=$matches[2]',
+			'top'
+    );
+}
+add_action('init', 'register_featured_filter_rewrite_rule');
 
 // Add custom query var
 function add_product_filter_query_var($vars) {
@@ -565,36 +799,35 @@ function filter_products_by_brand($query) {
 }
 
 
-
-
 // product category
-// Add shortcode to display product categories with checkboxes and apply button
-function abbamedix_product_category_checkbox_list() {
-    // Get all product categories
-    $product_categories = get_terms([
+// Shortcode to display only parent product categories with checkboxes and apply button
+function abbamedix_parent_product_category_checkbox_list() {
+    // Get only parent product categories
+    $parent_categories = get_terms([
         'taxonomy'   => 'product_cat',
         'hide_empty' => false,
+        'parent'     => 0, // Only parent categories
     ]);
 
     ob_start();
 
-    if (!empty($product_categories) && !is_wp_error($product_categories)) {
+    if (!empty($parent_categories) && !is_wp_error($parent_categories)) {
         ?>
         <form id="product-filter-category" class="productFilterCategory" method="GET" action="">
-					<div class="categoryList">
-            <?php foreach ($product_categories as $category) : ?>
-                <label>
-                    <input type="checkbox" name="product_cat[]" value="<?php echo esc_attr($category->slug); ?>"
-                        <?php if (isset($_GET['product_cat']) && in_array($category->slug, $_GET['product_cat'])) echo 'checked'; ?>>
-                    <?php echo esc_html($category->name); ?>
-                </label>
-            <?php endforeach; ?>
-					</div>
-					<button type="submit" class="btnApply">Apply</button>
+						<div class="categoryList">
+							<?php foreach ($parent_categories as $category) : ?>
+									<label>
+											<input type="checkbox" name="product_cat[]" value="<?php echo esc_attr($category->slug); ?>"
+													<?php if (isset($_GET['product_cat']) && in_array($category->slug, $_GET['product_cat'])) echo 'checked'; ?>>
+											<?php echo esc_html($category->name); ?>
+									</label><br>
+							<?php endforeach; ?>
+						</div>
+            <button type="submit" class="btnApply">Apply</button>
         </form>
         <?php
 
-        // Optional: Show selected category slugs
+        // Optional: Display selected category slugs
         if (isset($_GET['product_cat'])) {
             echo '<h4>Selected Categories:</h4>';
             echo '<ul>';
@@ -607,7 +840,8 @@ function abbamedix_product_category_checkbox_list() {
 
     return ob_get_clean();
 }
-add_shortcode('product-filter-category', 'abbamedix_product_category_checkbox_list');
+add_shortcode('product-filter-category', 'abbamedix_parent_product_category_checkbox_list');
+
 
 
 // custom product filter
@@ -619,7 +853,7 @@ function my_custom_product_filter() {
 			<div class="filterDropdown">
 					<button class="toggleBtn" id="tch">THC</button>
 					<div class="dropdown">
-					<label>TCH Range</label>
+					<label>THC Range</label>
 					<div class="slider">
 							<div class="progress"></div>
 					</div>
@@ -644,7 +878,7 @@ function my_custom_product_filter() {
 			<div class="filterDropdown">
 					<button class="toggleBtn" id="cbd">CBD</button>
 					<div class="dropdown range-second">
-					<label>CBD</label>
+					<label>CBD Range</label>
 					<div class="slider">
 							<div class="progress"></div>
 					</div>
@@ -670,74 +904,23 @@ function my_custom_product_filter() {
 					<button class="toggleBtn" id="size">size</button>
 					<div class="dropdown">
 					<label>size</label>
-					<div class="slider">
-							<div class="progress"></div>
-					</div>
-					<div class="range-input">
-							<input type="range" class="range-min" min="0" max="100" value="0" step="1">
-							<input type="range" class="range-max" min="0" max="100" value="100" step="1">
-					</div>
-					<div class="price-input">
-							<div class="field">
-							<input type="number" class="input-min" value="0">
-							</div>
-							<div class="separator">To</div>
-							<div class="field">
-							<input type="number" class="input-max" value="100">
-							</div>
-					</div>
-					
-					<button type="submit" class="btnApply">Apply</button>
+					<?php echo do_shortcode('[product_sizes]'); ?>
 					</div>
 			</div>
 
 			<div class="filterDropdown">
 					<button class="toggleBtn" id="dominance">dominance</button>
 					<div class="dropdown">
-					<label>dominance</label>
-					<div class="slider">
-							<div class="progress"></div>
-					</div>
-					<div class="range-input">
-							<input type="range" class="range-min" min="0" max="100" value="0" step="1">
-							<input type="range" class="range-max" min="0" max="100" value="100" step="1">
-					</div>
-					<div class="price-input">
-							<div class="field">
-							<input type="number" class="input-min" value="0">
-							</div>
-							<div class="separator">To</div>
-							<div class="field">
-							<input type="number" class="input-max" value="100">
-							</div>
-					</div>
-					
-					<button type="submit" class="btnApply">Apply</button>
+					<label>dominance</label>					
+					<?php echo do_shortcode('[product_dominance]'); ?>
 					</div>
 			</div>
 
 			<div class="filterDropdown">
 					<button class="toggleBtn" id="terpenes">terpenes</button>
 					<div class="dropdown">
-					<label>terpenes</label>
-					<div class="slider">
-							<div class="progress"></div>
-					</div>
-					<div class="range-input">
-							<input type="range" class="range-min" min="0" max="100" value="0" step="1">
-							<input type="range" class="range-max" min="0" max="100" value="100" step="1">
-					</div>
-					<div class="price-input">
-							<div class="field">
-							<input type="number" class="input-min" value="0">
-							</div>
-							<div class="separator">To</div>
-							<div class="field">
-							<input type="number" class="input-max" value="100">
-							</div>
-					</div>
-					
-					<button type="submit" class="btnApply">Apply</button>
+						<label>terpenes</label>
+						<?php echo do_shortcode('[terpene_checkboxes]'); ?>
 					</div>
 			</div>
 
@@ -853,3 +1036,77 @@ function enqueue_ajax_filter_script() {
     <?php
 }
 add_action('wp_head', 'enqueue_ajax_filter_script');
+
+
+// Register shortcode to display terpene checkboxes
+function render_terpene_checkboxes_shortcode() {
+    $terpenes = ['Myrcene', 'Limonene', 'Pinene', 'Linalool', 'Caryophyllene', 'Humulene', 'Terpinolene', 'Ocimene'];
+
+    $html = '<form method="post" class="terpene-form">';
+    $html .= '<div class="terpene-checkboxes">';
+
+    foreach ($terpenes as $terpene) {
+        $id = 'terpene_' . strtolower($terpene);
+        $html .= '<label style="display:block;margin-bottom:5px;">';
+        $html .= '<input type="checkbox" name="terpenes[]" value="' . esc_attr($terpene) . '"> ' . esc_html($terpene);
+        $html .= '</label>';
+    }
+
+    $html .= '</div>';
+    $html .= '<button type="submit" class="btnApply">Apply</button>'; // Optional
+    $html .= '</form>';
+
+    return $html;
+}
+add_shortcode('terpene_checkboxes', 'render_terpene_checkboxes_shortcode');
+
+
+// Shortcode to dynamically get and display product sizes (multi-select)
+function dynamic_product_sizes_multiselect_shortcode() {
+    // Replace 'pa_size' with your actual attribute slug
+    $attribute_name = 'pa_size';
+    $taxonomy = wc_sanitize_taxonomy_name($attribute_name);
+
+    // Get all terms (sizes) from the attribute
+    $terms = get_terms([
+        'taxonomy'   => $taxonomy,
+        'hide_empty' => false,
+    ]);
+
+    if (empty($terms) || is_wp_error($terms)) {
+        return '<p>No sizes found.</p>';
+    }
+
+    $html = '<form class="product-sizes-form">';
+
+    foreach ($terms as $term) {
+        $html .= '<label style="display:block; margin:4px 0;">';
+        $html .= '<input type="checkbox" name="product_sizes[]" value="' . esc_attr($term->name) . '"> ' . esc_html($term->name);
+        $html .= '</label>';
+    }
+		$html .= '<button type="submit" class="btnApply">Apply</button>'; // Optional
+    $html .= '</form>';
+    return $html;
+}
+add_shortcode('product_sizes', 'dynamic_product_sizes_multiselect_shortcode');
+
+
+// Shortcode to get and display product dominance from attribute
+function get_product_dominance_shortcode() {
+    global $product;
+
+    if (!$product || !is_product()) {
+        return '';
+    }
+
+    $taxonomy = 'pa_dominance';
+    $terms = wp_get_post_terms($product->get_id(), $taxonomy);
+
+    if (!empty($terms) && !is_wp_error($terms)) {
+        $names = wp_list_pluck($terms, 'name');
+        return '<p>' . esc_html(implode(', ', $names)) . '</p>';
+    }
+
+    return '<p><strong>Dominance:</strong> Not specified</p>';
+}
+add_shortcode('product_dominance', 'get_product_dominance_shortcode');
