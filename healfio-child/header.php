@@ -370,6 +370,8 @@
     jQuery(document).on('click', '.megaMenu h5', function() {
       jQuery(this).next('.labelGroup').slideToggle();
       jQuery(this).toggleClass('open');
+      jQuery(this).parents('.col').siblings('.col').children('.labelGroup').slideUp();
+      jQuery(this).parents('.col').siblings('.col').children('h5').removeClass('open');
     });
   }
 
@@ -480,8 +482,6 @@ form.addEventListener('submit', function (e) {
     window.location.href = `${siteBaseURL}/product-filter/${slugs}/`;
   });
 })();
-
-
 
 
 </script>

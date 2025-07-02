@@ -62,29 +62,42 @@ if (!empty($package_size_value)) {
 
 <?php if ( $price_html = $product->get_price_html() ) : ?>
 
-    <span class="price prodcard-price">
-		<?php 
-		    echo $currency_symbol . $price; 
-		if (isset($package_size_value) && !empty($package_size_value)) {
-            echo '/' . esc_html($package_size_value);
-		}
-		?>
-	</span>
+    <div class="price prodcard-price">
+        <div class="productQuantity">
+            <button type="button" class="btn minusQuantity">−</button>
+            <input type="number" class="quantity" value="1" min="1">
+            <button type="button" class="btn addQuantity">+</button>
+        </div>
+
+        <span>
+            <?php 
+                echo $currency_symbol . $price; 
+            if (isset($package_size_value) && !empty($package_size_value)) {
+                echo '/' . esc_html($package_size_value);
+            }
+            ?>
+        </span>
+
+</div>
 
 <?php endif; ?>
 
 <?php
 $link = apply_filters( 'woocommerce_loop_product_link', get_the_permalink(), $product );
-
-echo '<div class="cardFooter">';
-echo '  <div class="addtoCart">
-            <label>Add to cart</label>
-            <div class="productQuantity">
-                <button type="button" class="btn minusQuantity">−</button>
-                <input type="number" class="quantity" value="1" min="1">
-                <button type="button" class="btn addQuantity">+</button>
-            </div>
-        </div>';
-echo '  <a href="' . esc_url($link) . '">More Info</a>';
-echo '</div>';
 ?>
+
+<?php 
+   
+    // echo '<div class="cardFooter">';
+    // echo '  <div class="addtoCart">
+    //             <label>Select Size</label>
+    //             <div class="productQuantity">
+    //                 <button type="button" class="btn minusQuantity">−</button>
+    //                 <input type="number" class="quantity" value="1" min="1">
+    //                 <button type="button" class="btn addQuantity">+</button>
+    //             </div>
+    //         </div>';
+    // echo '  <a href="' . esc_url($link) . '">More Info</a>';
+    // echo '</div>';
+?>
+

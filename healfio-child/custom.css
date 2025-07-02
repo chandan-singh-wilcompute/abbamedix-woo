@@ -45,7 +45,7 @@ button {
 }
 button.button {
   border-radius: 0 !important;
-  background: #9DA632 !important;
+  background: #A7AF39 !important;
   box-shadow: none !important;
   font-size: 24px;
   text-transform: uppercase !important;
@@ -85,6 +85,10 @@ body .elementor-button:focus {
   max-width: 100%;
   padding: 0;
 }
+.navbar.open-pr-nav .navbar-nav {
+  max-height: 350px;
+  overflow-y: auto;
+}
 .megaMenu {
   opacity: 0;
   visibility: hidden;
@@ -96,7 +100,7 @@ body .elementor-button:focus {
   z-index: 9991;
   width: 100%;
   max-width: 1170px;
-  background-color: #9DA632;
+  background-color: #A7AF39;
   transition: all 0.3s;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
 }
@@ -135,6 +139,8 @@ body .elementor-button:focus {
   align-items: stretch;
   box-sizing: border-box;
   flex-wrap: wrap;
+  max-height: 400px;
+  overflow-y: auto;
 }
 .megaMenu .colGroup {
   display: flex;
@@ -209,7 +215,7 @@ body .elementor-button:focus {
   background-color: gray;
   position: relative;
   font-size: 12px;
-  width: 10.2%;
+  width: 120px;
   text-align: right;
   transition: all 0.2s ease-in-out;
   font-weight: bold;
@@ -312,10 +318,10 @@ body .elementor-button:focus {
 }
 .header-icons .input-field:hover svg.search-icon,
 .header-icons .cart-contents:hover svg {
-  color: #9DA632 !important;
+  color: #A7AF39 !important;
 }
 .header-profile:hover svg {
-  fill: #9DA632;
+  fill: #A7AF39;
 }
 .header-profile:hover .dropdown-menu {
   transition: 0.3s;
@@ -336,7 +342,7 @@ body .elementor-button:focus {
   margin-bottom: 1px;
 }
 .header-profile:hover .dropdown-menu li:hover {
-  background-color: #9DA632;
+  background-color: #A7AF39;
 }
 .header-profile:hover .dropdown-menu li a {
   color: #ffffff;
@@ -348,7 +354,7 @@ body .elementor-button:focus {
   margin: 0 auto;
 }
 .animated-icon1 span {
-  background: #9DA632;
+  background: #A7AF39;
 }
 .magic-search form .inner-form .row .input-field.first input {
   border-radius: 0;
@@ -433,7 +439,7 @@ body .elementor-button:focus {
   width: 24px;
   height: 24px;
   border-radius: 100%;
-  background-color: #63a7b6;
+  background-color: #6EB0BE;
   color: white;
   position: relative;
   margin-right: 5px;
@@ -484,7 +490,7 @@ body .elementor-button:focus {
   font-size: 14px;
 }
 .age-gate__remember {
-  line-height: 20px;
+  line-height: 22px;
 }
 .innerBanner .caption {
   display: flex;
@@ -548,7 +554,7 @@ body .elementor-button:focus {
 .registration input:-webkit-autofill:hover,
 .registration input:-webkit-autofill:focus,
 .registration input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px #63a7b6 inset !important;
+  -webkit-box-shadow: 0 0 0 30px #6EB0BE inset !important;
   -webkit-text-fill-color: #ffffff !important;
 }
 .registration .elementor-field-group input[type="text"],
@@ -557,7 +563,7 @@ body .elementor-button:focus {
 .registration .elementor-field-group input[type="password"] {
   border: 0;
   border-radius: 0;
-  -webkit-box-shadow: 0 0 0 30px #63a7b6 inset !important;
+  -webkit-box-shadow: 0 0 0 30px #6EB0BE inset !important;
   -webkit-text-fill-color: #ffffff !important;
 }
 .registration .elementor-field-label {
@@ -609,7 +615,7 @@ body .elementor-button:focus {
   position: relative;
   appearance: none;
   -webkit-appearance: none;
-  background: #63a7b6;
+  background: #6EB0BE;
   margin-right: 10px;
 }
 .registration input[type="checkbox"]:hover,
@@ -625,7 +631,7 @@ body .elementor-button:focus {
   font-size: 22px;
   transform: rotate(17deg);
   z-index: 2;
-  color: #63a7b6;
+  color: #6EB0BE;
 }
 .registration input[type="checkbox"]:checked:before,
 .registration input[type="radio"]:checked:before {
@@ -666,7 +672,7 @@ body .elementor-button:focus {
   padding: 6px 12px;
   border: none;
   border-radius: 3px;
-  background-color: #9da632;
+  background-color: #A7AF39;
   font-size: 24px;
 }
 .registration .kbw-signature {
@@ -698,7 +704,7 @@ body .elementor-button:focus {
   text-transform: uppercase;
   color: #ffffff;
   padding: 8px 10px;
-  background-color: #9da632;
+  background-color: #A7AF39;
   position: absolute;
 }
 .registration .width-100 {
@@ -724,7 +730,7 @@ body .elementor-button:focus {
 }
 .woocommerce form.login .registerButton {
   border-radius: 0;
-  background: #9DA632;
+  background: #A7AF39;
   box-shadow: none;
   font-size: 24px;
   text-transform: uppercase;
@@ -766,7 +772,7 @@ body .elementor-button:focus {
 }
 .woocommerce .woocommerce-form-login__submit {
   border-radius: none;
-  background: #9DA632;
+  background: #A7AF39;
   font-size: 24px;
   box-shadow: none;
 }
@@ -814,7 +820,7 @@ body .elementor-button:focus {
 }
 .woocommerce ul.products li.product .add_to_cart_button,
 .woocommerce ul.products li.product .product_type_variable {
-  display: none;
+  display: none !important;
 }
 .woocommerce ul.products .noProductsMessage {
   text-align: center;
@@ -826,12 +832,12 @@ body .elementor-button:focus {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  margin: 0 !important;
+  width: 97%;
+  margin: 0 5px !important;
 }
 .woocommerce ul.products li.product .woocommerce-loop-product__title {
   font-size: 16px;
-  line-height: 20px;
+  line-height: 22px;
   margin-top: 0;
   padding: 5px 15px 5px;
   height: 56px;
@@ -848,14 +854,21 @@ body .elementor-button:focus {
   letter-spacing: 0.1px;
 }
 .woocommerce ul.products li.product .button {
-  background-color: #9DA632;
+  background-color: #A7AF39;
   color: #ffffff;
   border-radius: 0;
   margin-bottom: 10px;
 }
 .woocommerce ul.products li.product .button:before {
+  color: #000000;
+  background-color: #000000;
+}
+.woocommerce ul.products li.product .button.active:before {
   color: #ffffff;
-  background-color: white;
+  background-color: #ffffff;
+}
+.woocommerce ul.products li.product .button.active {
+  color: #ffffff;
 }
 .woocommerce ul.products li.product .cardFooter {
   display: flex;
@@ -878,7 +891,7 @@ body .elementor-button:focus {
   margin-bottom: 5px;
 }
 .woocommerce ul.products li.product .cardFooter .btn {
-  background-color: #63a7b6 !important;
+  background-color: #6EB0BE !important;
 }
 .woocommerce ul.products li.product .cardFooter input[type="number"] {
   color: #000000 !important;
@@ -922,7 +935,7 @@ body .elementor-button:focus {
   display: none;
 }
 .skill-main .skill-per:before {
-  color: #9DA632;
+  color: #A7AF39;
   margin-top: -85px;
   font-size: 32px;
   background: transparent;
@@ -963,7 +976,7 @@ body .elementor-button:focus {
   padding-right: 0 !important;
 }
 .ordertrakingWrapper {
-  background: #9DA632;
+  background: #A7AF39;
   padding: 50px 0 80px;
 }
 .ordertrakingWrapper h4 {
@@ -1017,9 +1030,9 @@ body .elementor-button:focus {
   align-items: center;
   font-size: 22px;
   background-color: #ffffff;
-  color: #9DA632;
+  color: #A7AF39;
   border-radius: 50%;
-  border: solid 2px #9DA632;
+  border: solid 2px #A7AF39;
   margin-bottom: 5px;
   position: absolute;
   top: -11px;
@@ -1032,7 +1045,7 @@ body .elementor-button:focus {
   color: #ffffff;
 }
 .ordertrakingWrapper .orderStatusProgressbar .statusBar span.active i.bi {
-  background-color: #9DA632;
+  background-color: #A7AF39;
   color: #ffffff;
   border-color: #ffffff;
 }
@@ -1050,7 +1063,7 @@ body .elementor-button:focus {
 }
 .woocommerce-thankyou-order-received h1 {
   margin-top: 0;
-  color: #9DA632;
+  color: #A7AF39;
 }
 .woocommerce-thankyou-order-received span {
   display: block;
@@ -1080,7 +1093,7 @@ a.button.thankyou-button {
   font-size: 24px;
 }
 .stepsWrapper .customerCare .ccBtn {
-  background-color: #9da632;
+  background-color: #A7AF39;
   color: white;
   padding: 5px 10px;
   display: inline-block;
@@ -1136,7 +1149,7 @@ a.button.thankyou-button {
   font-size: 32px !important;
 }
 .productCategorySlider .elementor-slide-heading span {
-  background-color: #ff8e2d;
+  background-color: #FF9933;
   display: inline-block;
   padding: 0 5px;
   font-weight: normal;
@@ -1209,7 +1222,7 @@ a.button.thankyou-button {
   margin: 0 auto;
 }
 .featuredWrapper .viewAllBtn:hover {
-  color: #9DA632;
+  color: #A7AF39;
 }
 .productFilter {
   padding-top: 25px;
@@ -1251,7 +1264,7 @@ a.button.thankyou-button {
   line-height: 46px;
 }
 .productFilter .filterDropdown .toggleBtn.active {
-  background: #63a7b6;
+  background: #6EB0BE;
   color: #000000;
 }
 .productFilter .filterDropdown .toggleBtn.active:after {
@@ -1262,7 +1275,7 @@ a.button.thankyou-button {
   width: 100%;
   min-height: 135px;
   padding: 10px 15px;
-  background: #63a7b6;
+  background: #6EB0BE;
   color: #000000;
   margin-top: 5px;
   display: none;
@@ -1505,7 +1518,7 @@ a.button.thankyou-button {
   min-width: 28px;
   height: 28px;
   text-align: center;
-  background-color: #9DA632;
+  background-color: #A7AF39;
   color: #ffffff;
   box-shadow: none;
   padding: 0;
@@ -1534,7 +1547,7 @@ a.button.thankyou-button {
   display: none;
 }
 div[role="tablist"] {
-  background: #63a7b6;
+  background: #6EB0BE;
 }
 div[role="tablist"] span {
   position: relative;
@@ -1596,10 +1609,10 @@ div[role="tablist"] button:last-child span:after {
   background-color: #b8be14;
 }
 .progressWrapper .tchProgress + .tchProgress .progressContainer span.active {
-  background-color: #63a7b6;
+  background-color: #6EB0BE;
 }
 .progressWrapper .cbdProgress .progressContainer span.active {
-  background-color: #63a7b6;
+  background-color: #6EB0BE;
 }
 .theme-contact-form .wpcf7-not-valid-tip {
   margin-top: 0;
@@ -1646,7 +1659,7 @@ div[role="tablist"] button:last-child span:after {
   align-items: center;
 }
 .theme-contact-form .mcf-submit p .wpcf7-submit {
-  background: #9DA632;
+  background: #A7AF39;
   padding: 8px 20px;
   text-transform: uppercase;
 }
@@ -1663,7 +1676,7 @@ div[role="tablist"] button:last-child span:after {
   background-color: #1b5d72 !important;
 }
 .elementor-accordion .elementor-tab-content.elementor-active {
-  background-color: #63a7b6;
+  background-color: #6EB0BE;
   color: #ffffff;
 }
 .elementor-accordion .elementor-tab-content p:last-child {
@@ -1811,7 +1824,7 @@ div[role="tablist"] button:last-child span:after {
 .elementor-post__card .elementor-post__read-more {
   padding: 5px 10px;
   color: #ffffff !important;
-  background-color: #9da632;
+  background-color: #A7AF39;
   text-transform: uppercase;
   font-size: 24px;
 }
@@ -1847,7 +1860,7 @@ div[role="tablist"] button:last-child span:after {
   color: #ffffff;
   font-size: 24px !important;
   border: none !important;
-  background-color: #63a7b6;
+  background-color: #6EB0BE;
 }
 .categoryMenu ul li a::after {
   display: none;
@@ -1866,10 +1879,10 @@ div[role="tablist"] button:last-child span:after {
 .categoryMenu .elementor-nav-menu--dropdown li a {
   font-size: 24px !important;
   border: none !important;
-  background-color: #63a7b6;
+  background-color: #6EB0BE;
 }
 .categoryMenu .elementor-nav-menu--dropdown .elementor-item.elementor-item-active {
-  background-color: #63a7b6 !important;
+  background-color: #6EB0BE !important;
 }
 .categoryMenu .elementor-menu-toggle {
   display: none !important;
@@ -1879,7 +1892,7 @@ div[role="tablist"] button:last-child span:after {
   border: none ;
   line-height: 40px;
   padding: 0 40px 0 20px;
-  background: #63a7b6 url(../healfio-child/img/down-arrow.png) 95% center no-repeat;
+  background: #6EB0BE url(../healfio-child/img/down-arrow.png) 95% center no-repeat;
   color: white;
   height: 40px;
   text-transform: uppercase;
@@ -1908,8 +1921,19 @@ div[role="tablist"] button:last-child span:after {
 }
 .single_variation_wrap .single_variation {
   order: 1;
-  min-width: 100px;
   display: block !important;
+  position: relative;
+}
+.single_variation_wrap .single_variation p.stock,
+.single_variation_wrap .single_variation p.out-of-stock {
+  position: absolute;
+  right: 0;
+  font-size: 13px !important;
+  margin: 5px 0 0 0;
+}
+.single_variation_wrap .single_variation .price {
+  min-width: 80px;
+  min-height: 38px;
 }
 .input-text.qty {
   background: transparent;
@@ -1932,6 +1956,7 @@ input[type=number] {
 }
 .productDetails {
   max-width: 620px;
+  position: relative;
 }
 .productDetails .iconWrapper {
   display: flex;
@@ -2025,7 +2050,7 @@ input[type=number] {
   margin: 0;
 }
 .productDetails .addToCart .addToCartBtn {
-  background-color: #9DA632;
+  background-color: #A7AF39;
   color: #ffffff;
   font-size: 20px;
   padding: 5px 10px;
@@ -2055,7 +2080,7 @@ input[type=number] {
   object-position: center;
 }
 .slick-dots li button {
-  background-color: #9DA632;
+  background-color: #A7AF39;
   border-radius: 40px;
 }
 .slick-dots li button::before {
@@ -2137,6 +2162,12 @@ input[type=number] {
   max-width: 1170px;
   margin: 0 auto;
 }
+.singleProductContainer .single_add_to_cart_button {
+  margin-bottom: 0 !important;
+}
+.singleProductContainer .productDetails {
+  max-width: 720px;
+}
 .productDetails .woocommerce-product-rating,
 .productDetails .continue-shopping-button,
 .productDetails .product_meta,
@@ -2149,7 +2180,7 @@ input[type=number] {
   align-items: flex-start;
 }
 .woocommerce-tabs .tabs {
-  background-color: #63a7b6;
+  background-color: #6EB0BE;
 }
 .related.products {
   padding: 0 15px;
@@ -2200,7 +2231,7 @@ input[type=number] {
 .featuredFilterResultWrapper .viewAllBtn:hover,
 .productFilterResultWrapper .viewAllBtn:hover,
 .viewAllProducts .viewAllBtn:hover {
-  color: #9DA632;
+  color: #A7AF39;
 }
 .featuredFilterResultWrapper .products,
 .productFilterResultWrapper .products,
@@ -2371,7 +2402,7 @@ input[type=number] {
   word-break: break-word;
 }
 .filteredPosts .filteredpostItem .readMoreBtn {
-  background-color: #9DA632;
+  background-color: #A7AF39;
   font-family: "Comfortaa", sans-serif;
   font-size: 20px;
   text-transform: uppercase;
@@ -2379,6 +2410,9 @@ input[type=number] {
   color: #ffffff;
   border: 0;
   display: inline-block;
+}
+.filteredPosts .filteredpostItem .readMoreBtn:hover {
+  opacity: 0.8;
 }
 .woocommerce-ordering:before {
   content: 'SORT BY :';
@@ -2388,7 +2422,7 @@ input[type=number] {
   font-weight: bold;
 }
 .loadMoreBtn {
-  background-color: #9DA632;
+  background-color: #A7AF39;
   font-family: "Comfortaa", sans-serif;
   font-size: 24px;
   text-transform: uppercase;
@@ -2402,7 +2436,7 @@ input[type=number] {
 }
 .loader {
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #9DA632;
+  border-top: 5px solid #A7AF39;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -2423,52 +2457,509 @@ input[type=number] {
 }
 .shop-variation-swatches {
   border-radius: 0 0 16px 16px;
-  padding-top: 10px;
-  overflow: hidden;
-  height: 115px;
+  padding: 10px 10px 10px;
   display: flex;
+  justify-content: center;
   flex-direction: column;
-  justify-content: space-between;
 }
 .shop-variation-swatches .variation-stock {
-  font-size: 12px;
-  color: red;
+  color: #6EB0BE;
 }
-.shop-variation-swatches .swatch-group {
-  margin-bottom: 5px;
+.shop-variation-swatches .variation-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
 }
 .shop-variation-swatches .swatch-item {
-  min-width: 55px;
-  height: 34px;
+  min-width: 52px;
+  height: 36px;
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  color: #000000;
-  border: solid 1px #000000;
+  color: #666;
+  border: solid 1px #666;
   font-size: 14px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  margin-left: 10px;
+  margin-right: 10px;
   background: transparent;
   cursor: pointer;
+  border-radius: 30px;
+  font-family: "Comfortaa", sans-serif;
+  font-weight: bold;
+  padding: 0 10px;
 }
-.shop-variation-swatches .swatch-item:first-child {
-  margin-left: 0;
+.shop-variation-swatches .swatch-item:hover {
+  border-color: #6EB0BE;
+  color: #6EB0BE;
 }
-.shop-variation-swatches .swatch-item:hover,
 .shop-variation-swatches .swatch-item.active {
-  border-color: #63a7b6;
-  color: #63a7b6;
+  color: #ffffff;
+}
+.shop-variation-swatches .swatch-item.active:hover {
+  color: #ffffff;
 }
 .shop-variation-swatches button {
   width: 100%;
   margin: 0 !important;
+  border-radius: 20px !important;
 }
 .shop-variation-swatches form {
   margin-bottom: 0;
+}
+.shop-variation-swatches .variation-add-to-cart {
+  width: 100%;
 }
 .noProductFound {
   min-height: 320px;
 }
 .popularBrands .e-grid .elementor-widget {
   width: 90%;
+}
+.product {
+  box-shadow: none !important;
+}
+.product:hover {
+  box-shadow: 1px 1px 10px 5px rgba(99, 167, 182, 0.7) !important;
+}
+.prodcard-brand {
+  color: #ffffff;
+  font-size: 12px;
+  border-radius: 16px;
+  z-index: 1;
+  display: inline-block;
+  border: solid 1px #6EB0BE;
+}
+.products .shop-variation-swatches {
+  display: flex;
+  flex-direction: column;
+}
+.swatch-group {
+  margin-bottom: 56px;
+}
+.productQuantity {
+  display: none;
+}
+.productQuantity .btn {
+  background-color: #32350A;
+}
+.productQuantity .quantity {
+  color: #000000;
+}
+.productQuantity.active {
+  display: flex;
+}
+li .favouriteIcon {
+  margin-right: 5px;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+li .favouriteIcon .bi-heart-fill {
+  display: none;
+  color: #DD6A9B;
+}
+li .favouriteIcon:hover .bi-heart-fill {
+  display: inline;
+}
+li .favouriteIcon:hover .bi-heart {
+  display: none;
+}
+li .group {
+  position: relative;
+}
+li .childGroup {
+  padding: 5px 5px;
+}
+li .prodcard-attributes {
+  border-radius: 6px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+li .prodcard-attributes .product-list-attribute {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0;
+}
+li .prodcard-attributes .product-list-attribute strong {
+  margin-right: 5px;
+}
+li .price {
+  background-color: #A1D9E6;
+  color: #000000;
+}
+li .prodcard-brand {
+  border-color: #6EB0BE;
+  color: #6EB0BE;
+}
+li .prodcard-attributes {
+  background-color: #A1D9E6;
+}
+li .swatch-item:hover {
+  color: #6EB0BE;
+  border-color: #6EB0BE;
+}
+li .swatch-item.active,
+li .swatch-item.selected {
+  border-color: #6EB0BE;
+  background-color: #6EB0BE;
+}
+li.category-dried:hover,
+li.category-dried-flower-dried-flower:hover {
+  box-shadow: 1px 1px 10px 5px rgba(99, 167, 182, 0.7) !important;
+}
+li.category-dried .price,
+li.category-dried-flower-dried-flower .price {
+  background-color: #A1D9E6 !important;
+  color: #000000 !important;
+}
+li.category-dried .prodcard-brand,
+li.category-dried-flower-dried-flower .prodcard-brand {
+  border-color: #6EB0BE;
+  color: #6EB0BE;
+}
+li.category-dried .prodcard-attributes,
+li.category-dried-flower-dried-flower .prodcard-attributes {
+  background-color: #A1D9E6;
+}
+li.category-dried .swatch-item:hover,
+li.category-dried-flower-dried-flower .swatch-item:hover {
+  color: #6EB0BE;
+  border-color: #6EB0BE;
+}
+li.category-dried .swatch-item.active,
+li.category-dried-flower-dried-flower .swatch-item.active,
+li.category-dried .swatch-item.selected,
+li.category-dried-flower-dried-flower .swatch-item.selected {
+  border-color: #6EB0BE;
+  background-color: #6EB0BE;
+}
+li.category-beverages:hover {
+  box-shadow: 1px 1px 10px 5px rgba(197, 142, 142, 0.7) !important;
+}
+li.category-beverages .price {
+  background-color: #FFCCCC !important;
+  color: #000000 !important;
+}
+li.category-beverages .prodcard-brand {
+  border-color: #CC9999;
+  color: #CC9999;
+}
+li.category-beverages .prodcard-attributes {
+  background-color: #FFCCCC;
+}
+li.category-beverages .swatch-item:hover {
+  color: #CC9999;
+  border-color: #CC9999;
+}
+li.category-beverages .swatch-item.active,
+li.category-beverages .swatch-item.selected {
+  border-color: #CC9999;
+  background-color: #CC9999;
+}
+li.category-edibles-edibles:hover,
+li.category-edible:hover {
+  box-shadow: 1px 1px 10px 5px rgba(157, 166, 50, 0.7) !important;
+}
+li.category-edibles-edibles .price,
+li.category-edible .price {
+  background-color: #E0E6A1 !important;
+  color: #000000 !important;
+}
+li.category-edibles-edibles .prodcard-brand,
+li.category-edible .prodcard-brand {
+  border-color: #A7AF39;
+  color: #A7AF39;
+}
+li.category-edibles-edibles .prodcard-attributes,
+li.category-edible .prodcard-attributes {
+  background-color: #E0E6A1;
+}
+li.category-edibles-edibles .swatch-item:hover,
+li.category-edible .swatch-item:hover {
+  color: #A7AF39;
+  border-color: #A7AF39;
+}
+li.category-edibles-edibles .swatch-item.active,
+li.category-edible .swatch-item.active,
+li.category-edibles-edibles .swatch-item.selected,
+li.category-edible .swatch-item.selected {
+  border-color: #A7AF39;
+  background-color: #A7AF39;
+}
+li.category-topical:hover {
+  box-shadow: 1px 1px 10px 5px rgba(245, 143, 59, 0.7) !important;
+}
+li.category-topical .price {
+  background-color: #FFECE5 !important;
+  color: #000000 !important;
+}
+li.category-topical .prodcard-brand {
+  color: #F58F3B;
+  border-color: #F58F3B;
+}
+li.category-topical .prodcard-attributes {
+  background-color: #FFECE5;
+}
+li.category-topical .swatch-item:hover {
+  color: #F58F3B;
+  border-color: #F58F3B;
+}
+li.category-topical .swatch-item.active,
+li.category-topical .swatch-item.selected {
+  border-color: #F58F3B;
+  background-color: #F58F3B;
+}
+li.category-extracts-inhaled:hover {
+  box-shadow: 1px 1px 10px 5px rgba(173, 187, 208, 0.7) !important;
+}
+li.category-extracts-inhaled .price {
+  background-color: #C5CFDE !important;
+  color: #000000 !important;
+}
+li.category-extracts-inhaled .prodcard-brand {
+  border-color: #ADBBD0;
+  color: #ADBBD0;
+}
+li.category-extracts-inhaled .prodcard-attributes {
+  background-color: #C5CFDE;
+}
+li.category-extracts-inhaled .swatch-item:hover {
+  color: #ADBBD0;
+  border-color: #ADBBD0;
+}
+li.category-extracts-inhaled .swatch-item.active,
+li.category-extracts-inhaled .swatch-item.selected {
+  border-color: #ADBBD0;
+  background-color: #ADBBD0;
+}
+li.category-oils:hover {
+  box-shadow: 1px 1px 10px 5px rgba(204, 102, 0, 0.7) !important;
+}
+li.category-oils .price {
+  background-color: #DB934C !important;
+  color: #000000 !important;
+}
+li.category-oils .prodcard-brand {
+  color: #CC6600;
+  border-color: #CC6600;
+}
+li.category-oils .prodcard-attributes {
+  background-color: #DB934C;
+}
+li.category-oils .swatch-item:hover {
+  color: #CC6600;
+  border-color: #CC6600;
+}
+li.category-oils .swatch-item.active,
+li.category-oils .swatch-item.selected {
+  border-color: #CC6600;
+  background-color: #CC6600;
+}
+li.category-vapes:hover {
+  box-shadow: 1px 1px 10px 5px rgba(61, 133, 11, 0.7) !important;
+}
+li.category-vapes .price {
+  background-color: #7F9E6C !important;
+  color: #000000 !important;
+}
+li.category-vapes .prodcard-brand {
+  border-color: #3D850B;
+  color: #3D850B;
+}
+li.category-vapes .prodcard-attributes {
+  background-color: #7F9E6C;
+}
+li.category-vapes .swatch-item:hover {
+  color: #3D850B;
+  border-color: #3D850B;
+}
+li.category-vapes .swatch-item.active,
+li.category-vapes .swatch-item.selected {
+  border-color: #3D850B;
+  background-color: #3D850B;
+}
+li.category-concentrates:hover {
+  box-shadow: 1px 1px 10px 5px rgba(29, 104, 125, 0.7) !important;
+}
+li.category-concentrates .price {
+  background-color: #6095A3 !important;
+  color: #000000 !important;
+}
+li.category-concentrates .prodcard-brand {
+  border-color: #1D687D;
+  color: #1D687D;
+}
+li.category-concentrates .prodcard-attributes {
+  background-color: #6095A3;
+}
+li.category-concentrates .swatch-item:hover {
+  color: #1D687D;
+  border-color: #1D687D;
+}
+li.category-concentrates .swatch-item.active,
+li.category-concentrates .swatch-item.selected {
+  border-color: #1D687D;
+  background-color: #1D687D;
+}
+.woocommerce ul.products li.product .price {
+  color: #000000;
+  justify-content: center;
+  font-weight: bold;
+  padding: 8px 10px;
+  font-size: 20px;
+  position: absolute;
+  bottom: 62px;
+  border-radius: 6px;
+  justify-content: space-around;
+  height: 44px;
+}
+.prodcard-tags {
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: column;
+  padding: 5px 10px;
+  font-weight: bold;
+  line-height: 24px;
+}
+.prodcard-tags p {
+  margin-bottom: 0;
+}
+.woocommerce ul.products li.product .woocommerce-loop-product__title {
+  font-size: 20px;
+  line-height: 30px;
+  height: 68px;
+  font-family: "Comfortaa", sans-serif !important;
+  border: none;
+  text-transform: uppercase;
+}
+.woocommerce ul.products li.product a {
+  display: flex !important;
+  flex-direction: column;
+}
+.woocommerce-loop-product__buttons {
+  display: none;
+}
+.woocommerce ul.products li.product .button,
+.woocommerce ul.products li.product .button:hover {
+  background: #EEEFED !important;
+  border-color: #EEEFED !important;
+  color: #000000;
+  pointer-events: none;
+}
+.woocommerce ul.products li.category-dried .button,
+.woocommerce ul.products li.category-dried-flower-dried-flower .button,
+.woocommerce ul.products li.category-dried .button:hover,
+.woocommerce ul.products li.category-dried-flower-dried-flower .button:hover {
+  background: #EEEFED !important;
+  border-color: #EEEFED !important;
+  color: #000000;
+  pointer-events: none;
+}
+.woocommerce ul.products li.category-dried .button.active,
+.woocommerce ul.products li.category-dried-flower-dried-flower .button.active,
+.woocommerce ul.products li.category-dried .button:hover.active,
+.woocommerce ul.products li.category-dried-flower-dried-flower .button:hover.active {
+  background: #6EB0BE !important;
+  border-color: #6EB0BE !important;
+  pointer-events: all;
+}
+.woocommerce ul.products li.category-beverages .button,
+.woocommerce ul.products li.category-beverages .button:hover {
+  background: #EEEFED !important;
+  border-color: #EEEFED !important;
+  color: #000000;
+  pointer-events: none;
+}
+.woocommerce ul.products li.category-beverages .button.active,
+.woocommerce ul.products li.category-beverages .button:hover.active {
+  background: #CC9999 !important;
+  border-color: #CC9999 !important;
+  pointer-events: all;
+}
+.woocommerce ul.products li.category-edible .button,
+.woocommerce ul.products li.category-edibles-edibles .button,
+.woocommerce ul.products li.category-edible .button:hover,
+.woocommerce ul.products li.category-edibles-edibles .button:hover {
+  background: #EEEFED !important;
+  border-color: #EEEFED !important;
+  color: #000000;
+  pointer-events: none;
+}
+.woocommerce ul.products li.category-edible .button.active,
+.woocommerce ul.products li.category-edibles-edibles .button.active,
+.woocommerce ul.products li.category-edible .button:hover.active,
+.woocommerce ul.products li.category-edibles-edibles .button:hover.active {
+  background: #A7AF39 !important;
+  border-color: #A7AF39 !important;
+  pointer-events: all;
+}
+.woocommerce ul.products li.category-topical .button,
+.woocommerce ul.products li.category-topical .button:hover {
+  background: #EEEFED !important;
+  border-color: #EEEFED !important;
+  color: #000000;
+  pointer-events: none;
+}
+.woocommerce ul.products li.category-topical .button.active,
+.woocommerce ul.products li.category-topical .button:hover.active {
+  background: #FF9933 !important;
+  border-color: #FF9933 !important;
+  pointer-events: all;
+}
+.woocommerce ul.products li.category-extracts-inhaled .button,
+.woocommerce ul.products li.category-extracts-inhaled .button:hover {
+  background: #EEEFED !important;
+  border-color: #EEEFED !important;
+  color: #000000;
+  pointer-events: none;
+}
+.woocommerce ul.products li.category-extracts-inhaled .button.active,
+.woocommerce ul.products li.category-extracts-inhaled .button:hover.active {
+  background: #ADBBD0 !important;
+  border-color: #ADBBD0 !important;
+  pointer-events: all;
+}
+.woocommerce ul.products li.category-oils .button,
+.woocommerce ul.products li.category-oils .button:hover {
+  background: #EEEFED !important;
+  border-color: #EEEFED !important;
+  color: #000000;
+  pointer-events: none;
+}
+.woocommerce ul.products li.category-oils .button.active,
+.woocommerce ul.products li.category-oils .button:hover.active {
+  background: #CC6600 !important;
+  border-color: #CC6600 !important;
+  pointer-events: all;
+}
+.woocommerce ul.products li.category-vapes .button,
+.woocommerce ul.products li.category-vapes .button:hover {
+  background: #EEEFED !important;
+  border-color: #EEEFED !important;
+  color: #000000;
+  pointer-events: none;
+}
+.woocommerce ul.products li.category-vapes .button.active,
+.woocommerce ul.products li.category-vapes .button:hover.active {
+  background: #3D850B !important;
+  border-color: #3D850B !important;
+  pointer-events: all;
+}
+.woocommerce ul.products li.category-concentrates .button,
+.woocommerce ul.products li.category-concentrates .button:hover {
+  background: #EEEFED !important;
+  border-color: #EEEFED !important;
+  color: #000000;
+  pointer-events: none;
+}
+.woocommerce ul.products li.category-concentrates .button.active,
+.woocommerce ul.products li.category-concentrates .button:hover.active {
+  background: #1D687D !important;
+  border-color: #1D687D !important;
+  pointer-events: all;
 }

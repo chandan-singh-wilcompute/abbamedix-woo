@@ -428,9 +428,13 @@ td.product-remove a {
 .prodcard-tags {
     color: black;
     padding: 5px 15px;		
-		letter-spacing: 0.1px;
-		line-height: 16px;
-		font-weight: 600;
+    letter-spacing: 0.1px;
+    line-height: 16px;
+    font-weight: 600;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .prodcard-price {
@@ -654,7 +658,6 @@ a.page-numbers {
 
 .woocommerce ul.products li.product {
 	/* box-shadow: 1px 1px 12px rgba(99, 167, 182, 0.8) !important; */
-	box-shadow: 1px 1px 10px 5px rgba(157, 166, 50, 0.2) !important;
 	transition: box-shadow .25s; 
 }
 
@@ -664,15 +667,6 @@ a.page-numbers {
 		/* transform: scale(1.1);  */
     transition: transform 0.3s ease; 
 		/* Smooth transition */
-}
-/* Apply zoom-in effect on product card hover */
-.woocommerce ul.products li.product:hover {
-    /* Adjust the scale value as needed */
-		/* transform: scale(1.1);  */
-    /* transition: transform 0.3s ease;  */
-		/* Smooth transition */
-
-		box-shadow: 1px 1px 10px 5px rgba(157, 166, 50, 1) !important;
 }
 
 .woocommerce ul.products li.product .price {
@@ -685,6 +679,12 @@ a.page-numbers {
 .woocommerce ul.products li.product .woocommerce-loop-product__title {
     text-transform: capitalize;
 }
+
+.woocommerce ul.products li.product .button {
+    font-size: 14px;
+}
+
+
 /* Apply gradient color to product title */
 .single-product .product_title {
     background: linear-gradient(to right, #E27521, #E02968); /* Replace with your desired gradient colors */
@@ -710,12 +710,13 @@ a.page-numbers {
 .woocommerce ul.products li.product a {
     border-radius: 16px 16px 0 0;
     overflow: hidden;
-		font-size: 14px;
-		font-weight: 600;
+    font-size: 14px;
+    font-weight: 600;
+    position: static !important;
 }
 
 .woocommerce ul.products li.product .woocommerce-loop-product__link img {
-    border: 0 !important;
+    border-bottom: solid 1px #f1f1f1 !important;
 }
 
 /* Products image transform in hover */
@@ -775,10 +776,11 @@ a.page-numbers {
 }
 
 .woocommerce div.product form.cart .button {
-    position: absolute;
+    /* position: absolute;
     top: 50px;
-    right: -100px;
+    right: -100px; */
     white-space: nowrap;
+		position: static;
 }
 
 .single-product.woocommerce div.product .summary .price {
