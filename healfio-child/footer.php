@@ -111,6 +111,55 @@
         qtyInput.value = currentValue - 1;
       }
     }); 
+
+
+    // Product card quantity
+    function increaseQty(button) {
+        const input = button.previousElementSibling;
+        input.value = parseInt(input.value) + 1;
+        updateTotal(input);
+    }
+
+    function decreaseQty(button) {
+        const input = button.nextElementSibling;
+        if (parseInt(input.value) > 1) {
+        input.value = parseInt(input.value) - 1;
+        updateTotal(input);
+        }
+    }
+
+    function updateTotal(input) {
+        const card = input.closest('.product');
+        const priceText = card.querySelector('.prodcard-price span').innerText;
+        const price = parseFloat(priceText.replace('$', ''));
+        const qty = parseInt(input.value);
+        const totalPrice = card.querySelector('.prodcard-price span');
+        totalPrice.innerText = `Total: $${(price * qty).toFixed(2)}`;
+    }
+
+    jQuery(document).ready(function($) {
+    // Increase quantity
+    $('.qty-plus').on('click', function(e) {
+        e.preventDefault();
+        var input = $('input[name="quantity"]'); // global selector
+        var currentVal = parseInt(input.val());
+        if (!isNaN(currentVal)) {
+        input.val(currentVal + 1).change();
+        }
+    });
+
+    // Decrease quantity
+    $('.qty-minus').on('click', function(e) {
+        e.preventDefault();
+        var input = $('input[name="quantity"]'); // global selector
+        var currentVal = parseInt(input.val());
+        var min = parseInt(input.attr('min')) || 1;
+        if (!isNaN(currentVal) && currentVal > min) {
+        input.val(currentVal - 1).change();
+        }
+    });
+    });
+
   </script>
 
   <script>
@@ -173,20 +222,11 @@
             $(this).parents('.shop-variation-swatches').find('.single_add_to_cart_button').addClass('active');
             $(this).parents('li.product').find('.productQuantity').addClass('active');
 
-            $(this).parents('.shop-variation-swatches').find('.single_add_to_cart_button').text('Add to cart');
-           
+            $(this).parents('.shop-variation-swatches').find('.single_add_to_cart_button').text('Add to cart');           
         });
 
 
-        // $(".shop-variation-swatches").mouseover(function(){
-        //   $(".woocommerce-LoopProduct-link").css("pointer-events", "none");
-        // });
-
-        // $(".shop-variation-swatches").mouseleave(function(){
-        //   $(".woocommerce-LoopProduct-link").css("pointer-events", "all");
-        // });
     });
-
 
 
     jQuery(function($) {
