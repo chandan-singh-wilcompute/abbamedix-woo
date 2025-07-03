@@ -76,7 +76,7 @@
   }
   .related.products {
     max-width: 1488px;
-    margin: 0 auto;
+    margin: 80px auto 0;
   }
   .viewAllProducts .container-fluid {
     max-width: 1488px;
