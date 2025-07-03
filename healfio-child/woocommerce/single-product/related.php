@@ -16,38 +16,37 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+    exit;
 }
+
+global $product;
+
+// Force WooCommerce to get 8 related products
+$related_products = wc_get_related_products( $product->get_id(), 8 );
 
 if ( $related_products ) : ?>
 
-	<section class="related products">
+    <section class="related products">
+        <h2><?php esc_html_e( 'Related products', 'woocommerce' ); ?></h2>
 
-		<?php
-		$heading = apply_filters( 'woocommerce_product_related_products_heading', __( 'Related products', 'woocommerce' ) );
+        <?php
+        // Set up WooCommerce loop columns
+        global $woocommerce_loop;
+        $woocommerce_loop['columns'] = 4;
 
-		if ( $heading ) :
-			?>
-			<h2><?php echo esc_html( $heading ); ?></h2>
-		<?php endif; ?>
-		<?php woocommerce_product_loop_start(); ?>
+        woocommerce_product_loop_start();
 
-			<?php foreach ( $related_products as $related_product ) : ?>
+        foreach ( $related_products as $related_product ) :
+            $post_object = get_post( $related_product );
+            setup_postdata( $GLOBALS['post'] = $post_object );
+            wc_get_template_part( 'content', 'product' );
+        endforeach;
 
-					<?php
-					$post_object = get_post( $related_product->get_id() );
+        woocommerce_product_loop_end();
+        ?>
 
-					setup_postdata( $GLOBALS['post'] = $post_object ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited, Squiz.PHP.DisallowMultipleAssignments.Found
+    </section>
 
-					wc_get_template_part( 'content', 'product' );
-					?>
-
-			<?php endforeach; ?>
-
-		<?php woocommerce_product_loop_end(); ?>
-
-	</section>
-	<?php
-endif;
+<?php endif;
 
 wp_reset_postdata();

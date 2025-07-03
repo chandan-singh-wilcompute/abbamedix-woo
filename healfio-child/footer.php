@@ -148,6 +148,22 @@
         });
     });
 
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            const firstLi = document.querySelector('.variable-items-wrapper li:first-child');
+            if (firstLi) {
+                firstLi.click();
+                // console.log('First <li> clicked');
+            } else {
+                // console.log('No <li> found');
+            }
+        }, 1000); // 1 second delay
+    });
+
+
+
+
+
     jQuery(document).ready(function ($) {
         $('.swatch-item').on('click', function () {
             $('.swatch-item').removeClass('active');
@@ -161,6 +177,15 @@
             $(this).parents('.shop-variation-swatches').find('.single_add_to_cart_button').text('Add to cart');
            
         });
+
+
+        // $(".shop-variation-swatches").mouseover(function(){
+        //   $(".woocommerce-LoopProduct-link").css("pointer-events", "none");
+        // });
+
+        // $(".shop-variation-swatches").mouseleave(function(){
+        //   $(".woocommerce-LoopProduct-link").css("pointer-events", "all");
+        // });
     });
 
 
