@@ -113,5 +113,124 @@
     // }); 
   </script>
 
+  <script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const swatchItems = document.querySelectorAll('.swatch-item');
+
+        swatchItems.forEach(function (swatch) {
+            swatch.addEventListener('click', function () {
+            const productCard = swatch.closest('.product-card');
+
+            if (productCard) {
+                const addToCartButton = productCard.querySelector('.single_add_to_cart_button');
+                const productQuantity = productCard.querySelector('.productQuantity');
+
+                // Toggle 'active' on swatch item itself
+                swatch.classList.toggle('active');
+
+                if (addToCartButton) {
+                addToCartButton.classList.toggle('active');
+
+                // Change button text
+                if (addToCartButton.classList.contains('active')) {
+                    addToCartButton.textContent = 'Add to Cart';
+                } else {
+                    addToCartButton.textContent = 'Select Size';
+                }
+                }
+
+                if (productQuantity) {
+                productQuantity.classList.toggle('active');
+                }
+            }
+            });
+        });
+    });
+
+    jQuery(document).ready(function ($) {
+        $('.swatch-item').on('click', function () {
+            $('.swatch-item').removeClass('active');
+            $('li.product .productQuantity').removeClass('active');
+            $('li.product .single_add_to_cart_button').removeClass('active');
+            
+            $(this).addClass('active');            
+            $(this).parents('.shop-variation-swatches').find('.single_add_to_cart_button').addClass('active');
+            $(this).parents('li.product').find('.productQuantity').addClass('active');
+
+            $(this).parents('.shop-variation-swatches').find('.single_add_to_cart_button').text('Add to cart');
+           
+        });
+    });
+
+
+
+    jQuery(function($) {
+        $('.shop-variation-swatches').each(function () {
+            const container = $(this);
+            const productId = container.data('product-id');
+            let variations = [];
+
+            $.ajax({
+                url: wc_add_to_cart_params.ajax_url,
+                method: 'POST',
+                data: {
+                    action: 'get_variations_for_product',
+                    product_id: productId
+                },
+                success: function(response) {
+                    variations = response.data;
+                }
+            });
+
+            container.on('click', '.swatch-item', function () {
+                const swatchWrapper = $(this).closest('.shop-variation-swatches');
+                const selectedAttrs = getSelectedAttributes(swatchWrapper);
+                const match = findMatchingVariation(productId, selectedAttrs, variations);
+
+                const button = swatchWrapper.find('.single_add_to_cart_button');
+
+
+                if (match) {
+                    swatchWrapper.find('.variation_id').val(match.variation_id);
+                    // swatchWrapper.find('.variation-price').html(match.display_price_html || '');
+                    // swatchWrapper.find('.variation-stock').html(match.is_in_stock ? 'In Stock' : 'Out of Stock');
+                    swatchWrapper.find('.variation-add-to-cart').show();
+                    // button.prop('disabled', false);
+                } else {
+                    swatchWrapper.find('.variation_id').val('');
+                    // swatchWrapper.find('.variation-price').html('');
+                    // swatchWrapper.find('.variation-stock').html();
+                    swatchWrapper.find('.variation-add-to-cart').show();
+                    // button.prop('disabled', true);
+                }
+            });
+        });
+
+        function getSelectedAttributes(container) {
+            const attributes = {};
+            container.find('.swatch-item.active').each(function () {
+                const attr = $(this).data('attribute');
+                const val = $(this).data('value');
+                attributes[attr] = val;
+            });
+            return attributes;
+        }
+
+        function findMatchingVariation(productId, selectedAttrs, variations) {
+            return variations.find(function (variation) {
+                return Object.entries(selectedAttrs).every(function ([key, value]) {
+                    return variation.attributes[key] === value;
+                });
+            });
+        }
+    });
+
+
+
+
+
+  </script>
+
 </body>
 </html>

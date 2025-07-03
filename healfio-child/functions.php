@@ -113,27 +113,42 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
         global $product;
 
         echo '<div class="group">';
-
         // Output the product title
-        echo '<h2 class="' . esc_attr( apply_filters( 'woocommerce_product_loop_title_classes', 'woocommerce-loop-product__title' ) ) . '">' . get_the_title() . '</h2>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+        echo '<h2 class="' . esc_attr( apply_filters( 'woocommerce_product_loop_title_classes', 'woocommerce-loop-product__title' ) ) . '">       
+                <span class="favouriteIcon">
+                    <i class="bi bi-heart"></i>
+                    <i class="bi bi-heart-fill"></i>
+                </span>
+              ' . get_the_title() . '
+            </h2>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		//echo '<div class="prodcard-brand-name"><label>MTL Canabis</label></div>';  
 		echo '<div class="prodcard-brand"><label>MTL Canabis</label></div>';  
+        
+        echo '<div class="childGroup">';
+       
 		echo '<div class="prodcard-attributes">';
         // Get the THC attribute value
         $thc_value = $product->get_attribute('thc');
         if ( ! empty( $thc_value ) ) {
-            echo '<span class="product-list-attribute">THC : ' . esc_html( $thc_value ) . '</span>';
+            // echo '<div class="product-list-attribute"><strong>THC :</strong> <span>' . esc_html( $thc_value ) . '</span></div>';
+            echo '<div class="product-list-attribute"><strong>THC:</strong> <span>32%</span></div>';
         }
 		
         // Get the CBD attribute value
         $cbd_value = $product->get_attribute('cbd');
         if ( ! empty( $cbd_value ) ) {
-            echo '<span class="product-list-attribute">CBD : ' . esc_html( $cbd_value ) . '</span>';
+            // echo '<div class="product-list-attribute"><strong>CBD :</strong> <span>' . esc_html( $cbd_value ) . '</span></div>';
+            echo '<div class="product-list-attribute"><strong>CBD:</strong> <span>0.03%</span></div>';
         }
 		
 		echo '</div>';
-		echo'<div class="prodcard-tags">Terpenes<br>Myrcele - Limonede - Linalool<br>Total: 4.5%</div>';
+		
+        echo '</div>';
+        echo'<div class="prodcard-tags">
+                Terpenes &nbsp; 4.95%
+                <p>Myrcele - Limonede - Linalool </p>
+             </div>';
         echo '</div>';
     }
 }
@@ -1110,3 +1125,141 @@ function get_product_dominance_shortcode() {
     return '<p><strong>Dominance:</strong> Not specified</p>';
 }
 add_shortcode('product_dominance', 'get_product_dominance_shortcode');
+
+// Order id to product detail page
+add_action( 'init', function() {
+    if ( isset( $_GET['order_id'] ) && is_numeric( $_GET['order_id'] ) ) {
+        $order_id = absint( $_GET['order_id'] );
+        $order = wc_get_order( $order_id );
+
+        if ( $order ) {
+            foreach ( $order->get_items() as $item ) {
+                $product = $item->get_product();
+                if ( $product ) {
+                    // Change this if using a custom detail page
+                    $redirect_url = home_url( '/product/?product_id=' . $product->get_id() );
+                    wp_redirect( $redirect_url );
+                    exit;
+                }
+            }
+        }
+
+        // fallback redirect if order not found or empty
+        wp_redirect( home_url() );
+        exit;
+    }
+});
+
+
+// Add class to base on product main category
+add_filter('woocommerce_post_class', 'add_main_category_to_product_class', 10, 2);
+
+function add_main_category_to_product_class($classes, $product) {
+    if (!is_a($product, 'WC_Product')) {
+        $product = wc_get_product(get_the_ID());
+    }
+
+    if (!$product) return $classes;
+
+    $terms = get_the_terms($product->get_id(), 'product_cat');
+
+    if (!empty($terms) && !is_wp_error($terms)) {
+        usort($terms, function ($a, $b) {
+            return $a->term_order - $b->term_order;
+        });
+
+        $main_cat_slug = $terms[0]->slug;
+        $classes[] = 'category-' . sanitize_html_class($main_cat_slug);
+    }
+
+    return $classes;
+}
+
+// Display variation swatches on shop page
+add_action('woocommerce_after_shop_loop_item', 'display_variation_swatches', 15);
+function display_variation_swatches() {
+    global $product;
+    
+    if (!$product->is_type('variable')) {
+        return;
+    }
+    
+    $attributes = $product->get_variation_attributes();
+    $available_variations = $product->get_available_variations();
+    
+    if (empty($attributes)) {
+        return;
+    }
+    
+    echo '<div class="shop-variation-swatches" data-product-id="' . $product->get_id() . '">';
+    
+    foreach ($attributes as $attribute_name => $options) {
+        $attribute_label = wc_attribute_label($attribute_name);
+        
+        echo '<div class="swatch-group">';
+        // echo '<span class="swatch-label">Select' . $attribute_label . ':</span>';
+        echo '<div class="swatches">';
+        
+        foreach ($options as $option) {
+            $class = 'swatch-item';
+            $attribute_slug = str_replace('pa_', '', $attribute_name);
+            
+            // Check if this is a color attribute
+            if (strpos($attribute_name, 'color') !== false || strpos($attribute_name, 'colour') !== false) {
+                $class .= ' color-swatch';
+                $color_value = get_color_value($option);
+                $style = 'background-color: ' . $color_value . ';';
+                echo '<span class="' . $class . '" data-attribute="' . esc_attr($attribute_name) . '" data-value="' . esc_attr($option) . '" style="' . $style . '" title="' . esc_attr($option) . '"></span>';
+            } else {
+                $class .= ' text-swatch';
+                echo '<span class="' . $class . '" data-attribute="' . esc_attr($attribute_name) . '" data-value="' . esc_attr($option) . '">' . esc_html($option) . '</span>';
+            }
+        }
+        
+        echo '</div>';
+        echo '</div>';
+    }
+    
+    echo '<div class="variation-info">';
+    //echo '<span class="variation-price"></span>';
+    echo '<span class="variation-stock"></span>';
+    echo '</div>';
+    
+    echo '<div class="variation-add-to-cart">';
+    echo '<form class="cart" method="post" enctype="multipart/form-data">';
+    echo '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '">';
+    echo '<input type="hidden" name="product_id" value="' . $product->get_id() . '">';
+    echo '<input type="hidden" name="variation_id" class="variation_id" value="">';
+    echo '<input type="hidden" name="quantity" value="1">';
+    echo '<button type="submit" class="single_add_to_cart_button button alt">SELECT SIZE</button>';
+    echo '</form>';
+    echo '</div>';
+    
+    echo '</div>';
+}
+
+add_action('wp_ajax_get_variations_for_product', 'get_variations_for_product');
+add_action('wp_ajax_nopriv_get_variations_for_product', 'get_variations_for_product');
+
+function get_variations_for_product() {
+    $product_id = intval($_POST['product_id']);
+    $product = wc_get_product($product_id);
+
+    if (!$product || !$product->is_type('variable')) {
+        wp_send_json_error();
+    }
+
+    $variations = $product->get_available_variations();
+    wp_send_json_success($variations);
+}
+
+add_action('wp_enqueue_scripts', 'enqueue_custom_scripts');
+function enqueue_custom_scripts() {
+    wp_enqueue_script('jquery');
+    wp_enqueue_script('wc-add-to-cart-variation'); // Needed for variation handling
+    wp_localize_script('jquery', 'wc_add_to_cart_params', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+    ));
+}
+
+
