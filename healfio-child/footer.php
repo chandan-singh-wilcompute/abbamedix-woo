@@ -152,7 +152,7 @@
         $('.swatch-item').on('click', function () {
             $('.swatch-item').removeClass('active');
             $('li.product .productQuantity').removeClass('active');
-            $('li.product .single_add_to_cart_button').removeClass('active');
+            $('li.product .single_add_to_cart_button').removeClass('active').text('SELECT SIZE');
             
             $(this).addClass('active');            
             $(this).parents('.shop-variation-swatches').find('.single_add_to_cart_button').addClass('active');

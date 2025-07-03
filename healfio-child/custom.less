@@ -1061,8 +1061,6 @@ body .elementor-button:focus {
         overflow: hidden;
         word-break: break-word;
         text-align: center;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-        letter-spacing: 0.1px;
       }
 
       .button {
@@ -1074,6 +1072,7 @@ body .elementor-button:focus {
         &:before {
           color: @black;
           background-color: @black;
+          transition: none;
         }
 
         &.active:before {
@@ -1875,16 +1874,18 @@ a.button.thankyou-button {
     min-width: auto;
   }
 
-  .single_add_to_cart_button,
-  .continue-shopping-button {
-    margin-left: 10px !important;
-    font-size: 20px;
-    padding: 8px 10px 8px !important;
-  }
-
-  .single_add_to_cart_button{
-    &.disabled {
+  .productDetails {
+    .single_add_to_cart_button,
+    .continue-shopping-button {
+      margin-left: 10px !important;
+      font-size: 20px;
       padding: 8px 10px 8px !important;
+    }
+
+    .single_add_to_cart_button{
+      &.disabled {
+        padding: 8px 10px 8px !important;
+      }
     }
   }
 }
@@ -2628,15 +2629,13 @@ input[type=number] {
 .related.products {
   ul.products li.product {
     .woocommerce-loop-product__title {
-      font-size: 16px;
-      line-height: 20px;
+      font-size: 20px;
+      line-height: 30px;
       letter-spacing: 0;
       margin-top: 0;
       padding: 5px 15px 5px;
-      height: 56px;      
+      height: 68px;      
       margin-bottom: 0;
-      border-bottom: solid 1px #e0edf0;
-      border-top: solid 1px #e0edf0;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       display: -webkit-box;
@@ -2644,8 +2643,6 @@ input[type=number] {
       word-break: break-word;
       text-align: center;
       max-height: none;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-      letter-spacing: 0.1px;
     }
   }
 }
@@ -3137,11 +3134,28 @@ input[type=number] {
 // }
 
 
-.product {
+li.product {
   box-shadow: none !important;
 
   &:hover {
     box-shadow: 1px 1px 10px 5px rgba(99, 167, 182, 0.7) !important;
+  }
+
+  .productQuantity {
+
+    display: none;
+
+    .btn {
+      background-color: #32350A;
+    }
+
+    .quantity {
+      color: #000000;
+    }
+
+    &.active {
+      display: flex;
+    }
   }
 }
 
@@ -3163,23 +3177,6 @@ input[type=number] {
 
 .swatch-group {
   margin-bottom: 56px;
-}
-
-.productQuantity {
-
-  display: none;
-
-  .btn {
-    background-color: #32350A;
-  }
-
-  .quantity {
-    color: #000000;
-  }
-
-  &.active {
-    display: flex;
-  }
 }
 
 li {
@@ -3259,6 +3256,8 @@ li {
       background-color: #6EB0BE;
     }
   }
+
+
 
   &.category-dried,
   &.category-dried-flower-dried-flower {
@@ -3587,11 +3586,21 @@ li {
 .woocommerce ul.products li.product .button:hover {
   // background: #6EB0BE !important;
   // border-color: #6EB0BE !important;
+  transition: none;
 
   background: #EEEFED !important;
   border-color: #EEEFED !important;
   color: @black;
   pointer-events: none;
+
+  &.active {
+    background: #6EB0BE !important;
+    border-color: #6EB0BE !important;
+    pointer-events: all;
+    &:hover {
+      color: @white;
+    }
+  }
   
 }
 
@@ -3609,6 +3618,9 @@ li {
     background: #6EB0BE !important;
     border-color: #6EB0BE !important;
     pointer-events: all;
+    &:hover {
+      color: @white;
+    }
   }
 }
 
@@ -3623,6 +3635,9 @@ li {
     background: #CC9999 !important;
     border-color: #CC9999 !important;
     pointer-events: all;
+    &:hover {
+      color: @white;
+    }
   }
 }
 
@@ -3639,6 +3654,9 @@ li {
     background: #A7AF39 !important;
     border-color: #A7AF39 !important;
     pointer-events: all;
+    &:hover {
+      color: @white;
+    }
   }
 }
 
@@ -3653,6 +3671,9 @@ li {
     background: #FF9933 !important;
     border-color: #FF9933 !important;
     pointer-events: all;
+    &:hover {
+      color: @white;
+    }
   }
 }
 
@@ -3667,6 +3688,9 @@ li {
     background: #ADBBD0 !important;
     border-color: #ADBBD0 !important;
     pointer-events: all;
+    &:hover {
+      color: @white;
+    }
   }
 }
 
@@ -3681,6 +3705,9 @@ li {
     background: #CC6600 !important;
     border-color: #CC6600 !important;
     pointer-events: all;
+    &:hover {
+      color: @white;
+    }
   }
 }
 
@@ -3695,6 +3722,9 @@ li {
     background: #3D850B !important;
     border-color: #3D850B !important;
     pointer-events: all;
+    &:hover {
+      color: @white;
+    }
   }
 }
 
@@ -3709,5 +3739,8 @@ li {
     background: #1D687D !important;
     border-color: #1D687D !important;
     pointer-events: all;
+    &:hover {
+      color: @white;
+    }
   }
 }
