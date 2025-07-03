@@ -90,9 +90,9 @@
 
 <script>
     // GO Back
-    // document.getElementById("goback").addEventListener("click", () => {
-    //   history.back();
-    // });
+    document.getElementById("goback").addEventListener("click", () => {
+      history.back();
+    });
     
     // Quantity
     // const qtyInput = document.querySelector('.productQuantity .quantity .qty');

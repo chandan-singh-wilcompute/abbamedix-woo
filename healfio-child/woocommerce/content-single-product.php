@@ -61,6 +61,60 @@ if (post_password_required()) {
             ?>
 
             <div class="summary entry-summary productDetails">
+
+                <div class="progressWrapper">
+                    <div class="tchProgress">
+                        <label>TCH</label>
+                        <div class="progressContainer">
+                        <span class="active"></span>
+                        <span class="active"></span>
+                        <span class="active"></span>
+                        <span></span>
+                        </div>
+                        28-32%
+                    </div>
+
+                    <div class="cbdProgress">
+                        <label>CBD</label>
+                        <div class="progressContainer">
+                        <span class="active"></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        </div>
+                        0-1%
+                    </div>
+                </div>
+
+                <div class="iconWrapper">
+                    <div class="icon">
+                        <span class="sativa">Sativa</span>
+                        <p>25% <br>Sativa</p>
+                    </div>
+
+                    <div class="icon">
+                        <span class="indica">Indica</span>
+                        <p>75% <br>Indica</p>
+                    </div>
+
+                    <div class="icon">
+                        <span class="myRecene"></span>
+                        <p>Myrecene</p>
+                    </div>
+
+                    <div class="icon">
+                        <span class="limonene"></span>
+                        <p>Limonene</p>
+                    </div>
+
+                    <div class="icon">
+                        <span class="linalool"></span>
+                        <p>Linalool</p>
+                    </div>
+                </div>
+
+                <div class="devider"></div>
+
                 <?php
                 /**
                  * Hook: woocommerce_single_product_summary.
