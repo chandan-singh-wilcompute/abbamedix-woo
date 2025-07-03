@@ -64,9 +64,9 @@ if (!empty($package_size_value)) {
 
     <div class="price prodcard-price">
         <div class="productQuantity">
-            <button type="button" class="btn minusQuantity">−</button>
-            <input type="number" class="quantity" value="1" min="1">
-            <button type="button" class="btn addQuantity">+</button>
+            <button type="button" class="btn qty-minus" onclick="decreaseQty(this)">−</button>
+            <input type="number" class="quantity" value="1" min="1" onchange="updateTotal(this)">
+            <button type="button" class="btn qty-plus" onclick="increaseQty(this)">+</button>
         </div>
 
         <span>

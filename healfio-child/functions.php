@@ -103,6 +103,11 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
     // Remove the original WooCommerce function
     remove_action( 'woocommerce_shop_loop_item_title', 'woocommerce_template_loop_product_title', 10 );
+    
+   // Remove the default price output inside the product link
+    remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
+
+    add_action( 'woocommerce_after_shop_loop_item', 'woocommerce_template_loop_price', 5 );
 
     // Add your custom function
     add_action( 'woocommerce_shop_loop_item_title', 'my_custom_template_loop_product_title', 10 );
@@ -152,6 +157,12 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
         echo '</div>';
     }
 }
+
+add_action( 'init', 'custom_remove_default_loop_price' );
+function custom_remove_default_loop_price() {
+    remove_action( 'woocommerce_after_shop_loop_item_title', 'woocommerce_template_loop_price', 10 );
+}
+
 
 // Add Continue Shopping Button
 add_action('woocommerce_after_add_to_cart_button', 'add_continue_shopping_button');
@@ -1261,5 +1272,4 @@ function enqueue_custom_scripts() {
         'ajax_url' => admin_url('admin-ajax.php'),
     ));
 }
-
 

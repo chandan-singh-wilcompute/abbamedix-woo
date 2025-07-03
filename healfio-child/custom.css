@@ -2812,6 +2812,7 @@ li.category-concentrates .swatch-item.selected {
   border-radius: 6px;
   justify-content: space-around;
   height: 44px;
+  z-index: 2;
 }
 .prodcard-tags {
   line-height: 20px;
