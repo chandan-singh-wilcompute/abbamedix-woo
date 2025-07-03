@@ -95,22 +95,22 @@
     });
     
     // Quantity
-    // const qtyInput = document.querySelector('.productQuantity .quantity .qty');
-    // const increaseBtn = document.querySelector('.productQuantity .increase');
-    // const decreaseBtn = document.querySelector('.productQuantity .decrease');
+    const qtyInput = document.querySelector('.productQuantity .quantity .qty');
+    const increaseBtn = document.querySelector('.productQuantity .increase');
+    const decreaseBtn = document.querySelector('.productQuantity .decrease');
 
-    // increaseBtn.addEventListener('click', () => {
-    //   const currentValue = parseInt(qtyInput.value) || 0;
-    //   qtyInput.value = currentValue + 1;
-    // });
+    increaseBtn.addEventListener('click', () => {
+      const currentValue = parseInt(qtyInput.value) || 0;
+      qtyInput.value = currentValue + 1;
+    });
 
-    // decreaseBtn.addEventListener('click', () => {
-    //   const currentValue = parseInt(qtyInput.value) || 0;
-    //   const min = parseInt(qtyInput.min) || 0;
-    //   if (currentValue > min) {
-    //     qtyInput.value = currentValue - 1;
-    //   }
-    // }); 
+    decreaseBtn.addEventListener('click', () => {
+      const currentValue = parseInt(qtyInput.value) || 0;
+      const min = parseInt(qtyInput.min) || 0;
+      if (currentValue > min) {
+        qtyInput.value = currentValue - 1;
+      }
+    }); 
   </script>
 
   <script>
@@ -152,7 +152,7 @@
         $('.swatch-item').on('click', function () {
             $('.swatch-item').removeClass('active');
             $('li.product .productQuantity').removeClass('active');
-            $('li.product .single_add_to_cart_button').removeClass('active');
+            $('li.product .single_add_to_cart_button').removeClass('active').text('SELECT SIZE');
             
             $(this).addClass('active');            
             $(this).parents('.shop-variation-swatches').find('.single_add_to_cart_button').addClass('active');

@@ -850,8 +850,6 @@ body .elementor-button:focus {
   overflow: hidden;
   word-break: break-word;
   text-align: center;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-  letter-spacing: 0.1px;
 }
 .woocommerce ul.products li.product .button {
   background-color: #A7AF39;
@@ -862,6 +860,7 @@ body .elementor-button:focus {
 .woocommerce ul.products li.product .button:before {
   color: #000000;
   background-color: #000000;
+  transition: none;
 }
 .woocommerce ul.products li.product .button.active:before {
   color: #ffffff;
@@ -1498,13 +1497,13 @@ a.button.thankyou-button {
 .single-product .e-con .elementor-widget {
   min-width: auto;
 }
-.single-product .single_add_to_cart_button,
-.single-product .continue-shopping-button {
+.single-product .productDetails .single_add_to_cart_button,
+.single-product .productDetails .continue-shopping-button {
   margin-left: 10px !important;
   font-size: 20px;
   padding: 8px 10px 8px !important;
 }
-.single-product .single_add_to_cart_button.disabled {
+.single-product .productDetails .single_add_to_cart_button.disabled {
   padding: 8px 10px 8px !important;
 }
 .productQuantity {
@@ -2090,15 +2089,13 @@ input[type=number] {
   background-color: #ffffff;
 }
 .related.products ul.products li.product .woocommerce-loop-product__title {
-  font-size: 16px;
-  line-height: 20px;
+  font-size: 20px;
+  line-height: 30px;
   letter-spacing: 0;
   margin-top: 0;
   padding: 5px 15px 5px;
-  height: 56px;
+  height: 68px;
   margin-bottom: 0;
-  border-bottom: solid 1px #e0edf0;
-  border-top: solid 1px #e0edf0;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   display: -webkit-box;
@@ -2106,8 +2103,6 @@ input[type=number] {
   word-break: break-word;
   text-align: center;
   max-height: none;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-  letter-spacing: 0.1px;
 }
 .singleProductContainer {
   padding: 60px 0;
@@ -2515,11 +2510,23 @@ input[type=number] {
 .popularBrands .e-grid .elementor-widget {
   width: 90%;
 }
-.product {
+li.product {
   box-shadow: none !important;
 }
-.product:hover {
+li.product:hover {
   box-shadow: 1px 1px 10px 5px rgba(99, 167, 182, 0.7) !important;
+}
+li.product .productQuantity {
+  display: none;
+}
+li.product .productQuantity .btn {
+  background-color: #32350A;
+}
+li.product .productQuantity .quantity {
+  color: #000000;
+}
+li.product .productQuantity.active {
+  display: flex;
 }
 .prodcard-brand {
   color: #ffffff;
@@ -2535,18 +2542,6 @@ input[type=number] {
 }
 .swatch-group {
   margin-bottom: 56px;
-}
-.productQuantity {
-  display: none;
-}
-.productQuantity .btn {
-  background-color: #32350A;
-}
-.productQuantity .quantity {
-  color: #000000;
-}
-.productQuantity.active {
-  display: flex;
 }
 li .favouriteIcon {
   margin-right: 5px;
@@ -2846,10 +2841,21 @@ li.category-concentrates .swatch-item.selected {
 }
 .woocommerce ul.products li.product .button,
 .woocommerce ul.products li.product .button:hover {
+  transition: none;
   background: #EEEFED !important;
   border-color: #EEEFED !important;
   color: #000000;
   pointer-events: none;
+}
+.woocommerce ul.products li.product .button.active,
+.woocommerce ul.products li.product .button:hover.active {
+  background: #6EB0BE !important;
+  border-color: #6EB0BE !important;
+  pointer-events: all;
+}
+.woocommerce ul.products li.product .button.active:hover,
+.woocommerce ul.products li.product .button:hover.active:hover {
+  color: #ffffff;
 }
 .woocommerce ul.products li.category-dried .button,
 .woocommerce ul.products li.category-dried-flower-dried-flower .button,
@@ -2868,6 +2874,12 @@ li.category-concentrates .swatch-item.selected {
   border-color: #6EB0BE !important;
   pointer-events: all;
 }
+.woocommerce ul.products li.category-dried .button.active:hover,
+.woocommerce ul.products li.category-dried-flower-dried-flower .button.active:hover,
+.woocommerce ul.products li.category-dried .button:hover.active:hover,
+.woocommerce ul.products li.category-dried-flower-dried-flower .button:hover.active:hover {
+  color: #ffffff;
+}
 .woocommerce ul.products li.category-beverages .button,
 .woocommerce ul.products li.category-beverages .button:hover {
   background: #EEEFED !important;
@@ -2880,6 +2892,10 @@ li.category-concentrates .swatch-item.selected {
   background: #CC9999 !important;
   border-color: #CC9999 !important;
   pointer-events: all;
+}
+.woocommerce ul.products li.category-beverages .button.active:hover,
+.woocommerce ul.products li.category-beverages .button:hover.active:hover {
+  color: #ffffff;
 }
 .woocommerce ul.products li.category-edible .button,
 .woocommerce ul.products li.category-edibles-edibles .button,
@@ -2898,6 +2914,12 @@ li.category-concentrates .swatch-item.selected {
   border-color: #A7AF39 !important;
   pointer-events: all;
 }
+.woocommerce ul.products li.category-edible .button.active:hover,
+.woocommerce ul.products li.category-edibles-edibles .button.active:hover,
+.woocommerce ul.products li.category-edible .button:hover.active:hover,
+.woocommerce ul.products li.category-edibles-edibles .button:hover.active:hover {
+  color: #ffffff;
+}
 .woocommerce ul.products li.category-topical .button,
 .woocommerce ul.products li.category-topical .button:hover {
   background: #EEEFED !important;
@@ -2910,6 +2932,10 @@ li.category-concentrates .swatch-item.selected {
   background: #FF9933 !important;
   border-color: #FF9933 !important;
   pointer-events: all;
+}
+.woocommerce ul.products li.category-topical .button.active:hover,
+.woocommerce ul.products li.category-topical .button:hover.active:hover {
+  color: #ffffff;
 }
 .woocommerce ul.products li.category-extracts-inhaled .button,
 .woocommerce ul.products li.category-extracts-inhaled .button:hover {
@@ -2924,6 +2950,10 @@ li.category-concentrates .swatch-item.selected {
   border-color: #ADBBD0 !important;
   pointer-events: all;
 }
+.woocommerce ul.products li.category-extracts-inhaled .button.active:hover,
+.woocommerce ul.products li.category-extracts-inhaled .button:hover.active:hover {
+  color: #ffffff;
+}
 .woocommerce ul.products li.category-oils .button,
 .woocommerce ul.products li.category-oils .button:hover {
   background: #EEEFED !important;
@@ -2936,6 +2966,10 @@ li.category-concentrates .swatch-item.selected {
   background: #CC6600 !important;
   border-color: #CC6600 !important;
   pointer-events: all;
+}
+.woocommerce ul.products li.category-oils .button.active:hover,
+.woocommerce ul.products li.category-oils .button:hover.active:hover {
+  color: #ffffff;
 }
 .woocommerce ul.products li.category-vapes .button,
 .woocommerce ul.products li.category-vapes .button:hover {
@@ -2950,6 +2984,10 @@ li.category-concentrates .swatch-item.selected {
   border-color: #3D850B !important;
   pointer-events: all;
 }
+.woocommerce ul.products li.category-vapes .button.active:hover,
+.woocommerce ul.products li.category-vapes .button:hover.active:hover {
+  color: #ffffff;
+}
 .woocommerce ul.products li.category-concentrates .button,
 .woocommerce ul.products li.category-concentrates .button:hover {
   background: #EEEFED !important;
@@ -2962,4 +3000,8 @@ li.category-concentrates .swatch-item.selected {
   background: #1D687D !important;
   border-color: #1D687D !important;
   pointer-events: all;
+}
+.woocommerce ul.products li.category-concentrates .button.active:hover,
+.woocommerce ul.products li.category-concentrates .button:hover.active:hover {
+  color: #ffffff;
 }
