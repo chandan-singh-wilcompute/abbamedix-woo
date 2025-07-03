@@ -372,6 +372,12 @@ body .elementor-button:focus {
   margin-top: 30px;
   margin-bottom: 0;
 }
+.myProfile {
+  color: #ffffff;
+}
+.myProfile p:empty {
+  display: none;
+}
 .myProfile h5,
 .myProfile h6 {
   font-weight: bold;
