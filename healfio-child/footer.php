@@ -148,20 +148,19 @@
         });
     });
 
+    // Triggerd product size on window load
     window.addEventListener('load', function() {
         setTimeout(function() {
-            const firstLi = document.querySelector('.variable-items-wrapper li:first-child');
-            if (firstLi) {
-                firstLi.click();
-                // console.log('First <li> clicked');
+            const items = document.querySelectorAll('.variable-items-wrapper li');
+            const lastLi = items[items.length - 1];
+            if (lastLi) {
+                lastLi.click();
+                console.log('Last <li> clicked');
             } else {
-                // console.log('No <li> found');
+                console.log('No <li> found');
             }
-        }, 1000); // 1 second delay
+        }, 500); // 0.5 second delay
     });
-
-
-
 
 
     jQuery(document).ready(function ($) {
