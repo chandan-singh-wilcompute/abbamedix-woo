@@ -707,6 +707,12 @@ a.page-numbers {
 	margin-top: 0px;
 }
 
+.woocommerce ul.products li.product, 
+.woocommerce-page ul.products li.product {
+    border-radius: 16px !important;
+    margin-bottom: 3rem;
+}
+
 .woocommerce ul.products li.product a {
     border-radius: 16px 16px 0 0;
     overflow: hidden;
@@ -852,7 +858,6 @@ a.page-numbers {
 	width: 100%;
 	max-width: 1170px;
 }
-
 
 @media screen and (min-width: 1200px) {
   .primary-menu.navbar .dropdown-menu {
