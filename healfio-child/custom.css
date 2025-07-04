@@ -330,10 +330,11 @@ body .elementor-button:focus {
   top: 100%;
   display: block;
   background: transparent;
-  padding: 16px 0 10px;
+  padding: 18px 0 10px;
   border-radius: 0;
   line-height: 30px;
   left: -10px;
+  margin-top: 0;
 }
 .header-profile:hover .dropdown-menu li {
   background-color: #32350A;
@@ -381,6 +382,10 @@ body .elementor-button:focus {
 .myProfile h5,
 .myProfile h6 {
   font-weight: bold;
+}
+.myProfile h6 {
+  display: flex;
+  align-items: center;
 }
 .myProfile p {
   display: flex;
@@ -443,6 +448,19 @@ body .elementor-button:focus {
   font-weight: bold;
   background-color: #007866;
   display: inline-block;
+}
+.myProfile .btnManageCard {
+  padding: 5px 10px;
+  font-weight: bold;
+  background-color: #007866;
+  display: inline-block;
+  transition: all 0.3s ease-in-out;
+  font-size: 16px;
+  color: #ffffff;
+  margin-left: auto;
+}
+.myProfile .btnManageCard:hover {
+  background-color: #32350A;
 }
 .scriptHistoryWrapper .verified {
   width: 24px;
@@ -1917,7 +1935,7 @@ div[role="tablist"] button:last-child span:after {
   background-color: transparent !important;
   color: #ffffff !important;
   border-radius: 0 !important;
-  width: 54px !important;
+  min-width: 54px !important;
   box-shadow: none !important;
   margin: 0 0 0 10px !important;
 }
@@ -2120,7 +2138,7 @@ input[type=number] {
   max-width: 1170px;
   margin: 0 auto;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
   margin-bottom: 20px;
 }
@@ -3027,8 +3045,87 @@ li.category-concentrates .swatch-item.selected {
 }
 .manageCardWrapper {
   color: #ffffff;
+  padding-bottom: 50px;
 }
 .manageCardWrapper h1 {
   text-transform: uppercase;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+}
+.manageCardWrapper .backToMyProfile {
+  font-size: 16px;
+  padding: 10px 15px;
+  color: #ffffff;
+  background-color: #007876;
+  border: 0;
+  text-transform: uppercase;
+  transition: all 0.3s ease-in-out;
+  margin-left: auto;
+  letter-spacing: 0.5px;
+}
+.manageCardWrapper .backToMyProfile:hover {
+  background-color: #32350A;
+}
+.manageCardWrapper .manageCard {
+  min-height: 300px;
+}
+.manageCardWrapper .manageCard .addNewCarButton {
+  font-size: 16px;
+  padding: 10px 15px;
+  color: #ffffff;
+  background-color: #007876;
+  border: 0;
+  text-transform: uppercase;
+  transition: all 0.3s ease-in-out;
+}
+.manageCardWrapper .manageCard .addNewCarButton:hover {
+  background-color: #32350A;
+}
+.manageCardWrapper .manageCard .addCardForm {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 20px 0 20px 20px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+.manageCardWrapper .manageCard .addCardForm input[type="text"] {
+  border: 0;
+  border-radius: 0;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 13px 15px;
+  height: 52px;
+  width: 95%;
+  transition: all 0.3s ease-in-out;
+}
+.manageCardWrapper .manageCard .addCardForm label {
+  margin-bottom: 0;
+  display: block;
+}
+.manageCardWrapper .manageCard .addCardForm .form-group {
+  margin-bottom: 15px;
+  width: 50%;
+}
+.manageCardWrapper .manageCard .addCardForm .btnSaveCard {
+  font-size: 16px;
+  padding: 10px 15px;
+  color: #ffffff;
+  background-color: #007876;
+  border: 0;
+  text-transform: uppercase;
+  transition: all 0.3s ease-in-out;
+}
+.manageCardWrapper .manageCard .addCardForm .btnSaveCard:hover {
+  background-color: #32350A;
+}
+.variable-items-wrapper li:hover,
+.variable-items-wrapper li.selected {
+  border-color: #A7AF39;
+}
+.variable-items-wrapper li:hover .variable-item-span,
+.variable-items-wrapper li.selected .variable-item-span {
+  color: #A7AF39;
+}
+.checkout-button:hover {
   color: #ffffff;
 }
