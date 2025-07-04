@@ -484,6 +484,10 @@ body .elementor-button:focus {
     font-size: 12px;
     background-color: #0000007a;
 
+    label {
+      margin-bottom: 0;
+    }
+
     .btnCardRemove {
       width: 30px;
       height: 30px;
@@ -2751,11 +2755,16 @@ input[type=number] {
 
 .related.products {
   padding: 0 15px;
-  border-top: solid 1px;
+  
   h2 {
-    font-size: 45px;
+    font-size: 28px;
     color: #FFFFFF;
     margin-bottom: 30px;
+    text-transform: uppercase;
+    border-top: solid 1px #444;
+    border-width: thin;
+    margin-top: 0;
+    padding-top: 30px;
   }
 }
 
@@ -2805,7 +2814,7 @@ input[type=number] {
     display: grid;
     grid-template-columns: repeat(4,1fr);
     grid-column-gap: 48px;
-    grid-row-gap: 80px;
+    grid-row-gap: 48px;
 
     padding: 30px 0 !important;
 
@@ -3751,5 +3760,19 @@ li {
     &:hover {
       color: @white;
     }
+  }
+}
+
+
+.page-template-manage-card {
+  background: transparent;
+  background-image: linear-gradient(271deg, #4D732A 0%, #939F31 65%);
+}
+
+.manageCardWrapper {
+  color: @white;
+  h1 {
+    text-transform: uppercase;
+    color: @white;
   }
 }
