@@ -414,34 +414,42 @@ function add_meta_query_to_customer_search($args, $request) {
 }
 
 
-// Add "Manage Cards" to WooCommerce My Account menu
-add_filter('woocommerce_account_menu_items', 'add_manage_cards_menu_item');
-function add_manage_cards_menu_item($menu_items) {
-    $menu_items['manage-cards'] = 'Manage Cards';
-    return $menu_items;
-}
+// // Add "Manage Cards" to WooCommerce My Account menu
+// add_filter('woocommerce_account_menu_items', 'add_manage_cards_menu_item');
+// function add_manage_cards_menu_item($menu_items) {
+//     $menu_items['manage-cards'] = 'Manage Cards';
+//     return $menu_items;
+// }
 
-// Add endpoint for "Manage Cards"
-add_action('init', 'add_manage_cards_endpoint');
-function add_manage_cards_endpoint() {
-    add_rewrite_endpoint('manage-cards', EP_ROOT | EP_PAGES);
-}
+// add_filter('template_include', function($template) {
+//     if ( is_account_page() && get_query_var('manage-cards') !== false ) {
+//         return get_stylesheet_directory() . '/manage-cards-template.php';
+//     }
+//     return $template;
+// });
+
+// // Add endpoint for "Manage Cards"
+// add_action('init', 'add_manage_cards_endpoint');
+// function add_manage_cards_endpoint() {
+//     add_rewrite_endpoint('manage-cards', EP_ROOT | EP_PAGES);
+// }
 
 // Render content for "Manage Cards"
-add_action('woocommerce_account_manage-cards_endpoint', 'manage_cards_content');
-function manage_cards_content() {
-    //if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_card'])) {
-    //     process_card_submission();
-    // } else
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_token'])) {
-        delete_saved_card();
-    }
+// add_action('woocommerce_account_manage-cards_endpoint', 'manage_cards_content');
+// function manage_cards_content() {
+//     //if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_card'])) {
+//     //     process_card_submission();
+//     // } else
+//     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_token'])) {
+//         delete_saved_card();
+//     }
 
-    display_saved_cards();
-    display_add_card_form();
-}
+//     display_saved_cards();
+//     display_add_card_form();
+// }
 
 // Display saved cards
+add_shortcode('my_manage_cards_ui', 'display_saved_cards');
 function display_saved_cards() {
     
     $credit_cards = Client_Information::get_credit_cards();
@@ -486,7 +494,7 @@ function display_add_card_form() {
     
         <h3>Add New Card</h3>
         <form method="POST" id="addCardForm" action="">
-            <?php wp_nonce_field('moneris_save_card', 'moneris_card_nonce'); ?>
+            <?php wp_nonce_field("moneris_save_card", "moneris_card_nonce"); ?>
             
             <div>
                 <label for="first_name">First Name</label>
@@ -517,7 +525,7 @@ function display_add_card_form() {
                 <input type="hidden" id="moneris_data_key" name="moneris_data_key">
                 <button type="button" onclick="doMonerisSubmit();" name="submit_card">Save Card</button>
                 
-                <!-- <button type="button" onclick="doMonerisSubmit();"><?php esc_html_e('Submit Card Details', 'woocommerce'); ?></button> -->
+                <!-- <button type="button" onclick="doMonerisSubmit();"><?php esc_html_e("Submit Card Details", "woocommerce"); ?></button> -->
 
             </div>
         </form>
@@ -526,8 +534,8 @@ function display_add_card_form() {
     <script>
         // Trigger Moneris tokenization
         function doMonerisSubmit() {
-            var monFrameRef = document.getElementById('monerisFrame').contentWindow;
-            monFrameRef.postMessage('tokenize', 'https://esqa.moneris.com/HPPtoken/index.php');
+            var monFrameRef = document.getElementById("monerisFrame").contentWindow;
+            monFrameRef.postMessage("tokenize", "https://esqa.moneris.com/HPPtoken/index.php");
             return false;
         }
 
@@ -536,10 +544,10 @@ function display_add_card_form() {
             var respData = JSON.parse(e.data); // Moneris returns a JSON response
             console.log("Resp Data: ", respData);
             if (respData.responseCode[0] === "001" && respData.dataKey) {
-                document.getElementById('moneris_data_key').value = respData.dataKey;
-                document.getElementById('addCardForm').submit();
+                document.getElementById("moneris_data_key").value = respData.dataKey;
+                document.getElementById("addCardForm").submit();
             } else {
-                alert('Failed to tokenize credit card. Please try again.');
+                alert("Failed to tokenize credit card. Please try again.");
             }
         };
 
@@ -551,15 +559,15 @@ function display_add_card_form() {
             }
         };
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const toggleButton = document.getElementById('toggleAddCardForm');
-            const addCardFormContainer = document.getElementById('addCardFormContainer');
+        document.addEventListener("DOMContentLoaded", function () {
+            const toggleButton = document.getElementById("toggleAddCardForm");
+            const addCardFormContainer = document.getElementById("addCardFormContainer");
 
-            toggleButton.addEventListener('click', function () {
-                if (addCardFormContainer.style.display === 'none') {
-                    addCardFormContainer.style.display = 'block';
+            toggleButton.addEventListener("click", function () {
+                if (addCardFormContainer.style.display === "none") {
+                    addCardFormContainer.style.display = "block";
                 } else {
-                    addCardFormContainer.style.display = 'none';
+                    addCardFormContainer.style.display = "none";
                 }
             });
         });
@@ -571,10 +579,10 @@ function display_add_card_form() {
 /**
  * Handle form submission to save a card.
  */
-add_action('template_redirect', 'mcm_process_add_card_form');
+add_action("template_redirect", "mcm_process_add_card_form");
 function mcm_process_add_card_form() {
-    if (!isset($_POST['moneris_card_nonce']) || !wp_verify_nonce($_POST['moneris_card_nonce'], 'moneris_save_card')) {
-        // wc_add_notice('Invalid submission.', 'error');
+    if (!isset($_POST["moneris_card_nonce"]) || !wp_verify_nonce($_POST["moneris_card_nonce"], "moneris_save_card")) {
+        // wc_add_notice("Invalid submission.", "error");
         return;
     }
 
@@ -616,7 +624,8 @@ function handle_shipping_method_selected() {
     }
 
     $shipping_method = sanitize_text_field($_POST['shipping_method']);
-
+    my_debug_log("shipping method response = ");
+    my_debug_log($shipping_method);
     $user_id = get_current_user_id();
     // Get the client id of the customer
     $client_id = get_user_meta($user_id, 'client_id', true);
@@ -1242,7 +1251,8 @@ function extractValueCategory($input) {
 
 add_action( 'wp_ajax_fetch_and_store_product_data', 'save_api_products_to_temp_file' );
     function save_api_products_to_temp_file() {
-        $api_url = 'https://abbamedix.onample.com/api/v3/products/public_listing';
+        // $api_url = 'https://abbamedix.onample.com/api/v3/products/public_listing';
+        $api_url = AMPLE_CONNECT_API_BASE_URL . '/v3/products/public_listing';
         $products = ample_request($api_url);
 
         $upload_dir = wp_upload_dir();

@@ -70,6 +70,8 @@ class WC_Products {
     public function add_custom_variable_product($productData) {
         if (empty($productData['skus'])) return;
 
+        $is_descrete = false;
+
         $category_dictionary = [
             'Dried'                 => 'Dried Flower',
             'Edibles - Solids'      => 'Edibles',
@@ -90,6 +92,7 @@ class WC_Products {
         //     $parent_category = preg_replace('/\s*\(discrete units\)/i', '', $parent_category);
         // }
         if (stripos($child_category, '(discrete units)') !== false) {
+            $is_descrete = true;
             $child_category = preg_replace('/\s*\(discrete units\)/i', '', $child_category);
         }
 
@@ -140,8 +143,8 @@ class WC_Products {
         
         $product->set_description($productData['description'] ?? '');
         $product->set_sku($sku);
-        $product->set_manage_stock(true);
-        $product->set_stock_status('instock');
+        // $product->set_manage_stock(true);
+        // $product->set_stock_status('instock');
         // $product->set_category_ids($category_ids);
         $product->set_attributes($attributes);
 
@@ -151,11 +154,15 @@ class WC_Products {
 
         // Add product image if available
         $image_url = $productData['product_image'];
+        // my_debug_log($image_url);
         if (!empty($image_url)) {
             $attachment_id = $this->download_image_to_media_library($image_url);
             if ($attachment_id) {
                 $this->attach_image_to_product($attachment_id, $product_id, true);
+                // my_debug_log("Product attached to the product");
             }
+        } else {
+            my_debug_log("product image url not found : " . $productData['id'] . "\n");
         }
 
         // Add attributes
@@ -167,14 +174,30 @@ class WC_Products {
         $cannabinoids = ['thc', 'cbd', 'cbg', 'cbn', 'cbc'];
 
         foreach ($productData['skus'] as $sku_data) {
-            $package_size = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
-            $package_sizes[] = "{$package_size}g"; // Include "g" suffix
 
+            // Start of Attributes and package sizes
+            if (in_array($parent_category, ["Extracts", "Beverages", "Topicals"])) {
+                if (is_null($sku_data['net_volume'])) {
+                    $package_size = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
+                    $package_sizes[] = "{$package_size} g";
+                } else {
+                    $package_size = floatval($sku_data['net_volume']);
+                    $package_sizes[] = "{$package_size} ml";
+                }
+                
+            } else {
+                $package_size = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
+                $package_sizes[] = "{$package_size} g";
+            }
+            
             $cannabinoid_profile = $sku_data['cannabinoid_profile'] ?? [];
             foreach ($cannabinoid_profile as $key => $value_data) {
+                if (!isset($value_data['high'])) {
+                    continue;
+                }
                 $lower_key = strtolower($key);
                 foreach ($cannabinoids as $cannabinoid) {
-                    if (strpos($lower_key, $cannabinoid) !== false && isset($value_data['high'])) {
+                    if (strpos($lower_key, $cannabinoid) !== false) {
                         // Extract unit
                         if (strpos($lower_key, 'mg_g_') !== false) {
                             $unit = 'mg/g';
@@ -191,6 +214,7 @@ class WC_Products {
                     }
                 }
             }
+            // End of attributes and package sizes
         }
 
         // Build PACKAGE SIZE attribute
@@ -198,11 +222,32 @@ class WC_Products {
         $attributes = [];
 
         $package_attr = new WC_Product_Attribute();
-        $package_attr->set_name('PACKAGE SIZE');
+        $package_attr->set_name('pa_package-sizes');
         $package_attr->set_options($package_sizes);
         $package_attr->set_visible(true);
         $package_attr->set_variation(true);
         $attributes[] = $package_attr;
+    
+        // Add product-level attributes
+        $product_level_keys = [
+            'product_strain_name' => 'Strain',
+            'brand_name' => 'Brand',
+            'price_per_gram' => 'Price Per Gram',
+        ];
+    
+        foreach ($product_level_keys as $key => $label) {
+            
+            if (!empty($productData[$key])) {
+                // my_debug_log("attribute found " . $label . " = " . $productData[$key] . " product id - " . $productData['id']);
+                $attribute = new WC_Product_Attribute();
+                $slug  = sanitize_title($label);
+                $attribute->set_name(strtoupper($slug));
+                $attribute->set_options([$productData[$key]]);
+                $attribute->set_visible(true);
+                $attribute->set_variation(false);
+                $attributes[] = $attribute;
+            }
+        }
 
         // Add cannabinoid attributes (as range values)
         foreach ($cannabinoid_values as $cannabinoid => $units) {
@@ -246,9 +291,26 @@ class WC_Products {
                 $variation->set_parent_id( $product_id );
             }
 
-            $net_weight = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
-            $variation->set_attributes(['package-size' => "{$net_weight}g"]);
+            $pack_size = "";
+            $net_weight = 0;
+            if (in_array($parent_category, ["Extracts", "Beverages", "Topicals"])) {
+                if (is_null($sku_data['net_volume'])) {
+                    $net_weight = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
+                    $$pack_size = "{$net_weight} g";
+                } else {
+                    $net_weight = floatval($sku_data['net_volume']);
+                    $pack_size = "{$net_weight} ml";
+                }
+                
+            } else {
+                $net_weight = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
+                $pack_size = "{$net_weight} g";
+            }
+
+            // $net_weight = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
+            $variation->set_attributes(['pa_product-sizes' => $pack_size]);
             $variation->set_weight($net_weight);
+            $variation->set_sku($var_sku);
 
             $variation->set_regular_price($sku_data['unit_price'] ? $sku_data['unit_price'] / 100 : '0');
             // $variation->set_sku($sku_data['product_id'] . '-' . $sku_data['id']);
@@ -302,8 +364,28 @@ class WC_Products {
                 $variation->update_meta_data('RX Reduction', (float)$sku_data['unit_grams']);
             }
 
-            $variation->save();
+            // Start of terpens details
+            $terpens_values = $sku_data['terpene_profile'] ? $sku_data['terpene_profile'][0] : []; 
+            if ($terpens_values) {
+                foreach($terpens_values as $name => $value) {
+                    $meta_key = 'terpene_' . sanitize_title( $name ); 
+                    $variation->update_meta_data( $meta_key, $value );
+                }
+            }
 
+            if ( ! $variation->managing_stock() ) {
+                $variation->set_manage_stock( true );
+            }
+
+            // Get current stock
+            $current_stock = $variation->get_stock_quantity();
+
+            if ($current_stock == 0) {
+                $variation->set_stock_quantity( 10 );
+                $variation->set_stock_status( 'instock' );
+            }
+        
+            $variation->save();
         }
     
         $this->assign_product_to_dynamic_category($product_id, $parent_category, $child_category);
@@ -366,6 +448,7 @@ class WC_Products {
         // 2. Download image
         $tmp_file = download_url($image_url);
         if (is_wp_error($tmp_file)) {
+            // my_debug_log("Image download failed");
             error_log('Image download failed: ' . $tmp_file->get_error_message());
             return false;
         }
@@ -380,6 +463,7 @@ class WC_Products {
         if (is_wp_error($attachment_id)) {
             @unlink($tmp_file);
             error_log('Image upload failed: ' . $attachment_id->get_error_message());
+            // my_debug_log("Image upload failed");
             return false;
         }
     

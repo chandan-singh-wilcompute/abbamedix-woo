@@ -18,7 +18,15 @@ if (!defined('ABSPATH')) {
 function my_debug_log($message) {
     $file = WP_CONTENT_DIR . '/my-debug.log'; // Path to the custom log file
     $timestamp = date('Y-m-d H:i:s'); // Optional: Add a timestamp
-    $log_message = "[{$timestamp}] {$message}" . PHP_EOL;
+
+    if (is_array($message) || is_object($message)) {
+        $formattedMessage = print_r($message, true);
+    } else {
+        $formattedMessage = $message;
+    }
+
+    // Combine timestamp and message
+    $log_message = "[$timestamp] " . $formattedMessage . PHP_EOL;
 
     // Append the message to the log file
     file_put_contents($file, $log_message, FILE_APPEND);

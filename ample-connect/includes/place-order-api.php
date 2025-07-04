@@ -68,18 +68,24 @@ function custom_add_to_order($cart_item_key, $product_id, $quantity, $variation_
 
     $order = get_order_id_from_api();
     $order_id = $order['id'];
-
+    echo '<pre>';
+    echo print_r('order id = ', $order_id);
+    echo '</pre>';
+    
     if ($order_id) {
         $response = add_to_order($order_id, $sku_id, $quantity);
         if (is_wp_error($response)) {
             error_log('API call failed: ' . $response->get_error_message());
         } else {
-            $discounts = $response['order_items'][0]['discounts'];
-             // Assuming API response contains 'discount_percentage'
-            // if (!empty($discounts)) {
-            //     // Add discount data to the cart item
-            //     WC()->cart->cart_contents[ $cart_item_key ]['discount_percentage'] = $discounts[0];
-            // }
+            if (!empty($response['order_items'][0]['discounts'])) {
+                $discounts = $response['order_items'][0]['discounts'];
+                // Assuming API response contains 'discount_percentage'
+                if (!empty($discounts)) {
+                    // Add discount data to the cart item
+                    WC()->cart->cart_contents[ $cart_item_key ]['discount_percentage'] = $discounts[0];
+                }
+            }
+            
             error_log('API call succeeded: ' . wp_remote_retrieve_body($response));
         }
     }

@@ -16,7 +16,7 @@ function get_purchasable_products() {
     }
 
     $purchasable_products_url = AMPLE_CONNECT_WOO_CLIENT_URL . $client_id . '/purchasable_products';
-
+    my_debug_log("purchasable product url = " . $purchasable_products_url);
     $products = ample_request($purchasable_products_url);
 
     if (empty($products)) {
@@ -118,6 +118,7 @@ function get_order_id_from_api() {
     $body = array("client_id" => $client_id); 
 
     $data = ample_request(AMPLE_CONNECT_API_BASE_URL . "/v1/portal/orders/current_order", 'GET', $body);
+    
     $tax_data = array();
     if (isset($data['taxes']) && is_array($data['taxes'])) {
         $tax_type = array_key_first($data['taxes']);
@@ -147,6 +148,10 @@ function add_to_order($order_id, $sku_id, $quantity) {
     $body = array('quantity' => $quantity, 'sku_id' => $sku_id, 'client_id' => $client_id);
 
     $url = AMPLE_CONNECT_PORTAL_URL . "/orders/{$order_id}/add_to_order"; 
+    echo '<pre>';
+    echo print_r($url);
+    echo '</pre>';
+    my_debug_log("url = " . $url);
     $data = ample_request($url, 'PUT', $body);
     return $data;
 
