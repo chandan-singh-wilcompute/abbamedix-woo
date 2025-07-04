@@ -26,29 +26,42 @@ function custom_shipping_api_init() {
 
             public function calculate_shipping($package = array()) {
 
-                $user_id = get_current_user_id();
-                // Get the client id of the customer
-                $client_id = get_user_meta($user_id, 'client_id', true);
+                $cache_key = 'custom_shipping_rates_user_' . $user_id;
+                $shipping_options = get_transient($cache_key);
 
-                $order = get_order_id_from_api();
-                $order_id = $order['id'];
+                if (!$shipping_options) {
+                    $user_id = get_current_user_id();
+                    // Get the client id of the customer
+                    $client_id = get_user_meta($user_id, 'client_id', true);
 
-                $url = AMPLE_CONNECT_PORTAL_URL . "/orders/{$order_id}/shipping_rates"; 
+                    $order = get_order_id_from_api();
+                    $order_id = $order['id'];
 
-                $api_url = add_query_arg (
-                    array( 'client_id' => $client_id ),
-                    $url
-                );
+                    $url = AMPLE_CONNECT_PORTAL_URL . "/orders/{$order_id}/shipping_rates"; 
+                    my_debug_log("shipping url");
+                    my_debug_log($url);
+                    $api_url = add_query_arg (
+                        array( 'client_id' => $client_id ),
+                        $url
+                    );
 
-                $data = ample_request($api_url);
-                $shipping_options = array_merge(...array_values($data));
+                    $data = ample_request($api_url);
+                    $shipping_options = array_merge(...array_values($data));
 
+                    my_debug_log("shipping options");
+                    my_debug_log($shipping_options);
+                    
+                    // Cache for 2 minutes
+                    set_transient($cache_key, $shipping_options, 120);
+                }
+                
+                
                 if (!empty($shipping_options)) {
-                    $count = 1;
+                    
                     foreach ($shipping_options as $option) {
                         $rate = array(
                             'id'    => $option['id'],
-                            'label' => $option['service'],
+                            'label' => preg_replace('/(?<!^)([A-Z])/', ' $1', $option['service']),
                             'cost'  => (float)$option['rate'],
                         );
                         $this->add_rate($rate);
@@ -58,7 +71,6 @@ function custom_shipping_api_init() {
         }
     }
 }
-
 add_action('woocommerce_shipping_init', 'custom_shipping_api_init');
 
 function add_custom_shipping_method($methods) {

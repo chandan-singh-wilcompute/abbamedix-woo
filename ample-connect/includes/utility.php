@@ -14,13 +14,22 @@ function get_ample_api_token($expired = false) {
 
 // Handle API requests
 function ample_request($endpoint, $method = 'GET', $data = [], $headers = [], $log = false) {
-    
+    // echo '<pre>';
+    // echo print_r($endpoint);
+    // echo '</pre>';
     $response = api_call($endpoint, $method, $data, $headers, $log);
+
+    
 
     if ($log)
         $api_data = handle_response($response, true);
     else
         $api_data = handle_response($response);
+
+    // echo '<pre>';
+    // echo 'api response = ';
+    // echo print_r($api_data);
+    // echo '</pre>';
 
     if ($api_data == "Token_Expired") {
         $response = api_call($endpoint, $method, $data, $headers, $log, true);
@@ -79,8 +88,12 @@ function handle_response($response, $log = false) {
     $body = json_decode(wp_remote_retrieve_body($response), true);
     $status = wp_remote_retrieve_response_code($response);
 
+    // echo '<pre>';
+    // echo print_r($status);
+    // echo '</pre>';
+
     // Check if token is expired then refresh it
-    if (isset($body['error_code']) && $body['error_code'] == 'misc.api_user_token.expired') {
+    if ($status == "401" || (isset($body['error_code']) && $body['error_code'] == 'misc.api_user_token.expired')) {
         // return ['error' => 'Token expired. Try again.'];
         return "Token_Expired";
     }
