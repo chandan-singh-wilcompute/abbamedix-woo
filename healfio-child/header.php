@@ -153,7 +153,7 @@
                                     //echo $button_html;
                                 ?>
                             </li> -->
-                            <li><a href="<?php bloginfo('url'); ?>/my-account/customer-logout/">Logout</a></li>
+                            <li><a href="<?php echo wp_logout_url( home_url() ); ?>">Logout</a></li>
                         </ul>
 					</div>
 					<div class="header-cart-icon"><?php woo_cart_but(); ?></div>

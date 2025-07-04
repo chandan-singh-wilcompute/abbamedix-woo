@@ -459,7 +459,7 @@ function display_saved_cards() {
     $client_id = get_user_meta($user_id, "client_id", true);
     echo '<h3>Your Saved Cards</h3>';
     if (empty($credit_cards)) {
-        echo '<p>No saved cards found.</p>';
+        echo '<p class="alert alert-info">No saved cards found.</p>';
         return;
     }
 

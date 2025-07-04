@@ -74,7 +74,7 @@ $shipping_address    = get_user_meta($user_id, 'shipping_address', true); // Or 
 
 				<p class="mb-0"><span class="badgeApproved">Approved</span></p>
 				
-				<h6>CREDIT CARDS</h6>
+				<h6>CREDIT CARDS <a href="<?php bloginfo('url'); ?>/my-account/manage-card" class="btnManageCard">Manage Cards</a> </h6>
 				<div class="ccinfoContainer mb-5">
 					<span class="visaCard"></span>
 					<span><label>Visa</label><br><label>4222****8428</label>
@@ -87,7 +87,7 @@ $shipping_address    = get_user_meta($user_id, 'shipping_address', true); // Or 
 
 		<div class="col-md-6">
 			<div class="scriptHistoryWrapper">
-				<h5 class="mt-0">SCRIPT HISTORY</h5>
+				<h5 class="mt-0">ORDER HISTORY</h5>
 				
 				<div class="prescription-wrapper">
 					<div class="white-card">

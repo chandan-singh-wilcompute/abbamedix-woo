@@ -11,49 +11,52 @@
 
   <section class="manageCardWrapper">
 		<div class="container">
-			<h1>Manage Cards</h1>
+			<h1>Manage Cards <a href="<?php bloginfo('url'); ?>/my-account/" class="backToMyProfile">< &nbsp;Back to My Profile</a></h1>
 			<?php echo do_shortcode('[my_manage_cards_ui]'); ?>
-		</div>
-		<div class="container">
-			<div class="manageCard" style="min-height: 400px">
-				<button id="toggleAddCardForm" style="margin-bottom: 10px;">Add New Card</button>
-				<div id="addCardFormContainer" style="display: none; border: 1px solid #ccc; padding: 15px; margin-top: 10px;">
+		
+			<div class="manageCard">
+				<button id="toggleAddCardForm" class="addNewCarButton">Add New Card</button>
+				<div id="addCardFormContainer" class="addCardFormContainer">
 				
 					<h3>Add New Card</h3>
-					<form method="POST" id="addCardForm" action="">
+					<form method="POST" id="addCardForm" action="" class="addCardForm">
 						<?php wp_nonce_field("moneris_save_card", "moneris_card_nonce"); ?>
 						
-						<div>
+						<div class="form-group">
 							<label for="first_name">First Name</label>
 							<input type="text" name="first_name" id="first_name" required>
 						</div>
-						<div>
+						<div class="form-group">
 							<label for="last_name">Last Name</label>
 							<input type="text" name="last_name" id="last_name" required>
 						</div>
-						<div>
+						<div class="form-group">
 							<label for="street_name">Street Name</label>
 							<input type="text" name="street_name" id="street_name" required>
 						</div>
-						<div>
+						<div class="form-group">
 							<label for="street_number">Street Number</label>
 							<input type="text" name="street_number" id="street_number" required>
 						</div>
-						<div>
+						<div class="form-group">
 							<label for="postal_code">Postal Code</label>
 							<input type="text" name="postal_code" id="postal_code" required>
 						</div>
 
-						<div style="margin-top:15px;">
-							<label>Credit Card Details</label>
-							<iframe id="monerisFrame" src="https://esqa.moneris.com/HPPtoken/index.php?id=ht37S4JVAQ3VT7S&pmmsg=true&css_body=background:white;&css_textbox=border-width:2px;margin-top:5px;border-radius:5px;&display_labels=1&css_label_pan=float:left;width:25%;font-size:1.15em;&css_label_exp=float:left;width:25%;font-size:1.15em;&css_label_cvd=float:left;width:25%;font-size:1.15em;&css_textbox_pan=width:140px;&enable_exp=1&css_textbox_exp=width:40px;&enable_cvd=1&css_textbox_cvd=width:40px&enable_exp_formatting=1&enable_cc_formatting=1" frameborder="0" width="300px" height="200px"></iframe>
+						<div class="form-group">
+							&nbsp;
 						</div>
-						<div>
+
+						<div class="form-group" style="width: 97.5%">
+							<label>Credit Card Details</label>
+							<iframe id="monerisFrame" src="https://esqa.moneris.com/HPPtoken/index.php?id=ht37S4JVAQ3VT7S&pmmsg=true&css_body=background:white;&css_textbox=border-width:2px;margin-top:5px;border-radius:5px;&display_labels=1&css_label_pan=float:left;width:25%;font-size:1.15em;&css_label_exp=float:left;width:25%;font-size:1.15em;&css_label_cvd=float:left;width:25%;font-size:1.15em;&css_textbox_pan=width:140px;&enable_exp=1&css_textbox_exp=width:40px;&enable_cvd=1&css_textbox_cvd=width:40px&enable_exp_formatting=1&enable_cc_formatting=1" frameborder="0" width="100%"></iframe>
+						</div>
+
+						<div class="form-group" style="width: 97.5%; text-align:right">
 							<input type="hidden" id="moneris_data_key" name="moneris_data_key">
-							<button type="button" onclick="doMonerisSubmit();" name="submit_card">Save Card</button>
+							<button type="button" onclick="doMonerisSubmit();" name="submit_card" class="btnSaveCard">Save Card</button>
 							
 							<!-- <button type="button" onclick="doMonerisSubmit();"><?php esc_html_e("Submit Card Details", "woocommerce"); ?></button> -->
-
 						</div>
 					</form>
 				</div>
