@@ -24,13 +24,6 @@ if ( is_user_logged_in() ) {
 }
 
 ?>
-
-<div class="innerBanner loginBanner">
-	<div class="container">
-		<h1>Account login<h1>
-	</div>
-</div>
-
 <form class="woocommerce-form woocommerce-form-login login" method="post" <?php echo wp_kses((( $hidden ) ? 'style="display:none;"' : ''), 'woo-style'); ?>>
 
 	<?php do_action( 'woocommerce_login_form_start' ); ?>

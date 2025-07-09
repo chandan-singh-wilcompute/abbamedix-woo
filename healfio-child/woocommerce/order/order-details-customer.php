@@ -19,74 +19,67 @@ defined( 'ABSPATH' ) || exit;
 
 $show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_address();
 ?>
-<section class="woocommerce-customer-details" style="border: 3px solid #007866; padding: 48px; font-size: 25px;">
+<section class="woocommerce-customer-details mb-0">
+    <div class="container">
 
-	<?php if ( $show_shipping ) : ?>
+        <?php if ( $show_shipping ) : ?>
 
-	<section class="woocommerce-columns woocommerce-columns--2 woocommerce-columns--addresses col2-set addresses" style="font-size: 25px;">
-		
+        <section class="woocommerce-columns woocommerce-columns--2 woocommerce-columns--addresses col2-set addresses" style="font-size: 25px;">
+            
 
-	<?php endif; ?>
+        <?php endif; ?>
 
-	<h4 class="woocommerce-column__title"><?php esc_html_e( 'Contact details', 'healfio' ); ?></h4>
-	<p  style="word-break: break-word;">Contact : <?php echo wp_kses(( $order->get_billing_first_name( esc_html__( 'N/A', 'healfio' ) )), 'regular' ); ?> <?php echo wp_kses(( $order->get_billing_last_name( esc_html__( 'N/A', 'healfio' ) )), 'regular' ); ?>, <?php echo wp_kses(( $order->get_billing_email( esc_html__( 'N/A', 'healfio' ) )), 'regular' ); ?>, <?php echo wp_kses(( $order->get_billing_phone( esc_html__( 'N/A', 'healfio' ) )), 'regular' ); ?></p>
+        <h4 class="woocommerce-column__title"><?php esc_html_e( 'Contact details', 'healfio' ); ?></h4>
+        <p><strong>Contact :</strong> <?php echo wp_kses(( $order->get_billing_first_name( esc_html__( 'N/A', 'healfio' ) )), 'regular' ); ?> <?php echo wp_kses(( $order->get_billing_last_name( esc_html__( 'N/A', 'healfio' ) )), 'regular' ); ?>, <?php echo wp_kses(( $order->get_billing_email( esc_html__( 'N/A', 'healfio' ) )), 'regular' ); ?>, <?php echo wp_kses(( $order->get_billing_phone( esc_html__( 'N/A', 'healfio' ) )), 'regular' ); ?></p>
 
-	<?php if ( $show_shipping ) : ?>
-    <?php
-        $shipping_first_name = $order->get_shipping_first_name();
-        $shipping_last_name  = $order->get_shipping_last_name();
-        $shipping_company    = $order->get_shipping_company();
-        $shipping_address_1  = $order->get_shipping_address_1();
-        $shipping_address_2  = $order->get_shipping_address_2();
-        $shipping_city       = $order->get_shipping_city();
-        $shipping_state      = $order->get_shipping_state();
-        $shipping_postcode   = $order->get_shipping_postcode();
-        $shipping_country    = WC()->countries->countries[ $order->get_shipping_country() ];
+        <?php if ( $show_shipping ) : ?>
+        <?php
+            $shipping_first_name = $order->get_shipping_first_name();
+            $shipping_last_name  = $order->get_shipping_last_name();
+            $shipping_company    = $order->get_shipping_company();
+            $shipping_address_1  = $order->get_shipping_address_1();
+            $shipping_address_2  = $order->get_shipping_address_2();
+            $shipping_city       = $order->get_shipping_city();
+            $shipping_state      = $order->get_shipping_state();
+            $shipping_postcode   = $order->get_shipping_postcode();
+            $shipping_country    = WC()->countries->countries[ $order->get_shipping_country() ];
 
-        $shipping_address_components = array();
-        if ( $shipping_first_name ) {
-            $shipping_address_components[] = $shipping_first_name .' '.$shipping_last_name;
-        }
-        if ( $shipping_company ) {
-            $shipping_address_components[] = $shipping_company;
-        }
-        if ( $shipping_address_1 ) {
-            $shipping_address_components[] = $shipping_address_1;
-        }
-        if ( $shipping_address_2 ) {
-            $shipping_address_components[] = $shipping_address_2;
-        }
-        if ( $shipping_city ) {
-            $shipping_address_components[] = $shipping_city;
-        }
-        if ( $shipping_state ) {
-            $shipping_address_components[] = $shipping_state.' '.$shipping_postcode;
-        }
-        if ( $shipping_country ) {
-            $shipping_address_components[] = $shipping_country;
-        }
+            $shipping_address_components = array();
+            if ( $shipping_first_name ) {
+                $shipping_address_components[] = $shipping_first_name .' '.$shipping_last_name;
+            }
+            if ( $shipping_company ) {
+                $shipping_address_components[] = $shipping_company;
+            }
+            if ( $shipping_address_1 ) {
+                $shipping_address_components[] = $shipping_address_1;
+            }
+            if ( $shipping_address_2 ) {
+                $shipping_address_components[] = $shipping_address_2;
+            }
+            if ( $shipping_city ) {
+                $shipping_address_components[] = $shipping_city;
+            }
+            if ( $shipping_state ) {
+                $shipping_address_components[] = $shipping_state.' '.$shipping_postcode;
+            }
+            if ( $shipping_country ) {
+                $shipping_address_components[] = $shipping_country;
+            }
 
-        // Join the shipping address components with a comma and space
-        $shipping_address = implode( ', ', $shipping_address_components );
+            // Join the shipping address components with a comma and space
+            $shipping_address = implode( ', ', $shipping_address_components );
 
-        // Output the shipping address if any components exist
-        if ( ! empty( $shipping_address ) ) {
-            echo '<p>Shipping address: ' . wp_kses_post( $shipping_address ) . '</p>';
-        }
-    ?>
-<?php endif; ?>
-<p style="word-break: break-word;">Delivery Option : <?php echo wp_kses_post( $order->get_payment_method_title() ); ?> - <?php echo $order->get_formatted_order_total(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+            // Output the shipping address if any components exist
+            if ( ! empty( $shipping_address ) ) {
+                echo '<p><strong>Shipping address:</strong> ' . wp_kses_post( $shipping_address ) . '</p>';
+            }
+        ?>
+        <?php endif; ?>
+            <p style="word-break: break-word;"><strong>Delivery Option :</strong> <?php echo wp_kses_post( $order->get_payment_method_title() ); ?> - <?php echo $order->get_formatted_order_total(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+        </section>
 
-	
-
-
-
-		
-
-	
-
-	</section>
-
-	<?php do_action( 'woocommerce_order_details_after_customer_details', $order ); ?>
+        <?php do_action( 'woocommerce_order_details_after_customer_details', $order ); ?>
+    </div>
 
 </section>

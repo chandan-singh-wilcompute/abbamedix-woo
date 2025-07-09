@@ -28,156 +28,126 @@ $allowed_html = array(
 );
 ?>
 
-<div class="container">
+<div class="container myProfile">
 	<h1>MY PROFILE</h1>
 	<div class="row">
 		<div class="col-md-6">
-			<h6>
-				PERSONAL INFORMATION
-			</h6>
-			<p>
-				Client name: Cindi Jones
-			</p>
-			<p>
-				Client ID: 1234-1234-1234
-			</p>
-			<p>
-				Phone Number: (905) 123-1234
-			</p>
-			<p>
-				Date of Birth: 1975-01-01
-			</p>
-			<p>
-				Email address: souryoli@hotmail.com 
-			</p>
-		</div>
-		<div class="col-md-6">
-			<h6>
-				PRESCRIPTION INFORMATION
-				
-			</h6>
-			<p>
-				Prescription: 5g/day	
-			</p>
-			<p>
-				Amount available for order: 5g/day	
-				- Now 150 grams<br>
-				- 2025-06-01 150 grams
-			</p>
-			<p>
-				Prescription available until: 2025-09-06
-			</p>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-md-6">
-			PERSONAL INFORMATION
-			<span class="badge-approved">Approved</span>
-			Registration Date: 2020-10-10
-		</div>
-		<div class="col-md-6">
-			SHIPPING ADDRESS
-			<p>
-				123 Rue de Verdeun<br>
-				Montreal, Qc H4G 1J9
-			</p>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-md-5">
-			<h6>CREDIT CARDS</h6>
-			
-			<div class="ccinfoContainer">
-				<span class="visaCard"></span>
-				<span><label>Visa</label><br><label>4222****8428</label>
-				</span>
-				<span>Expiry: 07-2026</span>
-				<span><a role="button" class="btnCardRemove"><i class="bi bi-x"></i></a></span>
-			</div>
-			
-		</div>
-	</div>
-</div>
+			<div class="group1">
+				<h5 class="mt-0">PERSONAL INFORMATION</h5>
+				<p><strong>Client name</strong> Cindi Jones</p>
+				<p><strong>Client ID</strong> 1234-1234-1234</p>
+				<p><strong>Phone Number</strong> (905) 123-1234</p>
+				<p><strong>Date of Birth</strong> 1975-01-01</p>
+				<p><strong>Email address</strong> souryoli@hotmail.com </p>
+				<p><strong>Registration Date</strong> 2020-10-10</p>
 
-<div class="scriptHistoryWrapper">
-		
-		<div class="container">
-			<h6>SCRIPT HISTORY</h6>
-			
-			<div class="col-md-5 prescription-wrapper">
-				<div class="white-card">
-					<div>
-						<strong>Physician name:</strong> Karen Wallace<br>
-						<strong>End Date:</strong> 2025-09-06<br>
-						<span><i class="verified"></i>Verified</span>
-					</div>
-					<div class="card-col-right">
-						<span class="badge-active">ACTIVE</span>
-					</div>
+				<p><strong>Prescription available until:</strong> 2025-09-06</p>
+				<p><strong>Prescription</strong> - 5g/day	</p>
+				<p><strong>Amount available for order</strong>- 5g/day	
+					- Now 150 grams<br>
+					- 2025-06-01 150 grams
+				</p>
+			</div>
+
+			<div class="group2">				
+				<h6>SHIPPING ADDRESS</h6>
+				<p style="margin-top: 5px" class="address">
+					123 Rue de Verdeun<br>
+					Montreal, Qc H4G 1J9
+				</p>
+
+				<p class="mb-0"><span class="badgeApproved">Approved</span></p>
+				
+				<h6>CREDIT CARDS</h6>
+				<div class="ccinfoContainer mb-5">
+					<span class="visaCard"></span>
+					<span><label>Visa</label><br><label>4222****8428</label>
+					</span>
+					<span>Expiry: 07-2026</span>
+					<span><a role="button" class="btnCardRemove"><i class="bi bi-x"></i></a></span>
 				</div>
-
-				<div class="grey-card">
-					<div>
-						<strong>Physician name:</strong> Karen Wallace<br>
-						<strong>End Date:</strong> 2025-09-06<br>
-						<span><i class="verified"></i>Verified</span>
-					</div>
-					<div class="card-col-right">
-						<span class="badge-inactive">ACTIVE</span>
-					</div>
-				</div>			
-
-				<div class="grey-card">
-					<div>
-						<strong>Physician name:</strong> Karen Wallace<br>
-						<strong>End Date:</strong> 2025-09-06<br>
-						<span><i class="verified"></i>Verified</span>
-					</div>
-					<div class="card-col-right">
-						<span class="badge-inactive">ACTIVE</span>
-					</div>
-				</div>		
-				
-				
-				<div class="grey-card">
-					<div>
-						<strong>Physician name:</strong> Karen Wallace<br>
-						<strong>End Date:</strong> 2025-09-06<br>
-						<span><i class="verified"></i>Verified</span>
-					</div>
-					<div class="card-col-right">
-						<span class="badge-inactive">ACTIVE</span>
-					</div>
-				</div>		
-				
-				
-				<div class="grey-card">
-					<div>
-						<strong>Physician name:</strong> Karen Wallace<br>
-						<strong>End Date:</strong> 2025-09-06<br>
-						<span><i class="verified"></i>Verified</span>
-					</div>
-					<div class="card-col-right">
-						<span class="badge-inactive">ACTIVE</span>
-					</div>
-				</div>		
-				
-				
-				<div class="grey-card">
-					<div>
-						<strong>Physician name:</strong> Karen Wallace<br>
-						<strong>End Date:</strong> 2025-09-06<br>
-						<span><i class="verified"></i>Verified</span>
-					</div>
-					<div class="card-col-right" >
-						<span class="badge-inactive">ACTIVE</span>
-					</div>
-				</div>					
-							
 			</div>
-	</div>
+		</div>
 
+		<div class="col-md-6">
+			<div class="scriptHistoryWrapper">
+				<h5 class="mt-0">SCRIPT HISTORY</h5>
+				
+				<div class="prescription-wrapper">
+					<div class="white-card">
+						<div>
+							<strong>Physician name:</strong> Karen Wallace<br>
+							<strong>End Date:</strong> 2025-09-06<br>
+							<span><i class="verified"></i>Verified</span>
+						</div>
+						<div class="card-col-right">
+							<span class="badge-active">ACTIVE</span>
+						</div>
+					</div>
+
+					<div class="grey-card">
+						<div>
+							<strong>Physician name:</strong> Karen Wallace<br>
+							<strong>End Date:</strong> 2025-09-06<br>
+							<span><i class="verified"></i>Verified</span>
+						</div>
+						<div class="card-col-right">
+							<span class="badge-inactive">ACTIVE</span>
+						</div>
+					</div>			
+
+					<div class="grey-card">
+						<div>
+							<strong>Physician name:</strong> Karen Wallace<br>
+							<strong>End Date:</strong> 2025-09-06<br>
+							<span><i class="verified"></i>Verified</span>
+						</div>
+						<div class="card-col-right">
+							<span class="badge-inactive">ACTIVE</span>
+						</div>
+					</div>		
+										
+					<div class="grey-card">
+						<div>
+							<strong>Physician name:</strong> Karen Wallace<br>
+							<strong>End Date:</strong> 2025-09-06<br>
+							<span><i class="verified"></i>Verified</span>
+						</div>
+						<div class="card-col-right">
+							<span class="badge-inactive">ACTIVE</span>
+						</div>
+					</div>							
+					
+					<div class="grey-card">
+						<div>
+							<strong>Physician name:</strong> Karen Wallace<br>
+							<strong>End Date:</strong> 2025-09-06<br>
+							<span><i class="verified"></i>Verified</span>
+						</div>
+						<div class="card-col-right">
+							<span class="badge-inactive">ACTIVE</span>
+						</div>
+					</div>		
+					
+					
+					<div class="grey-card">
+						<div>
+							<strong>Physician name:</strong> Karen Wallace<br>
+							<strong>End Date:</strong> 2025-09-06<br>
+							<span><i class="verified"></i>Verified</span>
+						</div>
+						<div class="card-col-right" >
+							<span class="badge-inactive">ACTIVE</span>
+						</div>
+					</div>					
+								
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
+
+
 
 <?php
 	/**

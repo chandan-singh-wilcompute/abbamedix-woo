@@ -944,7 +944,7 @@ body .elementor-button:focus {
   padding-top: 90px;
 }
 .skill-main .skill-bar {
-  border: 0;
+  border: 0 !important;
 }
 .skill-main .skill-name {
   display: flex;
@@ -955,7 +955,7 @@ body .elementor-button:focus {
   color: white;
 }
 .skill-main .skill-per {
-  border-radius: 0;
+  border-radius: 0 !important;
 }
 .skill-main .skill-per:after {
   display: none;
@@ -966,6 +966,8 @@ body .elementor-button:focus {
   font-size: 32px;
   background: transparent;
   word-spacing: -8px;
+  white-space: nowrap;
+  transform: translateX(92%);
 }
 .herocart .swiper-slide-bg {
   background-position: center bottom;
@@ -1526,7 +1528,7 @@ a.button.thankyou-button {
 }
 .single-product .productDetails .single_add_to_cart_button,
 .single-product .productDetails .continue-shopping-button {
-  margin-left: 10px !important;
+  margin-left: 15px !important;
   font-size: 20px;
   padding: 8px 10px 8px !important;
 }
@@ -1598,7 +1600,7 @@ div[role="tablist"] button:last-child span:after {
 .progressWrapper .elementor-widget-container {
   display: flex;
 }
-.progressWrapper .tchProgress,
+.progressWrapper .thcProgress,
 .progressWrapper .cbdProgress {
   width: 120px;
   font-size: 12px;
@@ -1606,11 +1608,11 @@ div[role="tablist"] button:last-child span:after {
   margin-right: 20px;
   margin-bottom: 20px;
 }
-.progressWrapper .tchProgress:last-child,
+.progressWrapper .thcProgress:last-child,
 .progressWrapper .cbdProgress:last-child {
   margin-right: 0;
 }
-.progressWrapper .tchProgress label,
+.progressWrapper .thcProgress label,
 .progressWrapper .cbdProgress label {
   display: block;
   margin-bottom: 8px;
@@ -1618,23 +1620,23 @@ div[role="tablist"] button:last-child span:after {
   font-size: 18px;
   text-transform: uppercase;
 }
-.progressWrapper .tchProgress .progressContainer,
+.progressWrapper .thcProgress .progressContainer,
 .progressWrapper .cbdProgress .progressContainer {
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
 }
-.progressWrapper .tchProgress .progressContainer span,
+.progressWrapper .thcProgress .progressContainer span,
 .progressWrapper .cbdProgress .progressContainer span {
   border: solid 1px #ffffff;
   width: 26px;
   height: 12px;
 }
-.progressWrapper .tchProgress .progressContainer span.active,
+.progressWrapper .thcProgress .progressContainer span.active,
 .progressWrapper .cbdProgress .progressContainer span.active {
   background-color: #b8be14;
 }
-.progressWrapper .tchProgress + .tchProgress .progressContainer span.active {
+.progressWrapper .thcProgress + .thcProgress .progressContainer span.active {
   background-color: #6EB0BE;
 }
 .progressWrapper .cbdProgress .progressContainer span.active {
@@ -1949,17 +1951,18 @@ div[role="tablist"] button:last-child span:after {
   order: 1;
   display: block !important;
   position: relative;
+  min-width: 100px;
+  background-color: white;
+  height: 28px !important;
+  margin-left: 20px;
 }
 .single_variation_wrap .single_variation p.stock,
 .single_variation_wrap .single_variation p.out-of-stock {
   position: absolute;
   right: 0;
-  font-size: 13px !important;
-  margin: 5px 0 0 0;
-}
-.single_variation_wrap .single_variation .price {
-  min-width: 80px;
-  min-height: 38px;
+  margin: 0;
+  top: -50px;
+  text-transform: capitalize;
 }
 .input-text.qty {
   background: transparent;
@@ -2051,7 +2054,7 @@ input[type=number] {
 }
 .productDetails .productPrice,
 .productDetails .price {
-  height: 35px;
+  height: 28px;
   font-size: 14px;
   color: #000000;
   display: inline-flex;
@@ -2059,6 +2062,7 @@ input[type=number] {
   align-items: center;
   padding: 0 15px;
   background-color: #ffffff;
+  width: 100%;
 }
 .productDetails .addToCart {
   display: flex;
@@ -2086,6 +2090,31 @@ input[type=number] {
 }
 .productDetails .productQuantity {
   margin: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  width: 100%;
+}
+.productDetails .single_variation_wrap {
+  display: flex;
+  align-items: center;
+}
+.productDetails .single_variation_wrap .group {
+  display: flex;
+  align-items: center;
+}
+.productDetails .single_variation_wrap .addToCartGroup {
+  position: absolute;
+  left: -170px;
+  top: 42px;
+  white-space: nowrap;
+}
+.productDetails .single_variation_wrap .rxDeductionAmount {
+  font-size: 14px;
+  color: #ffffff;
+}
+.productDetails .single_add_to_cart_button {
+  min-width: 180px !important;
+  margin-bottom: 0 !important;
 }
 .slick-list {
   border: solid 2px #ffffff;
@@ -2184,9 +2213,6 @@ input[type=number] {
   max-width: 1170px;
   margin: 0 auto;
 }
-.singleProductContainer .single_add_to_cart_button {
-  margin-bottom: 0 !important;
-}
 .singleProductContainer .productDetails {
   max-width: 720px;
 }
@@ -2208,14 +2234,23 @@ input[type=number] {
   padding: 0 15px;
 }
 .related.products h2 {
-  font-size: 28px;
+  font-size: 38px;
   color: #FFFFFF;
   margin-bottom: 30px;
-  text-transform: uppercase;
+  text-transform: capitalize;
   border-top: solid 1px #444;
   border-width: thin;
   margin-top: 0;
   padding-top: 30px;
+}
+.related.products .productCount {
+  color: #ffffff;
+  text-transform: uppercase;
+  font-size: 18px;
+  margin-bottom: 0;
+  font-weight: bold;
+  line-height: 20px;
+  margin-top: -10px;
 }
 .content-single-product {
   width: 100%;
@@ -3067,6 +3102,14 @@ li.category-concentrates .swatch-item.selected {
 .manageCardWrapper .backToMyProfile:hover {
   background-color: #32350A;
 }
+.manageCardWrapper .savedCard {
+  padding: 20px 20px 0;
+  background-color: rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+.manageCardWrapper .savedCard tbody {
+  color: #ffffff;
+}
 .manageCardWrapper .manageCard {
   min-height: 300px;
 }
@@ -3128,4 +3171,14 @@ li.category-concentrates .swatch-item.selected {
 }
 .checkout-button:hover {
   color: #ffffff;
+}
+.woocommerce-cart-form__contents .product-quantity .quantity {
+  display: none;
+}
+.woocommerce-cart-form__contents .product-subtotal {
+  font-size: 32px;
+}
+
+.woocommerce .woocommerce-checkout table.shop_table .order-total th, .woocommerce .woocommerce-checkout table.shop_table .order-total td {
+  font-size: 20px;
 }

@@ -95,22 +95,22 @@
     });
     
     // Quantity
-    const qtyInput = document.querySelector('.productQuantity .quantity .qty');
-    const increaseBtn = document.querySelector('.productQuantity .increase');
-    const decreaseBtn = document.querySelector('.productQuantity .decrease');
+    // const qtyInput = document.querySelector('.productQuantity .quantity .qty');
+    // const increaseBtn = document.querySelector('.productQuantity .increase');
+    // const decreaseBtn = document.querySelector('.productQuantity .decrease');
 
-    increaseBtn.addEventListener('click', () => {
-      const currentValue = parseInt(qtyInput.value) || 0;
-      qtyInput.value = currentValue + 1;
-    });
+    // increaseBtn.addEventListener('click', () => {
+    //   const currentValue = parseInt(qtyInput.value) || 0;
+    //   qtyInput.value = currentValue + 1;
+    // });
 
-    decreaseBtn.addEventListener('click', () => {
-      const currentValue = parseInt(qtyInput.value) || 0;
-      const min = parseInt(qtyInput.min) || 0;
-      if (currentValue > min) {
-        qtyInput.value = currentValue - 1;
-      }
-    }); 
+    // decreaseBtn.addEventListener('click', () => {
+    //   const currentValue = parseInt(qtyInput.value) || 0;
+    //   const min = parseInt(qtyInput.min) || 0;
+    //   if (currentValue > min) {
+    //     qtyInput.value = currentValue - 1;
+    //   }
+    // }); 
 
 
     // Product card quantity
@@ -130,34 +130,38 @@
 
     function updateTotal(input) {
         const card = input.closest('.product');
-        const priceText = card.querySelector('.prodcard-price span').innerText;
-        const price = parseFloat(priceText.replace('$', ''));
+        const price = parseFloat(card.querySelector('#prod-price').value);
+        const cur = card.querySelector('#prod-cur').value;
+        // const priceText = card.querySelector('.prodcard-price span').innerText;
+        // const price = parseFloat(priceText.replace('$', ''));
         const qty = parseInt(input.value);
         const totalPrice = card.querySelector('.prodcard-price span');
-        totalPrice.innerText = `Total: $${(price * qty).toFixed(2)}`;
+        totalPrice.innerText = `${cur}${(price * qty).toFixed(2)}`;
     }
+    
 
+   
     jQuery(document).ready(function($) {
-    // Increase quantity
-    $('.qty-plus').on('click', function(e) {
-        e.preventDefault();
-        var input = $('input[name="quantity"]'); // global selector
-        var currentVal = parseInt(input.val());
-        if (!isNaN(currentVal)) {
-        input.val(currentVal + 1).change();
-        }
-    });
+        // Increase quantity
+        $('.qty-plus').on('click', function(e) {
+            e.preventDefault();
+            var input = $('input[name="quantity"]'); // global selector
+            var currentVal = parseInt(input.val());
+            if (!isNaN(currentVal)) {
+            input.val(currentVal + 1).change();
+            }
+        });
 
-    // Decrease quantity
-    $('.qty-minus').on('click', function(e) {
-        e.preventDefault();
-        var input = $('input[name="quantity"]'); // global selector
-        var currentVal = parseInt(input.val());
-        var min = parseInt(input.attr('min')) || 1;
-        if (!isNaN(currentVal) && currentVal > min) {
-        input.val(currentVal - 1).change();
-        }
-    });
+        // Decrease quantity
+        $('.qty-minus').on('click', function(e) {
+            e.preventDefault();
+            var input = $('input[name="quantity"]'); // global selector
+            var currentVal = parseInt(input.val());
+            var min = parseInt(input.attr('min')) || 1;
+            if (!isNaN(currentVal) && currentVal > min) {
+            input.val(currentVal - 1).change();
+            }
+        });
     });
 
   </script>
@@ -195,20 +199,6 @@
             }
             });
         });
-    });
-
-    // Triggerd product size on window load
-    window.addEventListener('load', function() {
-        setTimeout(function() {
-            const items = document.querySelectorAll('.variable-items-wrapper li');
-            const lastLi = items[items.length - 1];
-            if (lastLi) {
-                lastLi.click();
-                console.log('Last <li> clicked');
-            } else {
-                console.log('No <li> found');
-            }
-        }, 500); // 0.5 second delay
     });
 
 

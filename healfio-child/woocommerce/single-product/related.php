@@ -27,8 +27,11 @@ $related_products = wc_get_related_products( $product->get_id(), 8 );
 if ( $related_products ) : ?>
 
     <section class="related products">
-        <h2><?php esc_html_e( 'Related products', 'woocommerce' ); ?></h2>
-
+        <h2>
+            <?php esc_html_e( 'Related products', 'woocommerce' ); ?>
+            <p class="productCount"><?php echo do_shortcode('[product_count]') ?></p>
+        </h2>
+        
         <?php
         // Set up WooCommerce loop columns
         global $woocommerce_loop;

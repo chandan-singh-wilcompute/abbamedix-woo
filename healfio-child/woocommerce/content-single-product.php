@@ -63,8 +63,8 @@ if (post_password_required()) {
             <div class="summary entry-summary productDetails">
 
                 <div class="progressWrapper">
-                    <div class="tchProgress">
-                        <label>TCH</label>
+                    <div class="thcProgress">
+                        <label>THC</label>
                         <div class="progressContainer">
                         <span class="active"></span>
                         <span class="active"></span>
@@ -112,6 +112,8 @@ if (post_password_required()) {
                         <p>Linalool</p>
                     </div>
                 </div>
+
+                <!-- <?php //echo do_shortcode('[show_product_attributes]') ?> -->
 
                 <div class="devider"></div>
 
