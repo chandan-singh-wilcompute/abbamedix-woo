@@ -1240,7 +1240,7 @@ function display_variation_swatches() {
     echo '<form class="cart" method="post" enctype="multipart/form-data">';
     echo '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '">';
     echo '<input type="hidden" name="product_id" value="' . $product->get_id() . '">';
-    echo '<input type="hidden" name="variation_id" class="variation_id" value="">';
+    echo '<input type="hidden" name="variation_id" class="variation_id" value="">';    
     echo '<input type="hidden" name="quantity" value="1">';
     echo '<button type="submit" class="single_add_to_cart_button button alt">SELECT SIZE</button>';
     echo '</form>';
@@ -1271,5 +1271,98 @@ function enqueue_custom_scripts() {
     wp_localize_script('jquery', 'wc_add_to_cart_params', array(
         'ajax_url' => admin_url('admin-ajax.php'),
     ));
+}
+
+// Strain type
+function strain_brand_thc_cbd_shortcode() {
+    if (!is_product()) return ''; // Only show on product pages
+
+    global $product;
+
+    // Define your attribute slugs here
+    $attribute_slugs = array('pa_strain', 'pa_brand', 'pa_thc', 'pa_cbd');
+
+    $output = '<div class="product-attributes">';
+
+    foreach ($attribute_slugs as $slug) {
+        $terms = wc_get_product_terms($product->get_id(), $slug, array('fields' => 'names'));
+        if (!empty($terms)) {
+            $label = wc_attribute_label($slug);
+            $output .= '<p><strong>' . esc_html($label) . ':</strong> ' . implode(', ', $terms) . '</p>';
+        }
+    }
+
+    $output .= '</div>';
+
+    return $output;
+}
+add_shortcode('show_product_attributes', 'strain_brand_thc_cbd_shortcode');
+
+
+// Related Product Count
+function woocommerce_product_count_shortcode() {
+    $count = wp_count_posts('product');
+    $total = isset($count->publish) ? $count->publish : 0;
+
+    // Customize your before and after labels
+    $before = '';
+    $after = ' Products';
+
+    return $before . $total . $after;
+}
+add_shortcode('product_count', 'woocommerce_product_count_shortcode');
+
+
+// Register shortcode to show Rx Deduction Amount
+function rx_deduction_amount_shortcode($atts) {
+    global $product;
+
+    // Allow passing a product ID manually
+    $atts = shortcode_atts([
+        'id' => null,
+    ], $atts, 'rx_deduction');
+
+    // Get product ID: from attribute or current product
+    $product_id = $atts['id'] ? intval($atts['id']) : ($product ? $product->get_id() : null);
+
+    if (!$product_id) {
+        return ''; // No product context
+    }
+
+    $rx_deduction = get_post_meta($product_id, '_rx_deduction', true);
+
+    if (!empty($rx_deduction)) {
+        return '<p class="rx-deduction" style="font-weight:bold; color:#007C00;">Rx Deduction Amount: ' . wc_price(floatval($rx_deduction)) . '</p>';
+    }
+
+    return '';
+}
+add_shortcode('rx_deduction', 'rx_deduction_amount_shortcode');
+
+// Price per gram
+function shortcode_price_per_gram() {
+    global $product;
+
+    if ( ! is_a( $product, 'WC_Product' ) ) return '';
+
+    $price = floatval( $product->get_price() );
+    $weight = floatval( $product->get_weight() ); // in kg
+
+    if ( $weight <= 0 ) return '';
+
+    $grams = $weight * 1000;
+    $price_per_gram = $price / $grams;
+
+    return '<p><strong>Price per gram:</strong> $' . number_format( $price_per_gram, 4 ) . '</p>';
+}
+add_shortcode( 'price_per_gram', 'shortcode_price_per_gram' );
+
+// Update label pa_package-sizes to Package Size
+add_filter( 'woocommerce_attribute_label', 'custom_attribute_label_change', 10, 2 );
+function custom_attribute_label_change( $label, $name ) {
+    if ( $name === 'pa_package-sizes' ) {
+        $label = 'Package Size';
+    }
+    return $label;
 }
 

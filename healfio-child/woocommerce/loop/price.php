@@ -67,6 +67,8 @@ if (!empty($package_size_value)) {
             <button type="button" class="btn qty-minus" onclick="decreaseQty(this)">−</button>
             <input type="number" class="quantity" value="1" min="1" onchange="updateTotal(this)">
             <button type="button" class="btn qty-plus" onclick="increaseQty(this)">+</button>
+            <input type="hidden" id="prod-cur" value="<?php echo $currency_symbol; ?>">
+            <input type="hidden" id="prod-price" value="<?php echo $price; ?>">
         </div>
 
         <span>

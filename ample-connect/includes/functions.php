@@ -463,8 +463,9 @@ function display_saved_cards() {
         return;
     }
 
-    echo '<table>';
-    echo '<thead><tr><th>Card Type</th><th>Card Number</th><th>Expiry</th><th>Action</th></tr></thead>';
+    echo '<div class="savedCard">';
+    echo '<table class="table table-hover table-striped">';
+    echo '<thead class="thead-light"><tr><th>Card Type</th><th>Card Number</th><th>Expiry</th><th>Action</th></tr></thead>';
     echo '<tbody>';
 
     foreach ($credit_cards as $credit_card) {
@@ -475,7 +476,7 @@ function display_saved_cards() {
         echo '<td>';
         echo '<form method="POST" action="">';
         echo '<input type="hidden" name="delete_token" value="' . esc_attr($credit_card['id']) . '">';
-        echo '<button type="submit">Delete</button>';
+        echo '<button type="submit" class="btn btn-danger"><i class="bi bi-trash3"></i>&nbsp;Delete</button>';
         echo '</form>';
         echo '</td>';
         echo '</tr>';
@@ -483,6 +484,7 @@ function display_saved_cards() {
 
     echo '</tbody>';
     echo '</table>';
+    echo '</div>';
 }
 
 // Display add card form
@@ -1308,3 +1310,21 @@ add_action( 'wp_ajax_fetch_and_store_product_data', 'save_api_products_to_temp_f
         $result = process_product_batch_from_file( 50 ); // or whatever batch size
         wp_send_json_success( $result );
     }
+
+
+add_action('woocommerce_checkout_process', 'validate_selected_shipping_method');
+function validate_selected_shipping_method() {
+    $chosen_methods = WC()->session->get('chosen_shipping_methods');
+
+    if (!empty($chosen_methods) && in_array('select_shipping_placeholder', $chosen_methods)) {
+        wc_add_notice(__('Please select a valid shipping method.'), 'error');
+    }
+}
+
+
+add_action('woocommerce_before_checkout_form', 'force_shipping_reset', 5);
+function force_shipping_reset() {
+    if (function_exists('wc') && wc()->shipping()) {
+        wc()->shipping()->reset_shipping();
+    }
+}

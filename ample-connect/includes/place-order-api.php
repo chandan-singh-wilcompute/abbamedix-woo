@@ -68,9 +68,9 @@ function custom_add_to_order($cart_item_key, $product_id, $quantity, $variation_
 
     $order = get_order_id_from_api();
     $order_id = $order['id'];
-    echo '<pre>';
-    echo print_r('order id = ', $order_id);
-    echo '</pre>';
+    // echo '<pre>';
+    // echo print_r('order id = ', $order_id);
+    // echo '</pre>';
     
     if ($order_id) {
         $response = add_to_order($order_id, $sku_id, $quantity);

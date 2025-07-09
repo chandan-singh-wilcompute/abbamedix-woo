@@ -1181,7 +1181,7 @@ body .elementor-button:focus {
   padding-top: 90px;
 
   .skill-bar {
-    border: 0;
+    border: 0 !important;
   }
 
   .skill-name {
@@ -1194,7 +1194,7 @@ body .elementor-button:focus {
   }
 
   .skill-per {
-    border-radius: 0;
+    border-radius: 0 !important;
     &:after {
       display: none;
     }
@@ -1205,6 +1205,8 @@ body .elementor-button:focus {
       font-size: 32px;
       background: transparent;
       word-spacing: -8px;
+      white-space: nowrap;
+      transform: translateX(92%);
     }
   }
 }
@@ -1908,7 +1910,7 @@ a.button.thankyou-button {
   .productDetails {
     .single_add_to_cart_button,
     .continue-shopping-button {
-      margin-left: 10px !important;
+      margin-left: 15px !important;
       font-size: 20px;
       padding: 8px 10px 8px !important;
     }
@@ -1999,7 +2001,7 @@ div[role="tablist"] {
     display: flex;
   }
 
-  .tchProgress,
+  .thcProgress,
   .cbdProgress {
     width: 120px;
     font-size: 12px;
@@ -2035,7 +2037,7 @@ div[role="tablist"] {
     }
   }
 
-  .tchProgress + .tchProgress {
+  .thcProgress + .thcProgress {
     .progressContainer {
       span.active {
         background-color: #6EB0BE;
@@ -2449,18 +2451,18 @@ div[role="tablist"] {
     order: 1;
     display: block !important;
     position: relative;
+    min-width: 100px;
+    background-color: white;
+    height: 28px !important;
+    margin-left: 20px;
 
     p.stock,
     p.out-of-stock {
       position: absolute;
       right: 0;
-      font-size: 13px !important;
-      margin: 5px 0 0 0;
-    }
-
-    .price {
-      min-width: 80px;
-      min-height: 38px;
+      margin: 0;
+      top: -50px;
+      text-transform: capitalize;
     }
   }
 }
@@ -2574,7 +2576,7 @@ input[type=number] {
 
   .productPrice,
   .price {
-    height: 35px;
+    height: 28px;
     font-size: 14px;
     color: @black;
     display: inline-flex;
@@ -2582,6 +2584,7 @@ input[type=number] {
     align-items: center;
     padding: 0 15px;
     background-color: @white;
+    width: 100%;
   }
 
   .addToCart {
@@ -2614,7 +2617,38 @@ input[type=number] {
 
   .productQuantity {
     margin: 0;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 100%;
   }
+
+  .single_variation_wrap {
+    display: flex;
+    align-items: center;
+
+    .group {
+      display: flex;
+      align-items: center;
+    }
+
+    .addToCartGroup {
+      position: absolute;
+      left: -170px;
+      top: 42px;
+      white-space: nowrap;
+    }
+
+    .rxDeductionAmount {
+      font-size: 14px;
+      color: @white;
+    }
+  }
+
+  .single_add_to_cart_button {
+    min-width: 180px !important;
+    margin-bottom: 0 !important;
+  }
+
 }
 
 .slick-list {
@@ -2740,10 +2774,6 @@ input[type=number] {
     margin: 0 auto;
   }
 
-  .single_add_to_cart_button {
-    margin-bottom: 0 !important;
-  }
-
   .productDetails {
     max-width: 720px;
   }
@@ -2778,14 +2808,24 @@ input[type=number] {
   padding: 0 15px;
   
   h2 {
-    font-size: 28px;
+    font-size: 38px;
     color: #FFFFFF;
     margin-bottom: 30px;
-    text-transform: uppercase;
+    text-transform: capitalize;
     border-top: solid 1px #444;
     border-width: thin;
     margin-top: 0;
     padding-top: 30px;
+  }
+
+  .productCount {
+    color: #ffffff;
+    text-transform: uppercase;
+    font-size: 18px;
+    margin-bottom: 0;
+    font-weight: bold;
+    line-height: 20px;
+    margin-top: -10px;
   }
 }
 
@@ -3817,6 +3857,16 @@ li {
     }
   }
 
+  .savedCard {
+    padding: 20px 20px 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+
+    tbody {
+      color: @white;
+    }
+  }
+
   .manageCard {
     min-height: 300px;
 
@@ -3896,5 +3946,17 @@ li {
 .checkout-button {
   &:hover {
     color: @white;
+  }
+}
+
+.woocommerce-cart-form__contents {
+  .product-quantity {
+    .quantity {
+      display: none;
+    }
+  }
+
+  .product-subtotal {
+    font-size: 32px;
   }
 }

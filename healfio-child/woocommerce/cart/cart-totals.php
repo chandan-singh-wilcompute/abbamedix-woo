@@ -18,18 +18,18 @@
 defined( 'ABSPATH' ) || exit;
 
 ?>
-<div class="row cart-totals-wrapper" style="padding: 0px 32px 0px 32px; display: flex; align-items: center;">
+<div class="row cart-totals-wrapper" style="display: flex; align-items: center;">
 	<div class="col-md-12">
 		<div class="cart_totals <?php echo ( WC()->customer->has_calculated_shipping() ) ? 'calculated_shipping' : ''; ?>" style="width: 100%;">
 			<?php do_action( 'woocommerce_before_cart_totals' ); ?>
 
 			<h3 class="mb-0" style="font-size: 40px;
     font-weight: 400;"><?php esc_html_e( 'SHOPPING CART', 'healfio' ); ?></h3>
-			<h6 style="padding-left:0px;font-size:22px" class="mb-4 mt-1">Discounts will be applied on the next page</h6>
+			<h6 style="padding-left:0px;font-size:22px" class="mb-4 mt-1">Tax, Discounts and Shipping charges will be applied on the next page</h6>
 
 			<table cellspacing="0" class="shop_table shop_table_responsive summary_shop_table">
 
-				<tr class="cart-subtotal">
+				<!-- <tr class="cart-subtotal">
 					<th><?php esc_html_e( 'Subtotal:', 'healfio' ); ?></th>
 					<td data-title="<?php esc_attr_e( 'Subtotal:', 'healfio' ); ?>"><?php wc_cart_totals_subtotal_html(); ?></td>
 				</tr>
@@ -54,7 +54,7 @@ defined( 'ABSPATH' ) || exit;
 				<tr class="shipping">
 					<th><?php esc_html_e( 'Shipping:', 'healfio' ); ?></th>
 					<td data-title="<?php esc_attr_e( 'Shipping', 'healfio' ); ?>">Apply on the next step</td>
-				</tr>
+				</tr> -->
 
 				
 
@@ -64,7 +64,7 @@ defined( 'ABSPATH' ) || exit;
 
 				<tr class="order-total">
 					<th><?php esc_html_e( 'Total:', 'healfio' ); ?></th>
-					<td data-title="<?php esc_attr_e( 'Total', 'healfio' ); ?>"><?php wc_cart_totals_order_total_html(); ?></td>
+					<td data-title="<?php esc_attr_e( 'Total', 'healfio' ); ?>"><?php wc_cart_totals_subtotal_html(); //wc_cart_totals_order_total_html(); ?></td>
 				</tr>
 
 				<?php do_action( 'woocommerce_cart_totals_after_order_total' ); ?>

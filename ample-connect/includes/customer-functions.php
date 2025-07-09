@@ -148,10 +148,10 @@ function add_to_order($order_id, $sku_id, $quantity) {
     $body = array('quantity' => $quantity, 'sku_id' => $sku_id, 'client_id' => $client_id);
 
     $url = AMPLE_CONNECT_PORTAL_URL . "/orders/{$order_id}/add_to_order"; 
-    echo '<pre>';
-    echo print_r($url);
-    echo '</pre>';
-    my_debug_log("url = " . $url);
+    // echo '<pre>';
+    // echo print_r($url);
+    // echo '</pre>';
+    // my_debug_log("url = " . $url);
     $data = ample_request($url, 'PUT', $body);
     return $data;
 

@@ -47,20 +47,26 @@ Updated: 2024-05-06 20:12:56
     padding-left: 10px
 }
 
+.woocommerce-cart-form__cart-item a {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 .woocommerce-cart-form__cart-item .product-thumbnail,
 .woocommerce-table__line-item .product-thumbnail {
     padding: 0px !important;
-    width: 150px;
+    width: 200px;
 }
 
 .woocommerce-cart table.cart img,
 .woocommerce-view-order table.order_details img {
     width: 100%;
     height: 100%;
-
-    max-width: 150px;
+    object-position: center;
+    max-width: 200px;
     max-height: 150px;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 0px;
 }
 
@@ -129,6 +135,7 @@ td.product-total {
 }
 
 td.product-name a,
+td.product-name .variation,
 td.product-name .wc-item-meta {
 
     display: block;
@@ -136,8 +143,11 @@ td.product-name .wc-item-meta {
     width: 100%;
     margin: 0 auto;
     word-wrap: break-word;
-    font-weight: bold;
     color: #000000;
+}
+
+td.product-name a {
+    font-size: 24px;
 }
 
 td.product-name .wc-item-meta {
@@ -163,14 +173,14 @@ td.product-remove a {
 
 .quantity-minus,
 .quantity-plus {
-    width: 30px;
-    height: 30px;
+    width: 50px;
+    height: 50px;
     color: white;
     background-color: #63a7b6;
     border: none;
     border-radius: 100%;
     font-weight: 700;
-    font-size: 24px;
+    font-size: 34px;
 }
 
 .quantity-number {
@@ -442,16 +452,6 @@ td.product-remove a {
     color: white
 }
 
-.attachment-woocommerce_thumbnail {
-    width: 100% !important;
-    object-fit: fill !important;
-}
-
-.woocommerce-LoopProduct-link img {
-    width: 100% !important;
-    object-fit: fill !important;
-}
-
 .account_full_width {
     width: 100% !important;
     background: none;
@@ -623,13 +623,11 @@ a.page-numbers {
 
 .woocommerce-variation-price {
     margin-bottom: 0;
-    margin-left: 20px;
 }
 
 .woocommerce-variation-price .price {
     background-color: #ffffff;
     color: #000000 !important;
-    font-size: 15px !important;
     border-radius: 0;
     padding: 4px 15px 2px 15px;
 }
@@ -785,17 +783,17 @@ a.page-numbers {
     margin: 0;
 }
 
-.woocommerce div.product form.cart .button {
-    /* position: absolute;
-    top: 50px;
-    right: -100px; */
-    white-space: nowrap;
-		position: static;
+.woocommerce div.product div.summary {
+    margin-bottom: 4em;
 }
 
 .single-product.woocommerce div.product .summary .price {
-    line-height: 30px;
-    height: 30px;
+    line-height: 28px;
+    height: 28px;
+    font-size: 14px;
+}
+
+.single-product.woocommerce div.product .summary .price bdi {
     font-size: 14px;
 }
 
