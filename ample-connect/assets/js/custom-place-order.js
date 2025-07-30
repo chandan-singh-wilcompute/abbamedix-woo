@@ -32,71 +32,6 @@ jQuery(document).ready(function($) {
 
     controlPlaceOrderButton();
 
-    // // Function to log in and get the admin token
-    // function getAdminToken(callback) {
-    //     $.ajax({
-    //         type: 'GET',
-    //         url: custom_order.ajax_url, // Use WordPress AJAX URL
-    //         data: {
-    //             action: 'get_admin_token'
-    //         },
-    //         success: function(response) {
-    //             var data = JSON.parse(response);
-    //             if (data && data.token) {
-    //                 adminToken = data.token;
-    //                 if (callback) callback();
-    //             } else {
-    //                 disablePlaceOrderButton();
-    //             }
-    //         },
-    //         error: function() {
-    //             disablePlaceOrderButton();
-    //         }
-    //     });
-    // }
-
-    // Function to check user status
-    // function checkUserStatus() {
-    //     if (!adminToken) {
-    //         getAdminToken(checkUserStatus);
-    //         return;
-    //     }
-    //     $.ajax({
-    //         type: 'GET',
-    //         url: `https://medbox.sandbox.onample.com/api/v2/clients/${client_id}`,
-    //         data: {
-    //             token: adminToken
-    //         },
-    //         success: function(clientResponse) {
-    //             if (clientResponse && clientResponse.registration) {
-    //                 var status = clientResponse.registration.status;
-    //                 if (status == 'Approved') {
-    //                     enablePlaceOrderButton();
-    //                 } else {
-    //                     disablePlaceOrderButton();
-    //                 }
-    //             } else {
-    //                 disablePlaceOrderButton();
-    //             }
-    //         },
-    //         error: function(clientError) {
-    //             disablePlaceOrderButton();
-    //         }
-    //     });
-    // }
-
-    // // Call the checkUserStatus function on page load
-    // if(client_id){
-    //     checkUserStatus();
-    // }
-    
-
-    // Re-apply the status check after any AJAX request completes
-    // $(document).ajaxComplete(function() {
-    //     if(client_id){
-    //         checkUserStatus();
-    //     }
-    // });
 
     $(document).on('change', 'input[name="shipping_method[0]"]', function () {
         let shipping_method = $(this).val();
@@ -111,6 +46,7 @@ jQuery(document).ready(function($) {
             },
             success: function (response) {
                 console.log("API Response:", response);
+                $('body').trigger('update_checkout');
             },
             error: function (error) {
                 console.log("Error:", error);

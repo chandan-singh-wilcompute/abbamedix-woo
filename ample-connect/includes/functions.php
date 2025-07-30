@@ -5,7 +5,91 @@ if (!defined('ABSPATH')) {
 require_once plugin_dir_path(__FILE__) . '/customer-functions.php';
 
 // loading custom css
-wp_enqueue_style('ample-connect-styles2', plugin_dir_url(__FILE__) . '../assets/css/ample-connect.css');
+// wp_enqueue_style('ample-connect-styles2', plugin_dir_url(__FILE__) . '../assets/css/ample-connect.css');
+add_action('admin_enqueue_scripts', function () {
+    wp_enqueue_style('ample-connect-styles2', plugin_dir_url(__FILE__) . 'assets/css/admin.css');
+});
+
+add_action('wp_enqueue_scripts', function() {
+    wp_enqueue_script('wc-cart');
+    wp_enqueue_script('wc-cart-fragments');
+    wp_enqueue_script('gram-quota-script', dirname(plugin_dir_url(__FILE__)) . '/assets/js/gram-quota.js', ['jquery'], null, true);
+    wp_localize_script('gram-quota-script', 'GramQuotaAjax', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+    ]);
+});
+
+// // Set user's session at login
+// add_action('wp_login', 'set_user_session_on_login', 10, 2);
+// function set_user_session_on_login($user_login, $user) {
+//     // Set session data using your custom class
+//     $purchasable_products = get_purchasable_products($user->ID);
+//     Client_Information::fetch_information();
+//     $order_id = get_order_from_api_and_update_session($user->ID);
+//     ample_connect_log("order id from login is : ", $order_id);
+//     Ample_Session_Cache::set('purchasable_products', $purchasable_products);
+//     $order_id_2 = Ample_Session_Cache::get('order_id');
+//     ample_connect_log("order id from login 2 is : ", $order_id_2);
+// }
+
+// add_action('woocommerce_init', 'set_user_session_data_if_logged_in');
+// function set_user_session_data_if_logged_in() {
+//     // Skip if in admin dashboard (wp-admin or AJAX in admin context)
+//     if (is_admin() || (defined('DOING_AJAX') && DOING_AJAX && is_admin())) {
+//         return;
+//     }
+
+//     if (is_user_logged_in()) {
+//         $user = wp_get_current_user();
+//         // Prevent re-setting if already set
+//         if (!Ample_Session_Cache::get('order_id')) {
+//             get_purchasable_products_and_store_in_session($user->ID);
+//             Client_Information::fetch_information();
+//             get_order_from_api_and_update_session($user->ID);
+//         }
+//     }
+// }
+
+function is_login_page() {
+    return in_array($GLOBALS['pagenow'], ['wp-login.php', 'wp-register.php']);
+}
+
+
+add_action('template_redirect', 'set_user_session_data_if_logged_in');
+function set_user_session_data_if_logged_in() {
+    // Avoid admin, login pages, or AJAX calls
+    if (is_admin() || is_login_page() || wp_doing_ajax()) {
+        return;
+    }
+
+    // User must be logged in
+    if (!is_user_logged_in()) {
+        return;
+    }
+
+    $user = wp_get_current_user();
+
+    // Check if session is initialized and has required data
+    $session_initialized = Ample_Session_Cache::get('session_initialized');
+    $purchasable_products = Ample_Session_Cache::get('purchasable_products');
+
+    // Re-initialize if session is missing or incomplete
+    if (!$session_initialized || !$purchasable_products) {
+        ample_connect_log("Re-initializing session data for user: " . $user->ID);
+        
+        get_purchasable_products_and_store_in_session($user->ID);
+        Client_Information::fetch_information();
+        // get_order_from_api_and_update_session($user->ID);
+        // get_shipping_rates_and_store_in_session($user->ID);
+        Ample_Session_Cache::set('session_initialized', true);
+    }
+
+    if (!Ample_Session_Cache::has('order_id')) {
+        ample_connect_log("Getting current order.");
+        get_order_from_api_and_update_session($user->ID);
+    }
+}
+
 
 // Custom Fields add to User Profile Page
 function wk_custom_user_profile_fields($user)
@@ -453,6 +537,7 @@ add_shortcode('my_manage_cards_ui', 'display_saved_cards');
 function display_saved_cards() {
     
     $credit_cards = Client_Information::get_credit_cards();
+    $credit_cards = Ample_Session_Cache::get('credit_cards');
     $user_id = get_current_user_id();
 
     // Get the client id of the customer
@@ -626,14 +711,14 @@ function handle_shipping_method_selected() {
     }
 
     $shipping_method = sanitize_text_field($_POST['shipping_method']);
-    my_debug_log("shipping method response = ");
-    my_debug_log($shipping_method);
+    ample_connect_log("shipping method selected = ");
+    ample_connect_log($shipping_method);
     $user_id = get_current_user_id();
     // Get the client id of the customer
     $client_id = get_user_meta($user_id, 'client_id', true);
 
-    $order = get_order_id_from_api();
-    $order_id = $order['id'];
+    // $order = get_order_id_from_api();
+    $order_id = Ample_Session_Cache::get('order_id');
 
     $body = array(
         'shipping_rate_id' => $shipping_method,
@@ -643,6 +728,10 @@ function handle_shipping_method_selected() {
     $api_url = AMPLE_CONNECT_PORTAL_URL . "/orders/{$order_id}/set_shipping_rate"; 
     $body_data = ample_request($api_url, 'PUT', $body);
     if ($body_data) {
+        if (array_key_exists('id', $body_data)) {
+            store_current_order_to_session($body_data);
+            // WC()->cart->calculate_totals();
+        }
         wp_send_json_success($body_data);
         
     } else {
@@ -660,15 +749,33 @@ function get_prescription_data() {
     // Get the data from the request
     $client_id = isset($_POST['client_id']) ? sanitize_text_field($_POST['client_id']) : '';
 
+    // Retrieve from session if exists and not expired
+    $cached = WC()->session->get('prescription_data');
+
+    if (
+        !empty($cached) &&
+        isset($cached['client_id'], $cached['timestamp'], $cached['data']) &&
+        $cached['client_id'] === $client_id &&
+        (time() - $cached['timestamp']) < 1800 // 30 minutes = 1800 seconds
+    ) {
+        wp_send_json_success($cached['data']);
+    }
+
     // Do something with the data
     $presc_data = get_prescription_details($client_id);
+
+    // Save to session with timestamp
+    WC()->session->set('prescription_data', [
+        'client_id' => $client_id,
+        'data'      => $presc_data,
+        'timestamp' => time(),
+    ]);
 
     // Send the response back
     wp_send_json_success($presc_data);
 }
 // Hook for logged-in users
 add_action('wp_ajax_get_prescription_data', 'get_prescription_data');
-// Hook for non-logged-in users
 add_action('wp_ajax_nopriv_get_prescription_data', 'get_prescription_data');
 
 
@@ -1328,3 +1435,393 @@ function force_shipping_reset() {
         wc()->shipping()->reset_shipping();
     }
 }
+
+
+// Customer discount and policies
+add_action('woocommerce_review_order_before_payment', 'show_selectable_discounts_on_checkout');
+function show_selectable_discounts_on_checkout() {
+    $discount_codes = Ample_Session_Cache::get('applicable_discounts', []);
+    $applicable_policies = Ample_Session_Cache::get('applicable_policies', []);
+
+    if (empty($discount_codes) && empty($policy_data)) return;
+
+    echo '<div class="woocommerce-checkout-discounts">';
+    echo '<h3>Available Discounts</h3>';
+    echo '<ul style="list-style: none; padding-left: 0;">';
+
+    // Discount codes with checkboxes
+    foreach ($discount_codes as $discount) {
+        $desc   = esc_html($discount['description'] ?? $discount['code']);
+        $code   = esc_attr($discount['code']);
+        $id     = $discount['id'];
+        $amount = number_format($discount['amount'] / 100, 2);
+        echo "<li><label><input type='checkbox' class='apply-discount' value='{$id}' data-amount='{$discount['amount']}'> {$desc} (-\${$amount})</label></li>";
+    }
+
+    // Policy discount checkbox
+    foreach ($applicable_policies as $policy) {
+        $label   = esc_html($policy['name']);
+        $covers_shipping   = esc_attr($policy['covers_shipping']);
+        $id     = $policy['id'];
+        $percent = esc_html($policy['percent']);
+        echo "<li><label><input type='checkbox' class='apply-policy-discount' data-shipping='{$covers_shipping}' value='{$id}' data-percentage='{$percent}'> {$label} ({$percent}% off)</label></li>";
+    }
+
+    echo '</ul>';
+    echo '</div>';
+
+    // Add hidden fields for AJAX
+    echo '<input type="hidden" name="applied_custom_discount" id="applied_custom_discount" value="">';
+    echo '<input type="hidden" name="applied_policy_discount" id="applied_policy_discount" value="">';
+    echo '<input type="hidden" name="applied_policy_id" id="applied_policy_id" value="">';
+}
+
+
+add_action('wp_footer', 'custom_discount_ajax_script');
+function custom_discount_ajax_script() {
+    if (!is_checkout()) return;
+    ?>
+    <script>
+    jQuery(function($) {
+        function applyCustomDiscounts() {
+            var discountId = $('.apply-discount:checked').val() || '';
+            var policyPercent = $('.apply-policy-discount:checked').data('percentage') || '';
+            var policyId = $('.apply-policy-discount:checked').val() || '';
+
+            $('#applied_custom_discount').val(discountId);
+            $('#applied_policy_discount').val(policyPercent);
+            $('#applied_policy_id').val(policyId);
+
+            $('body').trigger('update_checkout');
+        }
+
+        $('.apply-discount, .apply-policy-discount').on('change', function () {
+            applyCustomDiscounts();
+        });
+    });
+    </script>
+    <?php
+}
+
+add_action('woocommerce_checkout_update_order_review', 'save_custom_discounts_to_session');
+function save_custom_discounts_to_session($post_data) {
+    parse_str($post_data, $parsed_data);
+
+    $custom_discount = sanitize_text_field($parsed_data['applied_custom_discount'] ?? '');
+    $policy_discount = floatval($parsed_data['applied_policy_discount'] ?? 0);
+    $policy_id = floatval($parsed_data['applied_policy_id'] ?? 0);
+
+    Ample_Session_Cache::set('applied_custom_discount', $custom_discount);
+    Ample_Session_Cache::set('applied_policy_discount', $policy_discount);
+    Ample_Session_Cache::set('applied_policy_id', $policy_id);
+}
+
+add_action('woocommerce_cart_calculate_fees', 'apply_selected_custom_discount', 20, 1);
+function apply_selected_custom_discount($cart) {
+    if (is_admin() && !defined('DOING_AJAX')) return;
+
+    $discount_id = WC()->session->get('applied_custom_discount', '');
+    $policy_percent = floatval(WC()->session->get('applied_policy_discount', 0));
+    $policy_id = floatval(WC()->session->get('applied_policy_id', ''));
+
+    // Apply discount code amount
+    $discount_codes = Ample_Session_Cache::get('applicable_discounts', []);
+    $applied_discounts = Ample_Session_Cache::get('applied_discounts', []);
+    foreach($applied_discounts as $dis) {
+        remove_discount_from_order($dis['id']);
+    }
+    foreach ($discount_codes as $discount) {
+        if ($discount['id'] === $discount_id) {
+            add_discount_to_order($discount_id);
+            $amount = floatval($discount['amount']) / 100;
+            $desc = esc_html($discount['description'] ?? $discount['code']);
+            $cart->add_fee($desc, -$amount);
+            break;
+        }
+    }
+
+    $policies = Ample_Session_Cache::get('applicable_policies', []);
+    // Apply percentage discount from policy
+    foreach ($policies as $policy) {
+        if ($policy['id'] == $policy_id) {
+            add_policy_to_order($policy_id);
+            $policy_percent = $policy['percent'];
+            $cart_total = 0;
+            foreach ( $cart->get_cart() as $item ) {
+                $cart_total += $item['line_total'] + $item['line_tax'];
+            }
+            $cart_total += $cart->get_shipping_total() + $cart->get_shipping_tax();
+            $fee_total = 0;
+            foreach ( $cart->get_fees() as $fee ) {
+                $fee_total += $fee->amount;
+            }
+            $cart_total += $fee_total;
+            $policy_discount = $cart_total * ($policy_percent / 100);
+            $cart->add_fee("{$policy['name']} ({$policy_percent}%)", -$policy_discount);
+            break;
+        }
+    }
+}
+
+function clear_custom_discount_session() {
+    WC()->session->__unset('applied_custom_discount');
+    WC()->session->__unset('applied_policy_discount');
+}
+add_action('woocommerce_cart_emptied', 'clear_custom_discount_session');
+
+// WC remove non displayable function
+if ( ! function_exists( 'wc_remove_non_displayable_chars' ) ) {
+    /**
+     * Remove non-displayable (non-printable) characters from a string.
+     *
+     * @param string $string Input string.
+     * @return string Cleaned string.
+     */
+    function wc_remove_non_displayable_chars( $string ) {
+        return preg_replace( '/[^\PC\s]/u', '', $string ); // removes control characters
+    }
+}
+
+// Order API call before order creation in Woocommerce
+add_action('woocommerce_after_checkout_validation', 'validate_checkout_with_external_api', 20, 2);
+function validate_checkout_with_external_api($posted_data, $errors) {
+    if (!empty($errors->get_error_messages())) {
+        return; // Other validation errors exist
+    }
+
+    $cart_total = floatval(WC()->cart->get_total('edit')); // float, e.g. 0.00
+
+    if ($cart_total !== 0.0) {
+        return;
+    }
+
+    $response = purchase_order_on_ample();
+
+    // Check response
+    if ($response && isset($response["purchased"]) && $response["purchased"] == TRUE) {
+    
+        $ample_order_id = $response["ample_order_id"];
+        $order_note = 'Order placed with Ample Order Id: ' . $ample_order_id; 
+
+        Ample_Session_Cache::set('order_note', $order_note);
+        Ample_Session_Cache::set('external_order_number', $response['id']);
+
+    } else {
+        $errors->add('api_error', __('There was a problem while placing order on Ample. Please try again.', 'ample-connect-plugin'));
+        return;
+    }
+}
+
+// Setting order details after order processing
+add_action('woocommerce_checkout_create_order', 'attach_api_data_to_order', 20, 2);
+function attach_api_data_to_order($order, $data) {
+
+    if (floatval($order->get_total()) !== 0.0) {
+        return;
+    }
+
+    $order_note = Ample_Session_Cache::get('order_note');
+    $external_order_number = Ample_Session_Cache::get('external_order_number');
+
+    if ($external_order_number) {
+        $order->add_order_note($order_note);
+        $order->update_meta_data('_external_order_number', $external_order_number);
+    }
+}
+
+
+// 2. Ajax Endpoint to return current grams
+add_action('wp_ajax_get_gram_quota_data', 'get_gram_quota_data');
+add_action('wp_ajax_nopriv_get_gram_quota_data', 'get_gram_quota_data');
+
+function get_gram_quota_data() {
+    $details = Ample_Session_Cache::get('policy_details');
+    if ($details) {
+        $available_grams = floatval($details['remaining_amount_for_current_period']);
+    } else {
+        $available_grams = 0;
+    }
+
+    $used_grams = 0;
+
+    foreach (WC()->cart->get_cart() as $cart_item) {
+        $product = $cart_item['data'];
+        $grams = $product->get_meta('RX Reduction');
+        // $package_size_raw = $product->get_attribute('pa_package-sizes'); // "3.5 g"
+        // $grams = floatval($package_size_raw);
+        if ($grams) {
+            $used_grams += floatval($grams) * $cart_item['quantity'];
+        }
+    }
+
+    wp_send_json([
+        'total' => $available_grams,
+        'used' => $used_grams,
+    ]);
+}
+
+
+
+
+
+
+// Debugging
+add_action('init', function() {
+    add_rewrite_rule('^debug-endpoint/?$', 'index.php?debug_custom=1', 'top');
+});
+
+add_filter('query_vars', function($vars) {
+    $vars[] = 'debug_custom';
+    return $vars;
+});
+
+
+add_action('template_redirect', function() {
+    if (get_query_var('debug_custom') == 1) {
+        // Load WordPress environment
+        get_header(); // Output theme header
+
+        // echo '<main id="debug-page" style="padding: 2rem;">';
+        // echo '<h2>Debug Output</h2>';
+        // echo '<pre>';
+
+        // echo "User Id: ";
+        // $user_id = get_current_user_id();
+        // print_r($user_id);
+        
+        // echo "\nOrder items\n";
+        // $cached_order_data = Ample_Session_Cache::get('order_items');
+        // print_r($cached_order_data);
+
+        // echo "custom tax data\n";
+        // $cached_order_data = Ample_Session_Cache::get('custom_tax_data');
+        // print_r($cached_order_data);
+
+        // echo "applicable discounts\n";
+        // $cached_order_data = Ample_Session_Cache::get('applicable_discounts');
+        // print_r($cached_order_data);
+
+        // echo "policy details \n";
+        // $cached_order_data = Ample_Session_Cache::get('policy_details');
+        // print_r($cached_order_data);
+
+        // echo "purchasable products\n";
+        // $p_p = Ample_Session_Cache::get('purchasable_products');
+        // print_r($p_p);
+
+        // echo "order id: ";
+        // $order_id_2 = Ample_Session_Cache::get('order_id');
+        // print_r($order_id_2);
+
+        // echo "\nshipping rates: ";
+        // $shipping_options = Ample_Session_Cache::get('custom_shipping_rates');
+        // print_r($shipping_options);
+
+        // echo '</pre>';
+        // echo '</main>';
+
+
+        echo '<div style="background: #f0f0f0; padding: 10px; margin: 10px; border: 1px solid #ccc;">';
+        echo '<h3>Ample Connect Session Debug</h3>';
+        echo '<p><strong>Session Available:</strong> ' . (Ample_Session_Cache::is_session_available() ? 'Yes' : 'No') . '</p>';
+        echo '<p><strong>User Logged In:</strong> ' . (is_user_logged_in() ? 'Yes' : 'No') . '</p>';
+        
+        if (is_user_logged_in()) {
+            $user = wp_get_current_user();
+            echo '<p><strong>User ID:</strong> ' . $user->ID . '</p>';
+            echo '<p><strong>Client ID:</strong> ' . get_user_meta($user->ID, 'client_id', true) . '</p>';
+        }
+        
+        $session_keys = [
+            'session_initialized',
+            'order_id',
+            'purchasable_products',
+            'custom_shipping_rates',
+            'custom_tax_data',
+            'applicable_discounts',
+            'policy_details',
+            'order_items',
+            'available_to_order',
+            'credit_cards',
+            'status',
+            'applicable_policies',
+            'applied_policy_id'
+        ];
+        
+        echo '<h4>Session Data:</h4>';
+        foreach ($session_keys as $key) {
+            $value = Ample_Session_Cache::get($key);
+            echo '<p><strong>' . $key . ':</strong> ';
+            print_r($value);
+            echo '</p>';
+        }
+        
+        echo '</div>';
+
+
+        get_footer(); // Output theme footer
+        exit;
+    }
+});
+
+// Clear session data on logout
+add_action('wp_logout', 'ample_connect_clear_session_on_logout');
+function ample_connect_clear_session_on_logout() {
+    Ample_Session_Cache::clear_all();
+}
+
+// Clear session data after order completion
+add_action('woocommerce_thankyou', 'ample_connect_clear_session_after_order');
+function ample_connect_clear_session_after_order($order_id) {
+    // Clear session data but keep order_id for potential reorder
+    $order_id_backup = Ample_Session_Cache::get('order_id');
+    Ample_Session_Cache::clear_all();
+    if ($order_id_backup) {
+        Ample_Session_Cache::set('last_completed_order_id', $order_id_backup);
+    }
+}
+
+// Debug session data (only for administrators)
+add_action('wp_footer', 'ample_connect_debug_session_data');
+function ample_connect_debug_session_data() {
+    if (!current_user_can('administrator')) {
+        return;
+    }
+    
+    if (isset($_GET['debug_session']) && $_GET['debug_session'] === '1') {
+        echo '<div style="background: #f0f0f0; padding: 10px; margin: 10px; border: 1px solid #ccc;">';
+        echo '<h3>Ample Connect Session Debug</h3>';
+        echo '<p><strong>Session Available:</strong> ' . (Ample_Session_Cache::is_session_available() ? 'Yes' : 'No') . '</p>';
+        echo '<p><strong>User Logged In:</strong> ' . (is_user_logged_in() ? 'Yes' : 'No') . '</p>';
+        
+        if (is_user_logged_in()) {
+            $user = wp_get_current_user();
+            echo '<p><strong>User ID:</strong> ' . $user->ID . '</p>';
+            echo '<p><strong>Client ID:</strong> ' . get_user_meta($user->ID, 'client_id', true) . '</p>';
+        }
+        
+        $session_keys = [
+            'session_initialized',
+            'order_id',
+            'purchasable_products',
+            'custom_shipping_rates',
+            'custom_tax_data',
+            'applicable_discounts',
+            'policy_details',
+            'order_items',
+            'available_to_order',
+            'credit_cards',
+            'status'
+        ];
+        
+        echo '<h4>Session Data:</h4>';
+        foreach ($session_keys as $key) {
+            $value = Ample_Session_Cache::get($key);
+            echo '<p><strong>' . $key . ':</strong> ' . (is_array($value) ? 'Array(' . count($value) . ')' : var_export($value, true)) . '</p>';
+        }
+        
+        echo '</div>';
+    }
+}
+
+

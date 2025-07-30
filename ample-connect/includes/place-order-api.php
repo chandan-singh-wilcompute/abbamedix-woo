@@ -8,7 +8,8 @@ add_filter('woocommerce_add_to_cart_validation', 'custom_add_to_cart_validation'
 function custom_add_to_cart_validation($passed, $product_id, $quantity, $variation_id, $variations) {
     
     if (is_user_logged_in()) {
-        $allowed_skus = get_purchasable_products();
+        // $allowed_skus = get_purchasable_products();
+        $allowed_skus = Ample_Session_Cache::get('purchasable_products');
         if (!empty($allowed_skus)) {
             $allowed_ids = get_product_ids_by_skus($allowed_skus);
             if (!in_array($product_id, $allowed_ids)) {
@@ -37,11 +38,12 @@ function custom_add_to_cart_validation($passed, $product_id, $quantity, $variati
         $total_package_size += floatval($package_size) * $quantity;
     }
     $total_package_size += $attribute_package_size;
-    $order = get_order_id_from_api();
-    $order_id = $order['id'];
+    // $order = get_order_id_from_api();
+    $order_id = Ample_Session_Cache::get('order_id');
 
     if ($order_id) {
-        $get_available_to_order = Client_Information::get_available_to_order();
+        // $get_available_to_order = Client_Information::get_available_to_order();
+        $get_available_to_order  = Ample_Session_Cache::get('available_to_order');
         if ($get_available_to_order < $total_package_size) {
             wc_add_notice('Insufficient available quantity to order. Only ' . $get_available_to_order . ' grams are available to order.', 'error');
             return false;
@@ -56,6 +58,12 @@ function custom_add_to_cart_validation($passed, $product_id, $quantity, $variati
 
 add_action('woocommerce_add_to_cart', 'custom_add_to_order', 10, 6);
 function custom_add_to_order($cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data) {
+    // Validate session is available
+    if (!Ample_Session_Cache::is_session_available()) {
+        ample_connect_log("Session not available during add to cart");
+        return;
+    }
+
     if ($variation_id) {
         $variation = wc_get_product($variation_id);
         $sku = $variation->get_sku();
@@ -66,28 +74,30 @@ function custom_add_to_order($cart_item_key, $product_id, $quantity, $variation_
         $sku_id = $product->get_sku();
     }
 
-    $order = get_order_id_from_api();
-    $order_id = $order['id'];
-    // echo '<pre>';
-    // echo print_r('order id = ', $order_id);
-    // echo '</pre>';
+    $order_id = Ample_Session_Cache::get('order_id');
     
     if ($order_id) {
-        $response = add_to_order($order_id, $sku_id, $quantity);
-        if (is_wp_error($response)) {
-            error_log('API call failed: ' . $response->get_error_message());
-        } else {
-            if (!empty($response['order_items'][0]['discounts'])) {
-                $discounts = $response['order_items'][0]['discounts'];
-                // Assuming API response contains 'discount_percentage'
-                if (!empty($discounts)) {
-                    // Add discount data to the cart item
-                    WC()->cart->cart_contents[ $cart_item_key ]['discount_percentage'] = $discounts[0];
+        try {
+            $response = add_to_order($order_id, $sku_id, $quantity);
+            if (is_wp_error($response)) {
+                error_log('API call failed: ' . $response->get_error_message());
+                // Don't remove from cart on API failure
+                return;
+            } else {
+                if (!empty($response['order_items'][0]['discounts'])) {
+                    $discounts = $response['order_items'][0]['discounts'];
+                    if (!empty($discounts)) {
+                        WC()->cart->cart_contents[ $cart_item_key ]['discount_percentage'] = $discounts[0];
+                    }
                 }
+                error_log('API call succeeded: ' . wp_remote_retrieve_body($response));
             }
-            
-            error_log('API call succeeded: ' . wp_remote_retrieve_body($response));
+        } catch (Exception $e) {
+            error_log('Exception during add to order: ' . $e->getMessage());
+            // Don't remove from cart on exception
         }
+    } else {
+        error_log('No order_id available during add to cart');
     }
 }
 
@@ -97,11 +107,12 @@ function ample_cart_updated($cart_item_key, $cart) {
     $product = wc_get_product($line_item['variation_id'] ?: $line_item['product_id']);
     $sku_id = explode("-", $product->get_sku())[1];
     
-    $order = get_order_id_from_api();
-    $order_id = $order['id'];
+    // $order = get_order_id_from_api();
+    $order_id = Ample_Session_Cache::get('order_id');
+    $order_items = Ample_Session_Cache::get('order_items');
     if($order_id) {
         $order_item_id = null;
-        foreach ($order['order_items'] as $item) {
+        foreach ($order_items as $item) {
             if ($item['sku_id'] == $sku_id) {
                 $order_item_id = $item['id'];
                 break;
@@ -124,7 +135,8 @@ function ample_cart_updated($cart_item_key, $cart) {
 add_action('woocommerce_before_cart', 'calculate_total_package_size');
 function calculate_total_package_size() {
     $total_package_size = 0;
-    $get_available_to_order = Client_Information::get_available_to_order();
+    // $get_available_to_order = Client_Information::get_available_to_order();
+    $get_available_to_order  = Ample_Session_Cache::get('available_to_order');
     // Loop through cart items
     foreach (WC()->cart->get_cart() as $cart_item) {
         $product = wc_get_product($cart_item['variation_id'] ?: $cart_item['product_id']);
@@ -139,7 +151,7 @@ function calculate_total_package_size() {
 }
 
 
-add_action( 'woocommerce_update_cart_action_cart_updated', 'cart_item_quantity_update_ample', 20, 4 );
+add_action( 'woocommerce_after_cart_item_quantity_update', 'cart_item_quantity_update_ample', 20, 4 );
 function cart_item_quantity_update_ample($cart_updated) {
     foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
         $updated_quantity = $cart_item['quantity'];
@@ -155,11 +167,12 @@ function cart_item_quantity_update_ample($cart_updated) {
             $sku_id = explode("-", $sku)[1];
         }
 
-        $order = get_order_id_from_api();
-        $order_id = $order['id'];
+        // $order = get_order_id_from_api();
+        $order_id = Ample_Session_Cache::get('order_id');
+        $order_items = Ample_Session_Cache::get('order_items');
         if($order_id){
             $order_item_id = null;
-            foreach ($order['order_items'] as $item) {
+            foreach ($order_items as $item) {
                 if ($item['sku_id'] == $sku_id) {
                     $order_item_id = $item['id'];
                     break;
@@ -185,16 +198,19 @@ function change_item_quantity($order_id, $order_item_id, $updated_quantity) {
     $body = array('order_item_id' => $order_item_id, 'quantity' => $updated_quantity);
 
     $data = ample_request($url, 'PUT', $body);
+    if (array_key_exists('id', $data)) {
+        store_current_order_to_session($data);
+    }
     return $data;
 }
 
 
 // checkout page 
 add_action('woocommerce_before_checkout_form', 'calculate_total_package_size_in_checkout_page');
-
 function calculate_total_package_size_in_checkout_page() {
     $total_package_size = 0;
-    $get_available_to_order = Client_Information::get_available_to_order();
+    // $get_available_to_order = Client_Information::get_available_to_order();
+    $get_available_to_order  = Ample_Session_Cache::get('available_to_order');
     // Loop through checkout items
     foreach (WC()->cart->get_cart() as $cart_item) {
         $product = wc_get_product($cart_item['variation_id'] ?: $cart_item['product_id']);
@@ -212,7 +228,8 @@ function calculate_total_package_size_in_checkout_page() {
 add_action('woocommerce_product_query', 'filter_products_based_on_login_status');
 function filter_products_based_on_login_status($query) {
     if (is_user_logged_in()) {
-        $allowed_skus = get_purchasable_products();
+        // $allowed_skus = get_purchasable_products();
+        $allowed_skus = Ample_Session_Cache::get('purchasable_products');
         if (!empty($allowed_skus)) {
             $allowed_ids = get_product_ids_by_skus($allowed_skus);
             if (!empty($allowed_ids)) {
@@ -256,3 +273,12 @@ function apply_discount_after_api( $cart ) {
     }
 }
 
+
+// Allow 0 amount orders
+add_filter('woocommerce_cart_needs_payment', 'allow_zero_total_checkout', 10, 2);
+function allow_zero_total_checkout($needs_payment, $cart) {
+    if ($cart->get_total('edit') <= 0) {
+        return false; // Don't require payment method for free orders
+    }
+    return $needs_payment;
+}

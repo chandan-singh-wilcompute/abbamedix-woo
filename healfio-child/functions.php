@@ -1203,7 +1203,26 @@ function display_variation_swatches() {
     }
     
     echo '<div class="shop-variation-swatches" data-product-id="' . $product->get_id() . '">';
-    
+    $currency_symbol = get_woocommerce_currency_symbol();
+    $price_html = $product->get_price_html();
+    $price = '';
+
+    if ($price_html) {
+        libxml_use_internal_errors(true);
+        $dom = new DOMDocument();
+        $dom->loadHTML($price_html);
+        libxml_clear_errors();
+
+        $price_elements = $dom->getElementsByTagName('span');
+        foreach ($price_elements as $element) {
+            if ($element->getAttribute('class') === 'woocommerce-Price-currencySymbol') {
+                $price_node = $element->nextSibling;
+                $price = $price_node->nodeValue;
+                break;
+            }
+        }
+    }
+
     foreach ($attributes as $attribute_name => $options) {
         $attribute_label = wc_attribute_label($attribute_name);
         
@@ -1230,9 +1249,13 @@ function display_variation_swatches() {
         echo '</div>';
         echo '</div>';
     }
-    
+
+    echo '<input type="hidden" id="prod-cur" value="' . esc_attr($currency_symbol) . '">';
+    echo '<input type="hidden" id="prod-price" value="' . esc_attr($price) . '">';
+
+
     echo '<div class="variation-info">';
-    //echo '<span class="variation-price"></span>';
+    echo '<span class="variation-price"></span>';
     echo '<span class="variation-stock"></span>';
     echo '</div>';
     
@@ -1251,7 +1274,6 @@ function display_variation_swatches() {
 
 add_action('wp_ajax_get_variations_for_product', 'get_variations_for_product');
 add_action('wp_ajax_nopriv_get_variations_for_product', 'get_variations_for_product');
-
 function get_variations_for_product() {
     $product_id = intval($_POST['product_id']);
     $product = wc_get_product($product_id);
@@ -1260,9 +1282,33 @@ function get_variations_for_product() {
         wp_send_json_error();
     }
 
-    $variations = $product->get_available_variations();
+    $available_variations = $product->get_available_variations();
+    $variations = [];
+
+    foreach ($available_variations as $variation_data) {
+        $variation_id = $variation_data['variation_id'];
+        $variation_obj = new WC_Product_Variation($variation_id);
+
+        // Add price_html
+        $variation_data['price_html'] = $variation_obj->get_price_html();
+
+        $variations[] = $variation_data;
+    }
+
     wp_send_json_success($variations);
 }
+
+// function get_variations_for_product() {
+//     $product_id = intval($_POST['product_id']);
+//     $product = wc_get_product($product_id);
+
+//     if (!$product || !$product->is_type('variable')) {
+//         wp_send_json_error();
+//     }
+
+//     $variations = $product->get_available_variations();
+//     wp_send_json_success($variations);
+// }
 
 add_action('wp_enqueue_scripts', 'enqueue_custom_scripts');
 function enqueue_custom_scripts() {
@@ -1366,3 +1412,20 @@ function custom_attribute_label_change( $label, $name ) {
     return $label;
 }
 
+// add_action('init', function () {
+//     if (isset($_POST['login']) && isset($_POST['username']) && isset($_POST['password'])) {
+//         $creds = array(
+//             'user_login'    => sanitize_text_field($_POST['username']),
+//             'user_password' => $_POST['password'],
+//             'remember'      => true,
+//         );
+//         $user = wp_signon($creds, false);
+
+//         if (is_wp_error($user)) {
+//             wc_add_notice($user->get_error_message(), 'error');
+//         } else {
+//             wp_redirect(home_url('/my-account/'));
+//             exit;
+//         }
+//     }
+// });

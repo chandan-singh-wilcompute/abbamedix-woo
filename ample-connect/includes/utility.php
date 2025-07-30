@@ -13,10 +13,25 @@ function get_ample_api_token($expired = false) {
 }
 
 // Handle API requests
-function ample_request($endpoint, $method = 'GET', $data = [], $headers = [], $log = false) {
+function ample_request($endpoint, $method = 'GET', $data = [], $headers = [], $log = true) {
     // echo '<pre>';
     // echo print_r($endpoint);
     // echo '</pre>';
+
+    // $backtrace = debug_backtrace();
+
+    // if (isset($backtrace[1])) {
+    //     $caller = $backtrace[1];
+
+    //     $called_from_function = $caller['function'] ?? 'N/A';
+    //     $called_from_file     = $caller['file'] ?? 'N/A';
+    //     $called_from_line     = $caller['line'] ?? 'N/A';
+
+    //     ample_connect_log("Called from function: " . $called_from_function . ", Called from file: " . $called_from_file . ", On line: " . $called_from_line);
+    // } else {
+    //     ample_connect_log("No caller found");
+    // }
+
     $response = api_call($endpoint, $method, $data, $headers, $log);
 
     
@@ -55,9 +70,9 @@ function api_call($endpoint, $method, $data, $headers, $log, $expired = false) {
         $body = $data;
 
     if ($log) {
-        my_debug_log("New Request Arrived - ");
-        my_debug_log("EndPoint: " . $endpoint);
-        my_debug_log($data);
+        ample_connect_log("New Request Arrived - ", true);
+        ample_connect_log("EndPoint: " . $endpoint, true);
+        //ample_connect_log($data, true);
     }
         
 
@@ -78,8 +93,8 @@ function api_call($endpoint, $method, $data, $headers, $log, $expired = false) {
 
 // Handle API response and check token expiry
 function handle_response($response, $log = false) {
-    if ($log)
-        my_debug_log($response);
+    // if ($log)
+    //     ample_connect_log($response, true);
 
     if (is_wp_error($response)) {
         return ['error' => $response->get_error_message()];
@@ -96,6 +111,10 @@ function handle_response($response, $log = false) {
     if ($status == "401" || (isset($body['error_code']) && $body['error_code'] == 'misc.api_user_token.expired')) {
         // return ['error' => 'Token expired. Try again.'];
         return "Token_Expired";
+    } else if (isset($body['error_code']) && $body['error_code'] == 'orders.not_found') {
+        WC()->session->__unset('cached_order_data');
+        $user_id = get_current_user_id();
+        clear_customer_cart($user_id);
     }
 
     return $body;
@@ -114,4 +133,30 @@ function custom_registration_generate_unique_username ($username)
     }
 
     return $username;
+}
+
+
+// Function to clear cart to the particular customer
+function clear_customer_cart( $customer_id ) {
+    if ( ! $customer_id ) {
+
+
+        return 0;
+    }
+
+    // Delete persistent cart stored in user meta
+    delete_user_meta( $customer_id, '_woocommerce_persistent_cart_1' );
+
+    // Delete session from WooCommerce session table
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'woocommerce_sessions';
+
+    // Delete session based on user ID (stored as session_key)
+    $wpdb->delete(
+        $table,
+        array( 'session_key' => $customer_id ),
+        array( '%s' )
+    );
+    return 1;
 }

@@ -940,13 +940,14 @@ body .elementor-button:focus {
   background: url(../healfio-child/img/trash-icon.png) 0 0 no-repeat;
   margin-bottom: 5px;
 }
-.skill-main {
+.woocommerce-cart-form .skill-main {
   padding-top: 90px;
 }
-.skill-main .skill-bar {
+.woocommerce-cart-form .skill-main .skill-bar {
   border: 0 !important;
+  border-radius: 0;
 }
-.skill-main .skill-name {
+.woocommerce-cart-form .skill-main .skill-name {
   display: flex;
   width: 100%;
   justify-content: space-between;
@@ -954,20 +955,24 @@ body .elementor-button:focus {
   font-weight: bold;
   color: white;
 }
-.skill-main .skill-per {
+.woocommerce-cart-form .skill-main .skill-per {
   border-radius: 0 !important;
+  background: #9da632;
 }
-.skill-main .skill-per:after {
+.woocommerce-cart-form .skill-main .skill-per:after {
   display: none;
 }
-.skill-main .skill-per:before {
+.woocommerce-cart-form .skill-main .skill-per:before {
   color: #A7AF39;
   margin-top: -85px;
   font-size: 32px;
   background: transparent;
   word-spacing: -8px;
-  white-space: nowrap;
+  white-space: pre;
   transform: translateX(92%);
+}
+.woocommerce-cart-form td.actions {
+  display: none;
 }
 .herocart .swiper-slide-bg {
   background-position: center bottom;
@@ -3178,7 +3183,36 @@ li.category-concentrates .swatch-item.selected {
 .woocommerce-cart-form__contents .product-subtotal {
   font-size: 32px;
 }
-
-.woocommerce .woocommerce-checkout table.shop_table .order-total th, .woocommerce .woocommerce-checkout table.shop_table .order-total td {
-  font-size: 20px;
+.fc-sidebar .skill-main {
+  padding-top: 20px;
+}
+.fc-sidebar .skill-main .skill-wrrap {
+  gap: 5px;
+}
+.fc-sidebar .skill-main .skill-bar {
+  border: 0 !important;
+  border-radius: 0;
+}
+.fc-sidebar .skill-main .skill-name {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: bold;
+}
+.fc-sidebar .skill-main .skill-per {
+  border-radius: 0 !important;
+  background: #9da632;
+}
+.fc-sidebar .skill-main .skill-per:after {
+  display: none;
+}
+.fc-sidebar .skill-main .skill-per:before {
+  color: #A7AF39;
+  margin-top: -75px;
+  font-size: 18px;
+  background: transparent;
+  word-spacing: -3px;
+  white-space: pre;
+  transform: translateX(92%);
 }

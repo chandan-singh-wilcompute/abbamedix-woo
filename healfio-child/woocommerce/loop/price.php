@@ -24,66 +24,68 @@ $currency_symbol = get_woocommerce_currency_symbol();
 ?>
 
 
-<?php
-if ($price_html = $product->get_price_html()) {
-    // Create a new DOMDocument object
-    libxml_use_internal_errors(true); // Suppress warnings
-    $dom = new DOMDocument();
-    $dom->loadHTML($price_html);
-    libxml_clear_errors(); // Clear any collected errors
-    $price_elements = $dom->getElementsByTagName('span');
-    foreach ($price_elements as $element) {
-        if ($element->getAttribute('class') === 'woocommerce-Price-currencySymbol') {
-            $price_node = $element->nextSibling;
-            $price = $price_node->nodeValue;
-            break;
+<?php 
+    $price_html = "";
+    if ( $product->is_type( 'variable' ) ) {
+        $available_variations = $product->get_available_variations();
+        $price_per_gram_list = [];
+
+        foreach ( $available_variations as $variation ) {
+            $variation_obj = new WC_Product_Variation( $variation['variation_id'] );
+            $variation_price = $variation_obj->get_price();
+            $package_size = $variation_obj->get_attribute( 'package-sizes' );
+
+            // Extract numeric value from package size (e.g., "3.5 g" → 3.5)
+
+            if (strpos($package_size, 'g') !== false) {
+                echo "Contains g";
+            }
+
+            preg_match('/[\d.]+/', $package_size, $matches);
+            $grams = isset($matches[0]) ? floatval($matches[0]) : 0;
+
+            if ( $grams > 0 ) {
+                $price_per_gram = $variation_price / $grams;
+                $price_per_gram_list[] = $price_per_gram;
+            }
         }
+
+        if ( ! empty( $price_per_gram_list ) ) {
+            $min_price = min( $price_per_gram_list );
+            $max_price = max( $price_per_gram_list );
+
+            $price_html = ( $min_price !== $max_price ) ? number_format($min_price, 2) . ' /gr – ' . number_format($max_price, 2) . ' /gr' : number_format($min_price, 2) . ' /gr';
+        } 
+
+    } else {
+        $regular_price = $product->get_price();
+        $package_size = $product->get_attribute( 'package-sizes' );
+
+        preg_match('/[\d.]+/', $package_size, $matches);
+        $grams = isset($matches[0]) ? floatval($matches[0]) : 0;
+
+        if ( $grams > 0 ) {
+            $price_per_gram = $regular_price / $grams;
+            $price_html = $price_per_gram . ' /gr';
+        }
+
     }
-}
-?>
-<?php
-$package_size_value = $product->get_attribute('package-size');
-if (!empty($package_size_value)) {
-    // Check if the string contains '|'
-    if (strpos($package_size_value, '|') !== false) {
-        // If '|' is found, split the string using '|'
-        $package_size = explode('|', $package_size_value);
-        // Assign the first part to $package_size[0]
-        $package_size_value = $package_size[0];
-    } elseif (strpos($package_size_value, ',') !== false) {
-        // If ',' is found, split the string using ','
-        $package_size = explode(',', $package_size_value);
-        // Assign the second part to $package_size[1]
-        $package_size_value = $package_size[1];
+    if ($price_html != "") {
+        $price_html = $currency_symbol . $price_html;
     }
-}
-?>
+    ?>
+    <div class="price prodcard-price" data-base-price="<?php echo $price_html; ?>">
 
-
-<?php if ( $price_html = $product->get_price_html() ) : ?>
-
-    <div class="price prodcard-price">
         <div class="productQuantity">
             <button type="button" class="btn qty-minus" onclick="decreaseQty(this)">−</button>
             <input type="number" class="quantity" value="1" min="1" onchange="updateTotal(this)">
             <button type="button" class="btn qty-plus" onclick="increaseQty(this)">+</button>
-            <input type="hidden" id="prod-cur" value="<?php echo $currency_symbol; ?>">
-            <input type="hidden" id="prod-price" value="<?php echo $price; ?>">
         </div>
 
-        <span>
-            <?php 
-                echo $currency_symbol . $price; 
-            if (isset($package_size_value) && !empty($package_size_value)) {
-                echo '/' . esc_html($package_size_value);
-            }
-            ?>
+        <span class="price-html">
+            <?php echo $price_html; ?>
         </span>
-
-</div>
-
-<?php endif; ?>
-
+    </div>
 <?php
 $link = apply_filters( 'woocommerce_loop_product_link', get_the_permalink(), $product );
 ?>
