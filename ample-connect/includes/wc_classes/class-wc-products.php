@@ -154,15 +154,15 @@ class WC_Products {
 
         // Add product image if available
         $image_url = $productData['product_image'];
-        // my_debug_log($image_url);
+        // ample_connect_log($image_url);
         if (!empty($image_url)) {
             $attachment_id = $this->download_image_to_media_library($image_url);
             if ($attachment_id) {
                 $this->attach_image_to_product($attachment_id, $product_id, true);
-                // my_debug_log("Product attached to the product");
+                // ample_connect_log("Product attached to the product");
             }
         } else {
-            my_debug_log("product image url not found : " . $productData['id'] . "\n");
+            ample_connect_log("product image url not found : " . $productData['id'] . "\n");
         }
 
         // Add attributes
@@ -238,7 +238,7 @@ class WC_Products {
         foreach ($product_level_keys as $key => $label) {
             
             if (!empty($productData[$key])) {
-                // my_debug_log("attribute found " . $label . " = " . $productData[$key] . " product id - " . $productData['id']);
+                // ample_connect_log("attribute found " . $label . " = " . $productData[$key] . " product id - " . $productData['id']);
                 $attribute = new WC_Product_Attribute();
                 $slug  = sanitize_title($label);
                 $attribute->set_name(strtoupper($slug));
@@ -308,7 +308,7 @@ class WC_Products {
             }
 
             // $net_weight = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
-            $variation->set_attributes(['pa_product-sizes' => $pack_size]);
+            $variation->set_attributes(['pa_package-sizes' => $pack_size]);
             $variation->set_weight($net_weight);
             $variation->set_sku($var_sku);
 
@@ -448,7 +448,7 @@ class WC_Products {
         // 2. Download image
         $tmp_file = download_url($image_url);
         if (is_wp_error($tmp_file)) {
-            // my_debug_log("Image download failed");
+            // ample_connect_log("Image download failed");
             error_log('Image download failed: ' . $tmp_file->get_error_message());
             return false;
         }
@@ -463,7 +463,7 @@ class WC_Products {
         if (is_wp_error($attachment_id)) {
             @unlink($tmp_file);
             error_log('Image upload failed: ' . $attachment_id->get_error_message());
-            // my_debug_log("Image upload failed");
+            // ample_connect_log("Image upload failed");
             return false;
         }
     

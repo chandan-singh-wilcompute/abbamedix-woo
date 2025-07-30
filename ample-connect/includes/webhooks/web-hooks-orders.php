@@ -16,8 +16,8 @@ add_action('rest_api_init', function() {
 function handle_orders_webhook(WP_REST_Request $request) {
     $data = $request->get_json_params();
     $jsonData = json_encode($data, JSON_PRETTY_PRINT);
-    my_debug_log("order webhook received");
-    my_debug_log($jsonData);
+    // ample_connect_log("order webhook received");
+    // ample_connect_log($jsonData);
 
     if (!validate_webhook_request_params($data)) {
         return new WP_REST_Response(array("message" => "Missing Required Data!"), 200);
@@ -138,30 +138,30 @@ function handle_orders_webhook(WP_REST_Request $request) {
     return new WP_REST_Response('Webhook received but nothing to do!', 200);
 }
 
-// Function to clear cart to the particular customer
-function clear_customer_cart( $customer_id ) {
-    if ( ! $customer_id ) {
+// // Function to clear cart to the particular customer
+// function clear_customer_cart( $customer_id ) {
+//     if ( ! $customer_id ) {
 
 
-        return 0;
-    }
+//         return 0;
+//     }
 
-    // Delete persistent cart stored in user meta
-    delete_user_meta( $customer_id, '_woocommerce_persistent_cart_1' );
+//     // Delete persistent cart stored in user meta
+//     delete_user_meta( $customer_id, '_woocommerce_persistent_cart_1' );
 
-    // Delete session from WooCommerce session table
-    global $wpdb;
+//     // Delete session from WooCommerce session table
+//     global $wpdb;
 
-    $table = $wpdb->prefix . 'woocommerce_sessions';
+//     $table = $wpdb->prefix . 'woocommerce_sessions';
 
-    // Delete session based on user ID (stored as session_key)
-    $wpdb->delete(
-        $table,
-        array( 'session_key' => $customer_id ),
-        array( '%s' )
-    );
-    return 1;
-}
+//     // Delete session based on user ID (stored as session_key)
+//     $wpdb->delete(
+//         $table,
+//         array( 'session_key' => $customer_id ),
+//         array( '%s' )
+//     );
+//     return 1;
+// }
 
 // Function to check if order item entry is there into the changes
 function check_for_order_item ($changes) {

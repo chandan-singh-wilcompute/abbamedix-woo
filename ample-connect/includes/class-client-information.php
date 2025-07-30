@@ -4,21 +4,13 @@ if (!defined('ABSPATH')) {
 }
 
 class  Client_Information {
-    /* Class to hold and return Client's information
+    /* Class to fetch and cache Client's information
         related to orders
     */
 
-    private static $available_to_order = null;
-    private static $client_id = null;
-    private static $credit_cards = null;
-    private static $status = null;
-
-    private static function fetch_information() {
+    public static function fetch_information() {
         
         if (!is_user_logged_in()) {
-            self::$available_to_order = null;
-            self::$client_id = null;
-            self::$credit_cards = null;
             return false;
         }
 
@@ -37,69 +29,26 @@ class  Client_Information {
             return false;
         }
 
-        self::$client_id = $client['id'];
         $prescriptions = $client['prescriptions'];
+        $available_to_order = 0;
         foreach ($prescriptions as $prescription) {
             if ($prescription['is_current'] == 1) {
-                self::$available_to_order = $prescription['available_to_order'];
+                $available_to_order = $prescription['available_to_order'];
                 break;
             }
-        }   
+        }  
+        Ample_Session_Cache::set('available_to_order', $available_to_order);
+    
         
-        self::$credit_cards = $client['credit_cards'];
+        $credit_cards = $client['credit_cards'];
+        Ample_Session_Cache::set('credit_cards', $credit_cards);
 
         // Fetching registration
         $registration = $client['registration'];
-        self::$status = $registration['status'];
+        $status = $registration['status'];
+        Ample_Session_Cache::set('status', $status);
 
         return true;
-    }
-
-    /**
-     * Get the available_to_order value
-     * 
-     * @return mixed The available_to_order value or null if not set
-     */
-    public static function get_available_to_order() {
-        if (self::$available_to_order === null) {
-            self::fetch_information();
-        }
-        
-        return self::$available_to_order;
-    }
-
-    /**
-     * Get the client_id value
-     * 
-     * @return mixed The client_id value or null if not set
-     */
-    public static function get_client_id() {
-        if (self::$client_id === null) {
-            self::fetch_information();
-        }
-        
-        return self::$client_id;
-    }
-
-    /**
-     * Get the credit_card_token_id value
-     * 
-     * @return mixed The credit_card_token_id value or null if not set
-     */
-    public static function get_credit_cards() {
-        if (self::$credit_cards === null or empty(self::$credit_cards)) {
-            self::fetch_information();
-        }
-        //self::fetch_information();
-        return self::$credit_cards;
-    }
-
-    public static function get_status() {
-        if (self::$status === null) {
-            self::fetch_information();
-        }
-        //self::fetch_information();
-        return self::$status;
     }
 
 }

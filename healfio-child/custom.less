@@ -1176,39 +1176,50 @@ body .elementor-button:focus {
   }
 }
 
-.skill-main {
+.woocommerce-cart-form {
 
-  padding-top: 90px;
+  .skill-main {
 
-  .skill-bar {
-    border: 0 !important;
-  }
+    padding-top: 90px;
 
-  .skill-name {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    font-size: 33px;
-    font-weight: bold;
-    color: white;
-  }
-
-  .skill-per {
-    border-radius: 0 !important;
-    &:after {
-      display: none;
+    .skill-bar {
+      border: 0 !important;
+      border-radius: 0;
     }
 
-    &:before {
-      color: @secondryGreen;
-      margin-top: -85px;
-      font-size: 32px;
-      background: transparent;
-      word-spacing: -8px;
-      white-space: nowrap;
-      transform: translateX(92%);
+    .skill-name {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      font-size: 33px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .skill-per {
+      border-radius: 0 !important;
+      background: #9da632;
+
+      &:after {
+        display: none;
+      }
+
+      &:before {
+        color: @secondryGreen;
+        margin-top: -85px;
+        font-size: 32px;
+        background: transparent;
+        word-spacing: -8px;
+        white-space: pre;
+        transform: translateX(92%);
+      }
     }
   }
+
+  td.actions {
+    display: none;
+  }
+
 }
 
 .herocart {
@@ -3958,5 +3969,48 @@ li {
 
   .product-subtotal {
     font-size: 32px;
+  }
+}
+
+.fc-sidebar {
+  .skill-main {
+
+    padding-top: 20px;
+
+    .skill-wrrap {
+      gap: 5px;
+    }
+
+    .skill-bar {
+      border: 0 !important;
+      border-radius: 0;
+    }
+
+    .skill-name {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .skill-per {
+      border-radius: 0 !important;
+      background: #9da632;
+
+      &:after {
+        display: none;
+      }
+
+      &:before {
+        color: @secondryGreen;
+        margin-top: -75px;
+        font-size: 18px;
+        background: transparent;
+        word-spacing: -3px;
+        white-space: pre;
+        transform: translateX(92%);
+      }
+    }
   }
 }

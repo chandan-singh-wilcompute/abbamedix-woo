@@ -15,17 +15,17 @@ jQuery(document).ready(function($) {
         toggleProductSyncTimeField();
     });
 
-    // let product_batch_count = 1;
+    //let product_batch_count = 1;
     let num_of_products = 0;
     $('#product_fetch_and_sync').on('click', function () {
         $.post(ajaxurl, {
             action: 'fetch_and_store_product_data'
         }, function(response) {
             if (response.success) {
-                console.log(response.data);
+                //console.log(response.data);
                 console.log('Data saved. Starting batch processing...');
                 num_of_products = 0;
-                // product_batch_count = 1;
+                //product_batch_count = 1;
                 runBatch(); // this function calls the batch processor via AJAX
             } else {
                 alert('Error: ' + response.data);
@@ -40,7 +40,7 @@ jQuery(document).ready(function($) {
         }, function(response) {
             console.log(response.data);
             num_of_products = num_of_products + 50;
-            // if(product_batch_count == 3) {
+            // if(product_batch_count == 4) {
             //     alert('All products processed! Total products = ' + num_of_products );
             //     return;
             // } else {

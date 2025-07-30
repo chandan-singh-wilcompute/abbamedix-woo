@@ -15,8 +15,13 @@ if (!defined('ABSPATH')) {
 }
 
 // Custom Log Function
-function my_debug_log($message) {
-    $file = WP_CONTENT_DIR . '/my-debug.log'; // Path to the custom log file
+function ample_connect_log($message, $api=false) {
+    if ($api) {
+        $file = WP_CONTENT_DIR . '/ample-api-log.log';
+    } else {
+        $file = WP_CONTENT_DIR . '/ample-log.log'; // Path to the custom log file
+    }
+    
     $timestamp = date('Y-m-d H:i:s'); // Optional: Add a timestamp
 
     if (is_array($message) || is_object($message)) {
@@ -45,6 +50,7 @@ define('AMPLE_CONNECT_WOO_ORDER_URL', AMPLE_CONNECT_API_BASE_URL . '/integration
 
 // Include the main plugin class. 
 require_once plugin_dir_path(__FILE__) . 'includes/utility.php';
+require_once plugin_dir_path(__FILE__) . 'includes/class-ample-session.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-ample-connect.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-ample-token-manager.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-client-information.php';
@@ -60,12 +66,12 @@ function ample_connect_include_functions() {
     require_once plugin_dir_path(__FILE__) . 'includes/product-restrictions.php';
     require_once plugin_dir_path(__FILE__) . 'includes/webhooks/web-hooks-products.php';
     require_once plugin_dir_path(__FILE__) . 'includes/webhooks/web-hooks-clients.php';
-    require_once plugin_dir_path(__FILE__) . 'includes/custom-shipping.php';
     require_once plugin_dir_path(__FILE__) . 'includes/wc_classes/class-wc-orders.php';
     require_once plugin_dir_path(__FILE__) . 'includes/wc-order-hooks.php';
     require_once plugin_dir_path(__FILE__) . 'includes/order-tracking-display.php';
     require_once plugin_dir_path(__FILE__) . 'includes/admin/order-tracking-admin.php';
     require_once plugin_dir_path(__FILE__) . 'includes/webhooks/web-hooks-orders.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/custom-shipping.php';
     //require_once plugin_dir_path(__FILE__) . 'includes/custom-payment.php';
 }
 

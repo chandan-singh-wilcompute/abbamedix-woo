@@ -157,9 +157,9 @@ do_action( 'woocommerce_before_cart' ); ?>
 					<div class="skill-main">
 						<div class="skill-wrrap">
 							<div class="skill-bar">
-								<div class="skill-per" data-min="0" data-per="30" data-max="150" style="width:30%"></div>
+								<div class="skill-per" data-min="0" data-per="" data-max="" style=""></div>
 							</div>
-							<div class="skill-name"><span class="gr">0&nbsp;gr </span><span class="gr">150&nbsp;gr</span></div>
+							<div class="skill-name"><span class="gr max"></span><span class="gr min">0&nbsp;gr</span></div>
 						</div>
 					</div>
 				</td>
@@ -197,7 +197,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 <?php do_action( 'woocommerce_after_cart' ); ?>
 <script>
-        document.querySelectorAll('.product-quantity').forEach(function(quantityWrapper) {
+    document.querySelectorAll('.product-quantity').forEach(function(quantityWrapper) {
         const quantityNumber = quantityWrapper.querySelector('.quantity-number');
         const minusButton = quantityWrapper.querySelector('.quantity-minus');
         const plusButton = quantityWrapper.querySelector('.quantity-plus');
@@ -234,8 +234,8 @@ do_action( 'woocommerce_before_cart' ); ?>
             }
             updateQuantity(); 
         });
-
-        
-        // updateQuantity();
     });
+
+	
+
 </script>

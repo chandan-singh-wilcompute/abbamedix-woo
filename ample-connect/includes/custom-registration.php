@@ -35,7 +35,8 @@ function custom_registration_enqueue_scripts() {
 
         // // Get the client_id from user meta
         // $client_id = get_user_meta($current_user_id, 'client_id', true);
-        $status = Client_Information::get_status();
+        // $status = Client_Information::get_status();
+        $status = Ample_Session_Cache::get('status');
 
         // Localize the script with ajax_url and client_id
         wp_localize_script('custom-order', 'custom_order', array(

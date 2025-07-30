@@ -116,66 +116,7 @@ jQuery(document).ready(function($) {
     }
 });
 
-jQuery(document.body).on('removed_from_cart updated_cart_totals', function () {
+
+jQuery(document.body).on('updated_cart_totals', function () {
     location.reload();
-});
-
-
-document.addEventListener('DOMContentLoaded', function () {
-    // var totalPackageSizeElement = document.getElementById('total-package-size');
-    // var availableToOrderElement = document.getElementById('available-to-order');
-
-    
-    // if (totalPackageSizeElement && availableToOrderElement) {
-    //     var totalPackageSize = parseFloat(totalPackageSizeElement.innerText);
-    //     var availableToOrder = parseFloat(availableToOrderElement.innerText);
-
-    //     console.log("Total package size: ", totalPackageSize);
-    //     console.log("Available to order: ", availableToOrder);
-
-    //     // Calculate the total package size including the available to order value
-    //     // var maxPackageSize = 150; // Set the maximum value as needed
-    //     var totalPackageSizeWithAvailable = totalPackageSize + availableToOrder;
-
-    //     // Calculate percentage based on total package size and max value
-    //     var percentage = (totalPackageSize / totalPackageSizeWithAvailable) * 100;
-
-    //     // Update the skill bar
-    //     var skillPerElement = document.querySelector('.skill-per');
-    //     skillPerElement.style.width = percentage + '%';
-    //     skillPerElement.setAttribute('data-per', totalPackageSize);
-
-    //     // Update the skill name
-    //     var skillNameElement = document.querySelector('.skill-name');
-    //     skillNameElement.innerHTML = totalPackageSize + ' / gr <span style="float: inline-end;">' + totalPackageSizeWithAvailable + ' / gr</span>';
-    // }
-
-    // Get all cart item rows
-    const cartRows = document.querySelectorAll('tr.woocommerce-cart-form__cart-item');
-
-    let total = 0;
-
-    cartRows.forEach(row => {
-        // Get the package size text (e.g. "8.4 g")
-        const packageSizeEl = row.querySelector('.variation-PackageSize p');
-        const packageSizeText = packageSizeEl ? packageSizeEl.textContent.trim() : '';
-        const packageSize = parseFloat(packageSizeText); // Convert "8.4 g" -> 8.4
-
-        // Get the quantity input value
-        const qtyInput = row.querySelector('.product-quantity input.qty');
-        const quantity = qtyInput ? parseInt(qtyInput.value, 10) : 0;
-
-        // If both values are valid numbers, multiply them
-        if (!isNaN(packageSize) && !isNaN(quantity)) {
-            total += packageSize * quantity;
-        }
-    });
-
-    var percentage = (total / 150) * 100;
-
-    // Update the skill bar
-    var skillPerElement = document.querySelector('.skill-per');
-    skillPerElement.style.width = percentage + '%';
-    skillPerElement.setAttribute('data-per', total);
-    console.log("Total sum (package size × quantity for all items):", total);
 });

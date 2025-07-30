@@ -102,9 +102,6 @@
 						<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
 						 width="" height="19px" viewBox="0 0 1280.000000 972.000000"
 						 preserveAspectRatio="xMidYMid meet">
-						<metadata>
-						Created by potrace 1.15, written by Peter Selinger 2001-2017
-						</metadata>
 						<g transform="translate(0.000000,972.000000) scale(0.100000,-0.100000)"
 						fill="#e1d77b" stroke="none">
 						<path d="M0 5455 l0 -4265 1944 0 1944 0 -53 -122 c-129 -299 -198 -603 -220
@@ -124,7 +121,7 @@
 					?>
 					<div class="header-call">
 						<a class="menu-item " href="<?php bloginfo('url'); ?>/contact-us"><svg width="" height="22px" viewBox="0 0 28 28" version="1.1" 
-							 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+							xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 						
 						<title>ic_fluent_phone_28_regular</title>
 						<desc>Created with Sketch.</desc>
@@ -142,25 +139,32 @@
 						<a class="menu-item " href="<?php bloginfo('url'); ?>/my-account/">
 						    <svg width="" height="22px" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="#FFFFFFB8"><path d="M16 7.992C16 3.58 12.416 0 8 0S0 3.58 0 7.992c0 2.43 1.104 4.62 2.832 6.09.016.016.032.016.032.032.144.112.288.224.448.336.08.048.144.111.224.175A7.98 7.98 0 0 0 8.016 16a7.98 7.98 0 0 0 4.48-1.375c.08-.048.144-.111.224-.16.144-.111.304-.223.448-.335.016-.016.032-.016.032-.032 1.696-1.487 2.8-3.676 2.8-6.106zm-8 7.001c-1.504 0-2.88-.48-4.016-1.279.016-.128.048-.255.08-.383a4.17 4.17 0 0 1 .416-.991c.176-.304.384-.576.64-.816.24-.24.528-.463.816-.639.304-.176.624-.304.976-.4A4.15 4.15 0 0 1 8 10.342a4.185 4.185 0 0 1 2.928 1.166c.368.368.656.8.864 1.295.112.288.192.592.24.911A7.03 7.03 0 0 1 8 14.993zm-2.448-7.4a2.49 2.49 0 0 1-.208-1.024c0-.351.064-.703.208-1.023.144-.32.336-.607.576-.847.24-.24.528-.431.848-.575.32-.144.672-.208 1.024-.208.368 0 .704.064 1.024.208.32.144.608.336.848.575.24.24.432.528.576.847.144.32.208.672.208 1.023 0 .368-.064.704-.208 1.023a2.84 2.84 0 0 1-.576.848 2.84 2.84 0 0 1-.848.575 2.715 2.715 0 0 1-2.064 0 2.84 2.84 0 0 1-.848-.575 2.526 2.526 0 0 1-.56-.848zm7.424 5.306c0-.032-.016-.048-.016-.08a5.22 5.22 0 0 0-.688-1.406 4.883 4.883 0 0 0-1.088-1.135 5.207 5.207 0 0 0-1.04-.608 2.82 2.82 0 0 0 .464-.383 4.2 4.2 0 0 0 .624-.784 3.624 3.624 0 0 0 .528-1.934 3.71 3.71 0 0 0-.288-1.47 3.799 3.799 0 0 0-.816-1.199 3.845 3.845 0 0 0-1.2-.8 3.72 3.72 0 0 0-1.472-.287 3.72 3.72 0 0 0-1.472.288 3.631 3.631 0 0 0-1.2.815 3.84 3.84 0 0 0-.8 1.199 3.71 3.71 0 0 0-.288 1.47c0 .352.048.688.144 1.007.096.336.224.64.4.927.16.288.384.544.624.784.144.144.304.271.48.383a5.12 5.12 0 0 0-1.04.624c-.416.32-.784.703-1.088 1.119a4.999 4.999 0 0 0-.688 1.406c-.016.032-.016.064-.016.08C1.776 11.636.992 9.91.992 7.992.992 4.14 4.144.991 8 .991s7.008 3.149 7.008 7.001a6.96 6.96 0 0 1-2.032 4.907z"/></svg>
 						</a>
-                        <ul class="dropdown-menu">
-                            <li><a href="<?php bloginfo('url'); ?>/my-account/">My Profile</a></li>
-                            <li><a href="<?php bloginfo('url'); ?>/my-account/orders/">My Order</a></li>
-                            <!-- <li>
-                                <a href="/ecommerce-test-api/my-account/view-order/">My Order Status</a>
-                                <?php //
-                                    //$hreff = esc_url( home_url( '/my-account/view-order/' . $order->id ) );
-                                    //$button_html = '<a href="' . $hreff . '" class="button check-status thankyou-button">' . esc_html__( 'Check Status', 'woocommerce' ) . '</a>';
-                                    //echo $button_html;
-                                ?>
-                            </li> -->
-                            <li><a href="<?php echo wp_logout_url( home_url() ); ?>">Logout</a></li>
-                        </ul>
+            <ul class="dropdown-menu">
+              <?php if (is_user_logged_in()) : ?>
+                  <li><a href="<?php echo esc_url(home_url('/my-account/')); ?>">My Profile</a></li>
+                  <li><a href="<?php echo esc_url(home_url('/my-account/orders/')); ?>">My Orders</a></li>
+                  <!-- Example: Future implementation for order status
+                  <li>
+                      <?php
+                      // $hreff = esc_url(home_url('/my-account/view-order/' . $order->id));
+                      // echo '<a href="' . $hreff . '" class="button check-status thankyou-button">Check Status</a>';
+                      ?>
+                  </li>
+                  -->
+                  <li><a href="<?php echo esc_url(wp_logout_url(home_url())); ?>">Logout</a></li>
+              <?php else : ?>
+                  <li><a href="<?php echo esc_url(home_url('/my-account/')); ?>">Login</a></li>
+              <?php endif; ?>
+          </ul>
 					</div>
 					<div class="header-cart-icon"><?php woo_cart_but(); ?></div>
 					<div>
 						<?php echo do_shortcode('[gtranslate]'); ?>
 					</div>
 				</div>
+        <?php if (is_user_logged_in()) : ?>
+        <div id="rx-dedu-info" style="color:#ceb323;margin-left:10px;margin-top:70px;z-index:9999;width:45px;"></div>
+        <?php endif; ?>
 			<?php
 
             $h_cta_btn_switcher = get_theme_mod('h_cta_btn_switcher', false);
@@ -415,74 +419,72 @@
   // ON shop all category
 
   document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.labelGroup').forEach(labelGroup => {
-    const checkAll = labelGroup.querySelector('.inputCheckAll');
-    const checkboxes = labelGroup.querySelectorAll('.inputCheck');
+    document.querySelectorAll('.labelGroup').forEach(labelGroup => {
+      const checkAll = labelGroup.querySelector('.inputCheckAll');
+      const checkboxes = labelGroup.querySelectorAll('.inputCheck');
 
-    if (checkAll && checkboxes.length) {
-      // When "Check All" is toggled
-      checkAll.addEventListener('change', () => {
+      if (checkAll && checkboxes.length) {
+        // When "Check All" is toggled
+        checkAll.addEventListener('change', () => {
+          checkboxes.forEach(cb => {
+            cb.checked = checkAll.checked;
+          });
+        });
+
+        // If any individual checkbox changes
         checkboxes.forEach(cb => {
-          cb.checked = checkAll.checked;
+          cb.addEventListener('change', () => {
+            const allChecked = Array.from(checkboxes).every(box => box.checked);
+            checkAll.checked = allChecked;
+          });
         });
-      });
-
-      // If any individual checkbox changes
-      checkboxes.forEach(cb => {
-        cb.addEventListener('change', () => {
-          const allChecked = Array.from(checkboxes).every(box => box.checked);
-          checkAll.checked = allChecked;
-        });
-      });
-    }
+      }
+    });
   });
-});
 
-// Product Category filter Form
-const siteBaseURL = "<?php echo esc_url(site_url()); ?>";
-const form = document.getElementById('product-category-filter-form');
-form.addEventListener('submit', function (e) {
-  e.preventDefault();
-    // const checked = Array.from(document.querySelectorAll('input[name="categories[]"]:checked'));
-    const checked = Array.from(document.querySelectorAll('input:checked'));
-    if (checked.length === 0) {
-        alert('Please select at least one category.');
-        return;
-    }
-
-    const slugs = checked.map(cb => cb.value).join('+');
-
-    // Redirect to pretty URL
-    window.location.href = `${siteBaseURL}/product-filter/${slugs}/`;
-});
-
-
-// Featured Category filter form
-(function () {
-  // Only set if not already defined
-  window.siteBaseURL = window.siteBaseURL || "<?php echo esc_url(site_url()); ?>";
-
-  const form = document.getElementById('featured-category-filter-form');
-
-  // Only proceed if form exists
-  if (!form) return;
-
+  // Product Category filter Form
+  const siteBaseURL = "<?php echo esc_url(site_url()); ?>";
+  const form = document.getElementById('product-category-filter-form');
   form.addEventListener('submit', function (e) {
     e.preventDefault();
+      // const checked = Array.from(document.querySelectorAll('input[name="categories[]"]:checked'));
+      const checked = Array.from(document.querySelectorAll('input:checked'));
+      if (checked.length === 0) {
+          alert('Please select at least one category.');
+          return;
+      }
 
-    const checked = Array.from(document.querySelectorAll('input:checked'));
+      const slugs = checked.map(cb => cb.value).join('+');
 
-    if (checked.length === 0) {
-      alert('Please select at least one category.');
-      return;
-    }
-
-    const slugs = checked.map(cb => cb.value).join('+');
-
-    window.location.href = `${siteBaseURL}/product-filter/${slugs}/`;
+      // Redirect to pretty URL
+      window.location.href = `${siteBaseURL}/product-filter/${slugs}/`;
   });
-})();
 
+  // Featured Category filter form
+  (function () {
+    // Only set if not already defined
+    window.siteBaseURL = window.siteBaseURL || "<?php echo esc_url(site_url()); ?>";
+
+    const form = document.getElementById('featured-category-filter-form');
+
+    // Only proceed if form exists
+    if (!form) return;
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const checked = Array.from(document.querySelectorAll('input:checked'));
+
+      if (checked.length === 0) {
+        alert('Please select at least one category.');
+        return;
+      }
+
+      const slugs = checked.map(cb => cb.value).join('+');
+
+      window.location.href = `${siteBaseURL}/product-filter/${slugs}/`;
+    });
+  })();
 
 </script>
 

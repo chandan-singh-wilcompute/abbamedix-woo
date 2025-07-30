@@ -861,6 +861,11 @@ a.page-numbers {
     border-radius: 0;
 }
 
+.woocommerce .woocommerce-checkout table.shop_table .order-total th, 
+.woocommerce .woocommerce-checkout table.shop_table .order-total td {
+    font-size: 20px;
+}
+
 @media screen and (min-width: 1200px) {
   .primary-menu.navbar .dropdown-menu {
     box-shadow: none;
@@ -914,4 +919,12 @@ a.page-numbers {
   .woocommerce ul.products li.product, .woocommerce-page ul.products li.product {
     justify-content: flex-start;
   }
+}
+
+.skill-per::before {
+    content:  attr(data-per) '        gr         remaining' !important;
+}
+
+.skill-per.skill-second::before {
+    content:  attr(data-per) '   gr   remaining' !important;
 }
