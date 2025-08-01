@@ -37,9 +37,9 @@ $currency_symbol = get_woocommerce_currency_symbol();
 
             // Extract numeric value from package size (e.g., "3.5 g" → 3.5)
 
-            if (strpos($package_size, 'g') !== false) {
-                echo "Contains g";
-            }
+            // if (strpos($package_size, 'g') !== false) {
+            //     echo "Contains g";
+            // }
 
             preg_match('/[\d.]+/', $package_size, $matches);
             $grams = isset($matches[0]) ? floatval($matches[0]) : 0;
@@ -89,19 +89,3 @@ $currency_symbol = get_woocommerce_currency_symbol();
 <?php
 $link = apply_filters( 'woocommerce_loop_product_link', get_the_permalink(), $product );
 ?>
-
-<?php 
-   
-    // echo '<div class="cardFooter">';
-    // echo '  <div class="addtoCart">
-    //             <label>Select Size</label>
-    //             <div class="productQuantity">
-    //                 <button type="button" class="btn minusQuantity">−</button>
-    //                 <input type="number" class="quantity" value="1" min="1">
-    //                 <button type="button" class="btn addQuantity">+</button>
-    //             </div>
-    //         </div>';
-    // echo '  <a href="' . esc_url($link) . '">More Info</a>';
-    // echo '</div>';
-?>
-

@@ -90,7 +90,7 @@ $shipping_address    = get_user_meta($user_id, 'shipping_address', true); // Or 
 				<h5 class="mt-0">ORDER HISTORY</h5>
 				
 				<div class="prescription-wrapper">
-					<div class="white-card">
+					<!-- <div class="white-card">
 						<div>
 							<strong>Physician name:</strong> Karen Wallace<br>
 							<strong>End Date:</strong> 2025-09-06<br>
@@ -149,7 +149,8 @@ $shipping_address    = get_user_meta($user_id, 'shipping_address', true); // Or 
 						<div class="card-col-right" >
 							<span class="badge-inactive">ACTIVE</span>
 						</div>
-					</div>													
+					</div>-->
+					<?php echo do_shortcode('[user_order_history]') ;?>	
 				</div>
 			</div>
 		</div>

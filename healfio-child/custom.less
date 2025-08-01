@@ -592,6 +592,44 @@ body .elementor-button:focus {
       font-weight: bold;
     }
   }
+
+  table {
+    thead {
+      background-color: #9da632;
+      color: white;
+      font-size: 14px;
+    }
+    
+    tbody,
+    tfoot {
+      background-color: #e8e8e8;
+    }
+
+    thead td,
+    tbody td {
+      border: 1px solid white;
+      font-size: 14px;
+    }
+
+    tr {
+      td:last-child {
+        text-align: center;
+        a {
+          padding: 5px;
+          background-color: #007876;
+          color: @white;
+          font-size: 12px;
+          text-align: center;
+          display: block;
+
+          &:hover {
+            background: #32350A;
+            color: @white;
+          }
+        }
+      }
+    }
+  }
 }
 
 .orderHistory {
@@ -654,7 +692,7 @@ body .elementor-button:focus {
   &.loginBanner {
     background: url(../healfio-child/img/login-banner.jpg) center center no-repeat;
     background-size: cover;
-    margin-top: 100px;
+    // margin-top: 100px;
 
     h1 {
       text-transform: uppercase;
@@ -2888,7 +2926,7 @@ input[type=number] {
     grid-column-gap: 48px;
     grid-row-gap: 48px;
 
-    padding: 30px 0 !important;
+    padding: 20px 0 50px !important;
 
     &:before,
     &:after {
@@ -2904,11 +2942,23 @@ input[type=number] {
 
   }
 
+
+  .productTopbar {
+    display: flex;
+    justify-content: space-between;
+
+    .woocommerce-ordering {
+      float: none;
+    }
+  }
+
   .titleWrapper {
     background-color: #1b5d72;
-    
-    margin-bottom: 20px;
-    padding: 15px 0;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px 0;
+    max-width: 1458px;
+    margin: 15px 0 10px;
 
     .container-fluid {
       display: flex;
@@ -2946,10 +2996,10 @@ input[type=number] {
       text-transform: capitalize;
       margin: 0;
       font-family: @Comfortaa;
-      font-size: 45px;
+      font-size: 20px;
       font-weight: bold;
       color: #FFFFFF;
-      line-height: 45px;
+      line-height: 20px;
     }
   }
 }
@@ -4014,3 +4064,26 @@ li {
     }
   }
 }
+
+.navbar-collapse {
+  position: relative;
+}
+
+.rxDeduInfo {
+  position: absolute;
+  right: -210px;
+  top: 15px;
+  color: @white;
+  white-space: nowrap;
+  width: 200px;
+  text-align: left;
+  z-index: 2;
+  font-size: 18px;
+  letter-spacing: -1px;
+
+  @media screen and (max-width: 768px){
+    position: static;
+    width: auto;
+  }
+}
+
