@@ -161,10 +161,11 @@
 					<div>
 						<?php echo do_shortcode('[gtranslate]'); ?>
 					</div>
+          <?php if (is_user_logged_in()) : ?>
+            <div id="rx-dedu-info" class="rxDeduInfo"></div>
+          <?php endif; ?>
 				</div>
-        <?php if (is_user_logged_in()) : ?>
-        <div id="rx-dedu-info" style="color:#ceb323;margin-left:10px;margin-top:70px;z-index:9999;width:45px;"></div>
-        <?php endif; ?>
+       
 			<?php
 
             $h_cta_btn_switcher = get_theme_mod('h_cta_btn_switcher', false);

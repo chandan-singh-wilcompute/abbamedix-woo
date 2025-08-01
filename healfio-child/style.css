@@ -487,15 +487,14 @@ td.product-remove a {
 
 .prescription-wrapper {
     overflow-y: scroll;
-    height: 694px;
+    height: 670px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
     background-color: white;
     font-size: 16px;
-    border-bottom: solid 10px white;
-    border-top: solid 10px white;
-    padding: 0 15px;
+    border: solid 10px white;
+    padding-right: 10px;
+    border-right: 5px;
 }
 
 .card-col-right {

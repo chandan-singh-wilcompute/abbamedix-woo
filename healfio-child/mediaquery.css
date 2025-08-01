@@ -419,6 +419,21 @@
   h5 {
     font-size: 25px;
   }
+  .featuredFilterResultWrapper .titleWrapper,
+  .productFilterResultWrapper .titleWrapper,
+  .viewAllProducts .titleWrapper {
+    padding: 5px 0;
+  }
+  .featuredFilterResultWrapper .titleWrapper h5,
+  .productFilterResultWrapper .titleWrapper h5,
+  .viewAllProducts .titleWrapper h5 {
+    font-size: 20px;
+  }
+  .featuredFilterResultWrapper .productTopbar,
+  .productFilterResultWrapper .productTopbar,
+  .viewAllProducts .productTopbar {
+    flex-direction: column;
+  }
 }
 @media (max-width: 570px) {
   #pr-nav {

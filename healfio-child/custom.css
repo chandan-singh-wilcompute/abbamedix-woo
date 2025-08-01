@@ -493,6 +493,35 @@ body .elementor-button:focus {
   margin-top: 10px;
   font-weight: bold;
 }
+.scriptHistoryWrapper table thead {
+  background-color: #9da632;
+  color: white;
+  font-size: 14px;
+}
+.scriptHistoryWrapper table tbody,
+.scriptHistoryWrapper table tfoot {
+  background-color: #e8e8e8;
+}
+.scriptHistoryWrapper table thead td,
+.scriptHistoryWrapper table tbody td {
+  border: 1px solid white;
+  font-size: 14px;
+}
+.scriptHistoryWrapper table tr td:last-child {
+  text-align: center;
+}
+.scriptHistoryWrapper table tr td:last-child a {
+  padding: 5px;
+  background-color: #007876;
+  color: #ffffff;
+  font-size: 12px;
+  text-align: center;
+  display: block;
+}
+.scriptHistoryWrapper table tr td:last-child a:hover {
+  background: #32350A;
+  color: #ffffff;
+}
 .orderHistory h1 {
   margin-bottom: 20px;
 }
@@ -536,7 +565,6 @@ body .elementor-button:focus {
 .innerBanner.loginBanner {
   background: url(../healfio-child/img/login-banner.jpg) center center no-repeat;
   background-size: cover;
-  margin-top: 100px;
 }
 .innerBanner.loginBanner h1 {
   text-transform: uppercase;
@@ -2308,7 +2336,7 @@ input[type=number] {
   grid-template-columns: repeat(4, 1fr);
   grid-column-gap: 48px;
   grid-row-gap: 48px;
-  padding: 30px 0 !important;
+  padding: 20px 0 50px !important;
 }
 .featuredFilterResultWrapper .products:before,
 .productFilterResultWrapper .products:before,
@@ -2326,12 +2354,26 @@ input[type=number] {
   width: auto !important;
   padding: 0 !important;
 }
+.featuredFilterResultWrapper .productTopbar,
+.productFilterResultWrapper .productTopbar,
+.viewAllProducts .productTopbar {
+  display: flex;
+  justify-content: space-between;
+}
+.featuredFilterResultWrapper .productTopbar .woocommerce-ordering,
+.productFilterResultWrapper .productTopbar .woocommerce-ordering,
+.viewAllProducts .productTopbar .woocommerce-ordering {
+  float: none;
+}
 .featuredFilterResultWrapper .titleWrapper,
 .productFilterResultWrapper .titleWrapper,
 .viewAllProducts .titleWrapper {
   background-color: #1b5d72;
-  margin-bottom: 20px;
-  padding: 15px 0;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px 0;
+  max-width: 1458px;
+  margin: 15px 0 10px;
 }
 .featuredFilterResultWrapper .titleWrapper .container-fluid,
 .productFilterResultWrapper .titleWrapper .container-fluid,
@@ -2375,10 +2417,10 @@ input[type=number] {
   text-transform: capitalize;
   margin: 0;
   font-family: "Comfortaa", sans-serif;
-  font-size: 45px;
+  font-size: 20px;
   font-weight: bold;
   color: #FFFFFF;
-  line-height: 45px;
+  line-height: 20px;
 }
 .featuredFilterResultWrapper .productFilter,
 .productFilterResultWrapper .productFilter {
@@ -3215,4 +3257,25 @@ li.category-concentrates .swatch-item.selected {
   word-spacing: -3px;
   white-space: pre;
   transform: translateX(92%);
+}
+.navbar-collapse {
+  position: relative;
+}
+.rxDeduInfo {
+  position: absolute;
+  right: -210px;
+  top: 15px;
+  color: #ffffff;
+  white-space: nowrap;
+  width: 200px;
+  text-align: left;
+  z-index: 2;
+  font-size: 18px;
+  letter-spacing: -1px;
+}
+@media screen and (max-width: 768px) {
+  .rxDeduInfo {
+    position: static;
+    width: auto;
+  }
 }
