@@ -288,14 +288,7 @@ function custom_product_filter_results_shortcode() {
         $formatted .= '.....';
     }
 
-    echo '<div class="titleWrapper">
-                <div class="container-fluid">
-                    <a id="goback" class="backBtn">
-                    Back
-                </a>
-                <h5>' . esc_html($formatted) . '</h5>
-                </div>
-            </div>';
+    
 
     if (empty($search_term)) {
         return '<div class="container text-white pt-5 pb-5" style="min-height:500px">Please select a category to view products.</div>';
@@ -385,6 +378,7 @@ function custom_product_filter_results_shortcode() {
     echo '<div class="container-fluid">';
     if ($query->have_posts()) {		
         
+        echo '<div class="productTopbar">';
         echo '<p class="product-count">' . $query->post_count . ' of ' . $query->found_posts . ' products</p>';
 
         echo '<form class="woocommerce-ordering" method="get">
@@ -422,6 +416,20 @@ function custom_product_filter_results_shortcode() {
             }
 
         echo '</form>';
+        
+        echo '</div>';
+
+        echo '<div class="titleWrapper">
+                <div class="container-fluid">
+                    <a id="goback" class="backBtn" style="display:none">
+                        Back
+                    </a>
+                <h5>' . esc_html($formatted) . '</h5>
+                </div>
+            </div>';
+
+        
+
         echo '<ul class="products elementor-grid columns-4">';
         while ($query->have_posts()) {
             $query->the_post();
@@ -1429,3 +1437,39 @@ function custom_attribute_label_change( $label, $name ) {
 //         }
 //     }
 // });
+
+function custom_user_order_history_shortcode() {
+    if (!is_user_logged_in()) {
+        return '<p>Please log in to view your order history.</p>';
+    }
+
+    $current_user_id = get_current_user_id();
+    $customer_orders = wc_get_orders(array(
+        'customer_id' => $current_user_id,
+        'limit' => -1,
+        'orderby' => 'date',
+        'order' => 'DESC',
+    ));
+
+    if (empty($customer_orders)) {
+        return '<p>No orders found.</p>';
+    }
+
+    ob_start();
+    echo '<table class="woocommerce-orders-table">';
+    echo '<thead><tr><th>Order</th><th>Date</th><th>Status</th><th>Total</th><th>Actions</th></tr></thead>';
+
+    foreach ($customer_orders as $order) {
+        echo '<tr>';
+        echo '<td>#' . $order->get_id() . '</td>';
+        echo '<td>' . $order->get_date_created()->date('Y-m-d') . '</td>';
+        echo '<td>' . wc_get_order_status_name($order->get_status()) . '</td>';
+        echo '<td>' . $order->get_formatted_order_total() . '</td>';
+        echo '<td><a href="' . esc_url($order->get_view_order_url()) . '">View</a></td>';
+        echo '</tr>';
+    }
+
+    echo '</table>';
+    return ob_get_clean();
+}
+add_shortcode('user_order_history', 'custom_user_order_history_shortcode');
