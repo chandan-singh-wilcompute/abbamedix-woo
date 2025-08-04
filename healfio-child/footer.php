@@ -538,8 +538,9 @@ document.addEventListener('DOMContentLoaded', function () {
         observer.observe(priceContainer, { childList: true, subtree: true });
     }
 
-
 });
+
+
 </script>
 
 

@@ -29,9 +29,9 @@
 
 	<script src="<?php echo get_stylesheet_directory_uri(); ?>/js/product-filter-dropdown.js"></script>
 	<script>
-		jQuery(document).ready(function ($) {
-			$('.productFilter').insertAfter('.titleWrapper');
-		});
+		// jQuery(document).ready(function ($) {
+		// 	$('.productFilter').insertAfter('.titleWrapper');
+		// });
 
 	</script>
 

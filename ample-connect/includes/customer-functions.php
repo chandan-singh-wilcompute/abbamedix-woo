@@ -172,6 +172,7 @@ function get_order_from_api_and_update_session($user_id = "") {
 }
 
 function store_current_order_to_session($data) {
+    
     // Retrive order_id and store it in wc session
     Ample_Session_Cache::set('order_id', $data['id']);
 

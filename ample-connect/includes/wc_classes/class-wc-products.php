@@ -85,7 +85,8 @@ class WC_Products {
 
         // === 1. Define Category and Subcategory ===
         $parent_category = $productData['product_type_subclass'];
-        $child_category = $productData['product_type_name'];
+        // $child_category = $productData['product_type_name'];
+        $child_category = $productData['product_type_display_name'];
 
         
         // if (stripos($parent_category, '(discrete units)') !== false) {
@@ -152,6 +153,11 @@ class WC_Products {
         
         $product_id = $product->get_id();
 
+        // Add tags to the product
+        if (isset($productData['product_tag_names']) && count($productData['product_tag_names']) > 0) {
+            wp_set_object_terms($product_id, $productData['product_tag_names'], 'product_tag', true);
+        }
+        
         // Add product image if available
         $image_url = $productData['product_image'];
         // ample_connect_log($image_url);

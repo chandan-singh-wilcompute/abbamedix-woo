@@ -1358,6 +1358,7 @@ function extractValueCategory($input) {
     }
 }
 
+
 add_action( 'wp_ajax_fetch_and_store_product_data', 'save_api_products_to_temp_file' );
     function save_api_products_to_temp_file() {
         // $api_url = 'https://abbamedix.onample.com/api/v3/products/public_listing';

@@ -254,224 +254,447 @@ function product_category_filter_shortcode() {
 }
 add_shortcode('product_category_filter', 'product_category_filter_shortcode');
 
-// Custom products menu filter
-function custom_product_filter_results_shortcode() {
 
-    $search_term = get_query_var('filter_slugs');
-    $search_term = sanitize_text_field($search_term);
-    $search_termms = explode('+', $search_term);
-    $search_termms = array_filter(array_map('trim', $search_termms));
-    $search_terms = [];
-
-    foreach ($search_termms as $term) {
-        // Split on dash if present
-        $parts = preg_split('/[\s\-]+/', $term);
-        foreach ($parts as $part) {
-            $part = trim($part);
-            if (!empty($part)) {
-                $search_terms[] = strtolower($part);
-            }
-        }
-    }
-    $paged = get_query_var('paged') ? intval(get_query_var('paged')) : 1;
-    $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
-    $orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
-    $order_args = WC()->query->get_catalog_ordering_args( $orderby );
-
-    $max_terms = 5;
-    $total_terms = count($search_terms);
-
-    $display_terms = array_slice($search_terms, 0, $max_terms);
-    $formatted = implode(', ', array_map('ucwords', $display_terms));
-
-    if ($total_terms > $max_terms) {
-        $formatted .= '.....';
-    }
-
-    
-
-    if (empty($search_term)) {
-        return '<div class="container text-white pt-5 pb-5" style="min-height:500px">Please select a category to view products.</div>';
-    }
-
-    $matched_ids = [];
-
-    // 1. Match by product title (using your custom posts_where filter)
-    $title_query = new WP_Query([
-        'post_type'           => 'product',
-        'posts_per_page'      => -1,
-        'post_status'         => 'publish',
-        'fields'              => 'ids',
-        'suppress_filters'    => false, // Needed for your custom title filter
-        'filter_title_terms' => $search_terms,
+// products menu
+function render_dynamic_product_category_filter_form() {
+    // Get all parent product categories
+    $parent_terms = get_terms([
+        'taxonomy'   => 'product_cat',
+        'hide_empty' => false,
+        'parent'     => 0,
     ]);
-    $matched_ids = $title_query->posts ?: [];
-    // echo '<pre>Matched by title: ' . implode(', ', $matched_ids) . '</pre>';
 
-    $matching_term_ids = [];
-    foreach ($search_terms as $term) {
-        $matching_terms = get_terms([
-            'taxonomy'   => 'product_cat',
-            'hide_empty' => false,
-            'name__like' => $term,
-        ]);
-
-        foreach ($matching_terms as $matched_term) {
-            $matching_term_ids[] = $matched_term->term_id;
-        }
+    if (empty($parent_terms) || is_wp_error($parent_terms)) {
+        return '<p>No categories found.</p>';
     }
 
-    $matching_term_ids = array_unique($matching_term_ids);
-
-    // Now do a proper tax_query using term IDs
-    $category_ids = [];
-    if (!empty($matching_term_ids)) {
-        $category_query = new WP_Query([
-            'post_type'      => 'product',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-            'fields'         => 'ids',
-            'tax_query'      => [
-                [
-                    'taxonomy' => 'product_cat',
-                    'field'    => 'term_id',
-                    'terms'    => $matching_term_ids,
-                    'operator' => 'IN',
-                ],
-            ],
-        ]);
-        $category_ids = $category_query->posts ?: [];
-    }
-    // echo '<pre>Matched by category: ' . implode(', ', $category_ids) . '</pre>';
-    $matched_ids = array_unique(array_merge($matched_ids, $category_ids));
-
-    // 3. Prevent match-all fallback
-    if (empty($matched_ids)) {
-        // echo '<pre>No matches found. Setting matched_ids = [0]</pre>';
-        $matched_ids = [0];
-    } else {
-        // echo '<pre>Final Matched IDs: ' . implode(', ', $matched_ids) . '</pre>';
-    }
-    
-    // 3. Final filtered paginated query
-    $args = [
-        'post_type'      => 'product',
-        'posts_per_page' => $view_all ? -1 : 12,
-        'paged'          => $view_all ? 1 : $paged,
-        'post_status'    => 'publish',
-        'orderby'        => 'title',
-        'order'          => 'ASC',
-        'suppress_filters'    => false,
-        'post__in'       => $matched_ids,
-    ];
-
-    $args['orderby'] = $order_args['orderby'];
-    $args['order']   = $order_args['order'];
-
-    if ( ! empty( $order_args['meta_key'] ) ) {
-        $args['meta_key'] = $order_args['meta_key'];
-    }
-
-    $query = new WP_Query($args);
     ob_start();
+    ?>
+    <form id="product-category-filter-form" class="productCategoryFilterForm" method="get">
+      <div class="colGroup">
+        <?php foreach ($parent_terms as $parent_term): ?>
+          <div class="col">
+            <h5><?php echo esc_html($parent_term->name); ?></h5>
+            <div class="labelGroup">
+              <?php
+              // Get sub-categories of this parent
+              $sub_terms = get_terms([
+                  'taxonomy'   => 'product_cat',
+                  'hide_empty' => false,
+                  'parent'     => $parent_term->term_id,
+              ]);
 
-    echo '<div class="container-fluid">';
-    if ($query->have_posts()) {		
+              foreach ($sub_terms as $sub_term): 
+                  $slug = esc_attr($sub_term->slug);
+                  $id = 'filter_' . sanitize_html_class($slug);
+                  ?>
+                  <label for="<?php echo $id; ?>">
+                      <input class="inputCheck" type="checkbox" id="<?php echo $id; ?>" value="<?php echo $slug; ?>">
+                      <?php echo esc_html($sub_term->name); ?>
+                  </label>
+              <?php endforeach; ?>
+
+              <!-- Optional: Add a "Shop All" checkbox -->
+              <label for="shopAll_<?php echo esc_attr($parent_term->slug); ?>">
+                <input class="inputCheck inputCheckAll" type="checkbox" id="shopAll_<?php echo esc_attr($parent_term->slug); ?>" value="<?php echo esc_attr($parent_term->slug); ?>">
+                Shop All <?php echo esc_html($parent_term->name); ?>
+              </label>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+
+      <div class="menuFooter">
+        <button type="button" id="selectAllProductMenu" class="selectAll">Select All</button>
+        <button type="submit" id="sortByBtn" class="sortBtn">Sort By</button>
+      </div>
+    </form>
+    <?php
+
+    return ob_get_clean();
+}
+add_shortcode('product_category_filter_form', 'render_dynamic_product_category_filter_form');
+
+
+// Custom products menu filter
+// function custom_product_filter_results_shortcode() {
+
+//     $search_term = get_query_var('filter_slugs');
+//     $search_term = sanitize_text_field($search_term);
+//     $search_termms = explode('+', $search_term);
+//     $search_termms = array_filter(array_map('trim', $search_termms));
+//     $search_terms = [];
+
+//     foreach ($search_termms as $term) {
+//         // Split on dash if present
+//         $parts = preg_split('/[\s\-]+/', $term);
+//         foreach ($parts as $part) {
+//             $part = trim($part);
+//             if (!empty($part)) {
+//                 $search_terms[] = strtolower($part);
+//             }
+//         }
+//     }
+//     $paged = get_query_var('paged') ? intval(get_query_var('paged')) : 1;
+//     $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
+//     $orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
+//     $order_args = WC()->query->get_catalog_ordering_args( $orderby );
+
+//     $max_terms = 5;
+//     $total_terms = count($search_terms);
+
+//     $display_terms = array_slice($search_terms, 0, $max_terms);
+//     $formatted = implode(', ', array_map('ucwords', $display_terms));
+
+//     if ($total_terms > $max_terms) {
+//         $formatted .= '.....';
+//     }
+
+    
+
+//     if (empty($search_term)) {
+//         return '<div class="container text-white pt-5 pb-5" style="min-height:500px">Please select a category to view products.</div>';
+//     }
+
+//     $matched_ids = [];
+
+//     // 1. Match by product title (using your custom posts_where filter)
+//     $title_query = new WP_Query([
+//         'post_type'           => 'product',
+//         'posts_per_page'      => -1,
+//         'post_status'         => 'publish',
+//         'fields'              => 'ids',
+//         'suppress_filters'    => false, // Needed for your custom title filter
+//         'filter_title_terms' => $search_terms,
+//     ]);
+//     $matched_ids = $title_query->posts ?: [];
+//     // echo '<pre>Matched by title: ' . implode(', ', $matched_ids) . '</pre>';
+
+//     $matching_term_ids = [];
+//     foreach ($search_terms as $term) {
+//         $matching_terms = get_terms([
+//             'taxonomy'   => 'product_cat',
+//             'hide_empty' => false,
+//             'name__like' => $term,
+//         ]);
+
+//         foreach ($matching_terms as $matched_term) {
+//             $matching_term_ids[] = $matched_term->term_id;
+//         }
+//     }
+
+//     $matching_term_ids = array_unique($matching_term_ids);
+
+//     // Now do a proper tax_query using term IDs
+//     $category_ids = [];
+//     if (!empty($matching_term_ids)) {
+//         $category_query = new WP_Query([
+//             'post_type'      => 'product',
+//             'posts_per_page' => -1,
+//             'post_status'    => 'publish',
+//             'fields'         => 'ids',
+//             'tax_query'      => [
+//                 [
+//                     'taxonomy' => 'product_cat',
+//                     'field'    => 'term_id',
+//                     'terms'    => $matching_term_ids,
+//                     'operator' => 'IN',
+//                 ],
+//             ],
+//         ]);
+//         $category_ids = $category_query->posts ?: [];
+//     }
+//     // echo '<pre>Matched by category: ' . implode(', ', $category_ids) . '</pre>';
+//     $matched_ids = array_unique(array_merge($matched_ids, $category_ids));
+
+//     // 3. Prevent match-all fallback
+//     if (empty($matched_ids)) {
+//         // echo '<pre>No matches found. Setting matched_ids = [0]</pre>';
+//         $matched_ids = [0];
+//     } else {
+//         // echo '<pre>Final Matched IDs: ' . implode(', ', $matched_ids) . '</pre>';
+//     }
+    
+//     // 3. Final filtered paginated query
+//     $args = [
+//         'post_type'      => 'product',
+//         'posts_per_page' => $view_all ? -1 : 12,
+//         'paged'          => $view_all ? 1 : $paged,
+//         'post_status'    => 'publish',
+//         'orderby'        => 'title',
+//         'order'          => 'ASC',
+//         'suppress_filters'    => false,
+//         'post__in'       => $matched_ids,
+//     ];
+
+//     $args['orderby'] = $order_args['orderby'];
+//     $args['order']   = $order_args['order'];
+
+//     if ( ! empty( $order_args['meta_key'] ) ) {
+//         $args['meta_key'] = $order_args['meta_key'];
+//     }
+
+//     $query = new WP_Query($args);
+//     ob_start();
+
+//     echo '<div class="container-fluid">';
+//     if ($query->have_posts()) {		
         
-        echo '<div class="productTopbar">';
-        echo '<p class="product-count">' . $query->post_count . ' of ' . $query->found_posts . ' products</p>';
+//         echo '<div class="productTopbar">';
+//         echo '<p class="product-count">' . $query->post_count . ' of ' . $query->found_posts . ' products</p>';
 
-        echo '<form class="woocommerce-ordering" method="get">
-            <select name="orderby" class="orderby" onchange="this.form.submit()">';
+//         echo '<form class="woocommerce-ordering" method="get">
+//             <select name="orderby" class="orderby" onchange="this.form.submit()">';
                 
-                $orderby_options = apply_filters( 'woocommerce_catalog_orderby', [
-                    'menu_order' => __( 'Default sorting', 'woocommerce' ),
-                    'popularity' => __( 'Sort by popularity', 'woocommerce' ),
-                    'rating'     => __( 'Sort by average rating', 'woocommerce' ),
-                    'date'       => __( 'Sort by latest', 'woocommerce' ),
-                    'price'      => __( 'Sort by price: low to high', 'woocommerce' ),
-                    'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
-                ] );
+//                 $orderby_options = apply_filters( 'woocommerce_catalog_orderby', [
+//                     'menu_order' => __( 'Default sorting', 'woocommerce' ),
+//                     'popularity' => __( 'Sort by popularity', 'woocommerce' ),
+//                     'rating'     => __( 'Sort by average rating', 'woocommerce' ),
+//                     'date'       => __( 'Sort by latest', 'woocommerce' ),
+//                     'price'      => __( 'Sort by price: low to high', 'woocommerce' ),
+//                     'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
+//                 ] );
 
-                $current_orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
+//                 $current_orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
 
-                foreach ( $orderby_options as $id => $label ) {
-                    echo '<option value="' . esc_attr( $id ) . '" ' . selected( $current_orderby, $id, false ) . '>' . esc_html( $label ) . '</option>';
-                }
+//                 foreach ( $orderby_options as $id => $label ) {
+//                     echo '<option value="' . esc_attr( $id ) . '" ' . selected( $current_orderby, $id, false ) . '>' . esc_html( $label ) . '</option>';
+//                 }
                 
-            echo '</select>';
+//             echo '</select>';
 
-            // Preserve all other GET parameters (filters, search, paged, etc)
-            foreach ( $_GET as $key => $value ) {
-                if ( 'orderby' === $key ) {
-                    continue;
-                }
-                if ( is_array( $value ) ) {
-                    foreach ( $value as $val ) {
-                        echo '<input type="hidden" name="' . esc_attr( $key ) . '[]" value="' . esc_attr( $val ) . '">';
-                    }
-                } else {
-                    echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '">';
-                }
-            }
+//             // Preserve all other GET parameters (filters, search, paged, etc)
+//             foreach ( $_GET as $key => $value ) {
+//                 if ( 'orderby' === $key ) {
+//                     continue;
+//                 }
+//                 if ( is_array( $value ) ) {
+//                     foreach ( $value as $val ) {
+//                         echo '<input type="hidden" name="' . esc_attr( $key ) . '[]" value="' . esc_attr( $val ) . '">';
+//                     }
+//                 } else {
+//                     echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '">';
+//                 }
+//             }
 
-        echo '</form>';
+//         echo '</form>';
         
-        echo '</div>';
+//         echo '</div>';
 
-        echo '<div class="titleWrapper">
-                <div class="container-fluid">
-                    <a id="goback" class="backBtn" style="display:none">
-                        Back
-                    </a>
-                <h5>' . esc_html($formatted) . '</h5>
-                </div>
-            </div>';
+//         echo '<div class="titleWrapper">
+//                 <div class="container-fluid">
+//                     <a id="goback" class="backBtn" style="display:none">
+//                         Back
+//                     </a>
+//                 <h5>' . esc_html($formatted) . '</h5>
+//                 </div>
+//             </div>';
 
         
 
-        echo '<ul class="products elementor-grid columns-4">';
-        while ($query->have_posts()) {
-            $query->the_post();
-            wc_get_template_part('content', 'product');
-        }
-        echo '</ul>';
-        global $wp;
-        $current_url = home_url(add_query_arg([], $wp->request));
-        $view_all_url = esc_url(add_query_arg('view', 'all', $current_url));
-        $paginate_url = esc_url(remove_query_arg('view', $current_url));
-        if ($view_all) {
-            echo '<a href="' . $paginate_url . '" class="viewAllBtn">Show Paginated</a>';
-        } else {
-            echo '<a href="' . $view_all_url . '" class="viewAllBtn">View All</a>';
-        }
+//         echo '<ul class="products elementor-grid columns-4">';
+//         while ($query->have_posts()) {
+//             $query->the_post();
+//             wc_get_template_part('content', 'product');
+//         }
+//         echo '</ul>';
+//         global $wp;
+//         $current_url = home_url(add_query_arg([], $wp->request));
+//         $view_all_url = esc_url(add_query_arg('view', 'all', $current_url));
+//         $paginate_url = esc_url(remove_query_arg('view', $current_url));
+//         if ($view_all) {
+//             echo '<a href="' . $paginate_url . '" class="viewAllBtn">Show Paginated</a>';
+//         } else {
+//             echo '<a href="' . $view_all_url . '" class="viewAllBtn">View All</a>';
+//         }
 
-        if (!$view_all && $query->max_num_pages > 1) {
-            echo '<nav class="woocommerce-pagination">';
-            echo '<ul class="page-numbers">';
-            echo paginate_links(array(
-                'base'      => trailingslashit(get_pagenum_link(1)) . 'page/%#%/',
-                'format'    => '',
-                'current'   => $paged,
-                'total'     => $query->max_num_pages,
-                'prev_text' => __('←'),
-                'next_text' => __('→'),
-                'type'      => 'list',
-            ));
+//         if (!$view_all && $query->max_num_pages > 1) {
+//             echo '<nav class="woocommerce-pagination">';
+//             echo '<ul class="page-numbers">';
+//             echo paginate_links(array(
+//                 'base'      => trailingslashit(get_pagenum_link(1)) . 'page/%#%/',
+//                 'format'    => '',
+//                 'current'   => $paged,
+//                 'total'     => $query->max_num_pages,
+//                 'prev_text' => __('←'),
+//                 'next_text' => __('→'),
+//                 'type'      => 'list',
+//             ));
 
-            echo '</ul>';
-            echo '</nav>';
-        }
+//             echo '</ul>';
+//             echo '</nav>';
+//         }
             
         
 
+//     } else {
+//         echo '<div class="noProductFound"><div class="alert alert-danger" role="alert">No products found of this type.</div></div>';				
+//     }
+
+//     echo '</div>';
+
+//     wp_reset_postdata();
+//     return ob_get_clean();
+// }
+function custom_product_filter_results_shortcode() {
+    $request_uri = $_SERVER['REQUEST_URI'];
+    preg_match('#product-filter/([^/]+)#', $request_uri, $matches);
+
+    // Start output buffering
+    ob_start();
+    echo '<div class="container-fluid">';
+
+    if (isset($matches[1])) {
+
+        $filter_string = $matches[1];
+        $sub_categories = explode('+', $filter_string);
+        $total_products = 0;
+        $term_results = [];
+
+        // Capture the current orderby value
+        $orderby = isset($_GET['orderby']) ? wc_clean(wp_unslash($_GET['orderby'])) : 'menu_order';
+
+        // Default order settings
+        $order_args = [
+            'orderby' => 'menu_order',
+            'order' => 'ASC',
+            'meta_key' => '',
+        ];
+
+        switch ($order_by) {
+            case 'price':
+                $order_args['orderby'] = 'meta_value_num';
+                $order_args['meta_key'] = '_price';
+                $order_args['order'] = 'ASC';
+                break;
+            case 'price-desc':
+                $order_args['orderby'] = 'meta_value_num';
+                $order_args['meta_key'] = '_price';
+                $order_args['order'] = 'DESC';
+                break;
+            case 'date':
+                $order_args['orderby'] = 'date';
+                $order_args['order'] = 'DESC';
+                break;
+            case 'popularity':
+                $order_args['orderby'] = 'meta_value_num';
+                $order_args['meta_key'] = 'total_sales';
+                $order_args['order'] = 'DESC';
+                break;
+            case 'rating':
+                $order_args['orderby'] = 'meta_value_num';
+                $order_args['meta_key'] = '_wc_average_rating';
+                $order_args['order'] = 'DESC';
+                break;
+            default:
+                $order_args['orderby'] = 'menu_order';
+                $order_args['order'] = 'ASC';
+                break;
+        }
+
+        // Loop through sub-category slugs and collect product queries
+        foreach ($sub_categories as $slug) {
+            $term = get_term_by('slug', sanitize_title($slug), 'product_cat');
+            if (!$term || is_wp_error($term)) {
+                continue;
+            }
+
+            $args = [
+                'post_type'      => 'product',
+                'posts_per_page' => -1,
+                'orderby'        => $orderby_args['orderby'],
+                'order'          => $orderby_args['order'],
+                'meta_key'       => isset($orderby_args['meta_key']) ? $orderby_args['meta_key'] : '',
+                'tax_query'      => [[
+                    'taxonomy' => 'product_cat',
+                    'field'    => 'slug',
+                    'terms'    => $term->slug,
+                    'include_children' => false,
+                ]],
+            ];
+            if (!empty($order_args['meta_key'])) {
+                $args['meta_key'] = $order_args['meta_key'];
+            }
+            $query = new WP_Query($args);
+
+            if ($query->have_posts()) {
+                $term_results[] = [
+                    'term'  => $term,
+                    'query' => $query,
+                ];
+                $total_products += $query->found_posts;
+            }
+        }
+
+        // Show Top Bar only if there are results
+        if ($total_products > 0) {
+            echo '<div class="productTopbar">';
+            echo '<p class="product-count">Found ' . $total_products . ' products</p>';
+
+            echo '<form class="woocommerce-ordering" method="get">';
+            echo '<select name="orderby" class="orderby" onchange="this.form.submit()">';
+
+            $orderby_options = apply_filters('woocommerce_catalog_orderby', [
+                'menu_order' => __('Default sorting', 'woocommerce'),
+                'popularity' => __('Sort by popularity', 'woocommerce'),
+                'rating'     => __('Sort by average rating', 'woocommerce'),
+                'date'       => __('Sort by latest', 'woocommerce'),
+                'price'      => __('Sort by price: low to high', 'woocommerce'),
+                'price-desc' => __('Sort by price: high to low', 'woocommerce'),
+            ]);
+
+            foreach ($orderby_options as $id => $label) {
+                echo '<option value="' . esc_attr($id) . '" ' . selected($orderby, $id, false) . '>' . esc_html($label) . '</option>';
+            }
+
+            echo '</select>';
+
+            // Preserve other GET parameters
+            foreach ($_GET as $key => $value) {
+                if ($key === 'orderby') {
+                    continue;
+                }
+                if (is_array($value)) {
+                    foreach ($value as $val) {
+                        echo '<input type="hidden" name="' . esc_attr($key) . '[]" value="' . esc_attr($val) . '">';
+                    }
+                } else {
+                    echo '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '">';
+                }
+            }
+
+            echo '</form>';
+            echo '</div>'; // End productTopbar
+        }
+
+        // Loop through each term's results and render product blocks
+        foreach ($term_results as $entry) {
+            $term = $entry['term'];
+            $query = $entry['query'];
+
+            echo '<div class="titleWrapper">
+                    <div class="container-fluid">
+                        <a id="goback" class="backBtn" style="display:none">Back</a>
+                        <h5>' . esc_html($term->name) . '</h5>
+                    </div>
+                </div>';
+
+            echo '<ul class="products elementor-grid columns-4">';
+            while ($query->have_posts()) {
+                $query->the_post();
+                wc_get_template_part('content', 'product');
+            }
+            echo '</ul>';
+            wp_reset_postdata();
+        }
+
+        if ($total_products === 0) {
+            echo '<div class="noProductFound"><div class="alert alert-danger" role="alert">No products found.</div></div>';
+        }
     } else {
-        echo '<div class="noProductFound"><div class="alert alert-danger" role="alert">No products found of this type.</div></div>';				
+        echo '<div class="noProductFound"><div class="alert alert-danger" role="alert">No filter terms selected.</div></div>';
     }
-
-    echo '</div>';
-
-    wp_reset_postdata();
+    echo '</div>'; // End container
     return ob_get_clean();
 }
 add_shortcode('custom_product_filter_results', 'custom_product_filter_results_shortcode');
@@ -479,217 +702,179 @@ add_shortcode('custom_product_filter_results', 'custom_product_filter_results_sh
 
 // Custom Featured menu filter 
 function custom_featured_filter_results_shortcode() {
+    $request_uri = $_SERVER['REQUEST_URI'];
+    preg_match('#featured-filter/([^/]+)#', $request_uri, $matches);
 
-    $search_term = get_query_var('filter_slugs');
-    $search_term = sanitize_text_field($search_term);
-    $search_termms = explode('+', $search_term);
-    $search_termms = array_filter(array_map('trim', $search_termms));
-    $search_terms = [];
+    ob_start();
+    echo '<div class="container-fluid">';
 
-    foreach ($search_termms as $term) {
-        // Split on dash if present
-        $parts = preg_split('/[\s\-]+/', $term);
-        foreach ($parts as $part) {
-            $part = trim($part);
-            if (!empty($part)) {
-                $search_terms[] = strtolower($part);
+    if (isset($matches[1])) {
+
+        $filter_string = $matches[1];
+        $tagged_filters = explode('+', $filter_string);
+        $total_products = 0;
+        $term_results = [];
+
+        // Capture the current orderby value
+        $orderby = isset($_GET['orderby']) ? wc_clean(wp_unslash($_GET['orderby'])) : 'menu_order';
+
+        // Setup order args
+        $order_args = [
+            'orderby' => 'menu_order',
+            'order' => 'ASC',
+            'meta_key' => '',
+        ];
+
+        switch ($orderby) {
+            case 'price':
+                $order_args['orderby'] = 'meta_value_num';
+                $order_args['meta_key'] = '_price';
+                $order_args['order'] = 'ASC';
+                break;
+            case 'price-desc':
+                $order_args['orderby'] = 'meta_value_num';
+                $order_args['meta_key'] = '_price';
+                $order_args['order'] = 'DESC';
+                break;
+            case 'date':
+                $order_args['orderby'] = 'date';
+                $order_args['order'] = 'DESC';
+                break;
+            case 'popularity':
+                $order_args['orderby'] = 'meta_value_num';
+                $order_args['meta_key'] = 'total_sales';
+                $order_args['order'] = 'DESC';
+                break;
+            case 'rating':
+                $order_args['orderby'] = 'meta_value_num';
+                $order_args['meta_key'] = '_wc_average_rating';
+                $order_args['order'] = 'DESC';
+                break;
+            default:
+                $order_args['orderby'] = 'menu_order';
+                $order_args['order'] = 'ASC';
+                break;
+        }
+
+        // Loop through tag_subcategory pairs
+        foreach ($tagged_filters as $entry) {
+            if (strpos($entry, '_') === false) continue;
+
+            list($tag, $subcategory_slug) = explode('_', $entry, 2);
+
+            $term = get_term_by('slug', sanitize_title($subcategory_slug), 'product_cat');
+            if (!$term || is_wp_error($term)) continue;
+
+            $args = [
+                'post_type'      => 'product',
+                'posts_per_page' => -1,
+                'orderby'        => $order_args['orderby'],
+                'order'          => $order_args['order'],
+                'tax_query'      => [
+                    'relation' => 'AND',
+                    [
+                        'taxonomy' => 'product_cat',
+                        'field'    => 'slug',
+                        'terms'    => $term->slug,
+                        'include_children' => false,
+                    ],
+                    [
+                        'taxonomy' => 'product_tag', // or custom taxonomy name
+                        'field'    => 'slug',
+                        'terms'    => sanitize_title($tag),
+                    ]
+                ],
+            ];
+
+            if (!empty($order_args['meta_key'])) {
+                $args['meta_key'] = $order_args['meta_key'];
+            }
+
+            $query = new WP_Query($args);
+
+            if ($query->have_posts()) {
+                $term_results[] = [
+                    'term'  => $term,
+                    'query' => $query,
+                ];
+                $total_products += $query->found_posts;
             }
         }
-    }
-    $paged = get_query_var('paged') ? intval(get_query_var('paged')) : 1;
-    $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
-    $orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
-    $order_args = WC()->query->get_catalog_ordering_args( $orderby );
 
-    $max_terms = 5;
-    $total_terms = count($search_terms);
+        // Render topbar if there are products
+        if ($total_products > 0) {
+            echo '<div class="productTopbar">';
+            echo '<p class="product-count">Found ' . $total_products . ' products</p>';
 
-    $display_terms = array_slice($search_terms, 0, $max_terms);
-    $formatted = implode(', ', array_map('ucwords', $display_terms));
+            echo '<form class="woocommerce-ordering" method="get">';
+            echo '<select name="orderby" class="orderby" onchange="this.form.submit()">';
 
-    if ($total_terms > $max_terms) {
-        $formatted .= '.....';
-    }
+            $orderby_options = apply_filters('woocommerce_catalog_orderby', [
+                'menu_order' => __('Default sorting', 'woocommerce'),
+                'popularity' => __('Sort by popularity', 'woocommerce'),
+                'rating'     => __('Sort by average rating', 'woocommerce'),
+                'date'       => __('Sort by latest', 'woocommerce'),
+                'price'      => __('Sort by price: low to high', 'woocommerce'),
+                'price-desc' => __('Sort by price: high to low', 'woocommerce'),
+            ]);
 
-    echo '<div class="titleWrapper">
-                <div class="container-fluid">
-                    <a id="goback" class="backBtn">
-                    Back
-                </a>
-                <h5>' . esc_html($formatted) . '</h5>
-                </div>
-            </div>';
+            foreach ($orderby_options as $id => $label) {
+                echo '<option value="' . esc_attr($id) . '" ' . selected($orderby, $id, false) . '>' . esc_html($label) . '</option>';
+            }
 
-    if (empty($search_term)) {
-        return '<div class="container text-white pt-5 pb-5" style="min-height:500px">Please select a category to view products.</div>';
-    }
-
-    $matched_ids = [];
-
-    // 1. Match by product title (using your custom posts_where filter)
-    $title_query = new WP_Query([
-        'post_type'           => 'product',
-        'posts_per_page'      => -1,
-        'post_status'         => 'publish',
-        'fields'              => 'ids',
-        'suppress_filters'    => false, // Needed for your custom title filter
-        'filter_title_terms' => $search_terms,
-    ]);
-    $matched_ids = $title_query->posts ?: [];
-    // echo '<pre>Matched by title: ' . implode(', ', $matched_ids) . '</pre>';
-
-    $matching_term_ids = [];
-    foreach ($search_terms as $term) {
-        $matching_terms = get_terms([
-            'taxonomy'   => 'product_cat',
-            'hide_empty' => false,
-            'name__like' => $term,
-        ]);
-
-        foreach ($matching_terms as $matched_term) {
-            $matching_term_ids[] = $matched_term->term_id;
-        }
-    }
-
-    $matching_term_ids = array_unique($matching_term_ids);
-
-    // Now do a proper tax_query using term IDs
-    $category_ids = [];
-    if (!empty($matching_term_ids)) {
-        $category_query = new WP_Query([
-            'post_type'      => 'product',
-            'posts_per_page' => -1,
-            'post_status'    => 'publish',
-            'fields'         => 'ids',
-            'tax_query'      => [
-                [
-                    'taxonomy' => 'product_cat',
-                    'field'    => 'term_id',
-                    'terms'    => $matching_term_ids,
-                    'operator' => 'IN',
-                ],
-            ],
-        ]);
-        $category_ids = $category_query->posts ?: [];
-    }
-    // echo '<pre>Matched by category: ' . implode(', ', $category_ids) . '</pre>';
-    $matched_ids = array_unique(array_merge($matched_ids, $category_ids));
-
-    // 3. Prevent match-all fallback
-    if (empty($matched_ids)) {
-        // echo '<pre>No matches found. Setting matched_ids = [0]</pre>';
-        $matched_ids = [0];
-    } else {
-        // echo '<pre>Final Matched IDs: ' . implode(', ', $matched_ids) . '</pre>';
-    }
-    
-    // 3. Final filtered paginated query
-    $args = [
-        'post_type'      => 'product',
-        'posts_per_page' => $view_all ? -1 : 12,
-        'paged'          => $view_all ? 1 : $paged,
-        'post_status'    => 'publish',
-        'orderby'        => 'title',
-        'order'          => 'ASC',
-        'suppress_filters'    => false,
-        'post__in'       => $matched_ids,
-    ];
-
-    $args['orderby'] = $order_args['orderby'];
-    $args['order']   = $order_args['order'];
-
-    if ( ! empty( $order_args['meta_key'] ) ) {
-        $args['meta_key'] = $order_args['meta_key'];
-    }
-
-    $query = new WP_Query($args);
-    ob_start();
-
-    echo '<div class="container-fluid">';
-    if ($query->have_posts()) {		
-        
-        echo '<p class="product-count">' . $query->post_count . ' of ' . $query->found_posts . ' products</p>';
-
-        echo '<form class="woocommerce-ordering" method="get">
-            <select name="orderby" class="orderby" onchange="this.form.submit()">';
-                
-                $orderby_options = apply_filters( 'woocommerce_catalog_orderby', [
-                    'menu_order' => __( 'Default sorting', 'woocommerce' ),
-                    'popularity' => __( 'Sort by popularity', 'woocommerce' ),
-                    'rating'     => __( 'Sort by average rating', 'woocommerce' ),
-                    'date'       => __( 'Sort by latest', 'woocommerce' ),
-                    'price'      => __( 'Sort by price: low to high', 'woocommerce' ),
-                    'price-desc' => __( 'Sort by price: high to low', 'woocommerce' ),
-                ] );
-
-                $current_orderby = isset( $_GET['orderby'] ) ? wc_clean( wp_unslash( $_GET['orderby'] ) ) : 'menu_order';
-
-                foreach ( $orderby_options as $id => $label ) {
-                    echo '<option value="' . esc_attr( $id ) . '" ' . selected( $current_orderby, $id, false ) . '>' . esc_html( $label ) . '</option>';
-                }
-                
             echo '</select>';
 
-            // Preserve all other GET parameters (filters, search, paged, etc)
-            foreach ( $_GET as $key => $value ) {
-                if ( 'orderby' === $key ) {
-                    continue;
-                }
-                if ( is_array( $value ) ) {
-                    foreach ( $value as $val ) {
-                        echo '<input type="hidden" name="' . esc_attr( $key ) . '[]" value="' . esc_attr( $val ) . '">';
+            // Preserve other GET parameters
+            foreach ($_GET as $key => $value) {
+                if ($key === 'orderby') continue;
+
+                if (is_array($value)) {
+                    foreach ($value as $val) {
+                        echo '<input type="hidden" name="' . esc_attr($key) . '[]" value="' . esc_attr($val) . '">';
                     }
                 } else {
-                    echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '">';
+                    echo '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '">';
                 }
             }
 
-        echo '</form>';
-        echo '<ul class="products elementor-grid columns-4">';
-        while ($query->have_posts()) {
-            $query->the_post();
-            wc_get_template_part('content', 'product');
-        }
-        echo '</ul>';
-        global $wp;
-        $current_url = home_url(add_query_arg([], $wp->request));
-        $view_all_url = esc_url(add_query_arg('view', 'all', $current_url));
-        $paginate_url = esc_url(remove_query_arg('view', $current_url));
-        if ($view_all) {
-            echo '<a href="' . $paginate_url . '" class="viewAllBtn">Show Paginated</a>';
-        } else {
-            echo '<a href="' . $view_all_url . '" class="viewAllBtn">View All</a>';
+            echo '</form>';
+            echo '</div>'; // End productTopbar
         }
 
-        if (!$view_all && $query->max_num_pages > 1) {
-            echo '<nav class="woocommerce-pagination">';
-            echo '<ul class="page-numbers">';
-            echo paginate_links(array(
-                'base'      => trailingslashit(get_pagenum_link(1)) . 'page/%#%/',
-                'format'    => '',
-                'current'   => $paged,
-                'total'     => $query->max_num_pages,
-                'prev_text' => __('←'),
-                'next_text' => __('→'),
-                'type'      => 'list',
-            ));
+        // Render each result block
+        foreach ($term_results as $entry) {
+            $term = $entry['term'];
+            $query = $entry['query'];
 
+            echo '<div class="titleWrapper">
+                    <div class="container-fluid">
+                        <a id="goback" class="backBtn" style="display:none">Back</a>
+                        <h5>' . esc_html($term->name) . '</h5>
+                    </div>
+                </div>';
+
+            echo '<ul class="products elementor-grid columns-4">';
+            while ($query->have_posts()) {
+                $query->the_post();
+                wc_get_template_part('content', 'product');
+            }
             echo '</ul>';
-            echo '</nav>';
+            wp_reset_postdata();
         }
-            
-        
+
+        if ($total_products === 0) {
+            echo '<div class="noProductFound"><div class="alert alert-danger" role="alert">No products found.</div></div>';
+        }
 
     } else {
-        echo '<div class="noProductFound"><div class="alert alert-danger" role="alert">No products found of this type.</div></div>';				
+        echo '<div class="noProductFound"><div class="alert alert-danger" role="alert">No filter terms selected.</div></div>';
     }
 
-    echo '</div>';
-
-    wp_reset_postdata();
+    echo '</div>'; // End container
     return ob_get_clean();
+
 }
-add_shortcode('custom_featured_filter_results', 'custom_product_filter_results_shortcode');
+add_shortcode('custom_featured_filter_results', 'custom_featured_filter_results_shortcode');
 
 
 add_shortcode('custom_products_paginated', 'custom_product_filter_results');
