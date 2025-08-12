@@ -1,26 +1,44 @@
 (function () {
     const rxDed = document.getElementById('rx-dedu-info');
+    
 
-    function updateBar(usedGrams, totalGrams) {
-        const remainingGrams = Math.max(0, totalGrams - usedGrams);
+    // function updateBar(usedGrams, totalGrams) {
+    //     const remainingGrams = Math.max(0, totalGrams - usedGrams);
         
-        rxDed.innerText = `${remainingGrams} gr remaining`;
+    //     // rxDed.innerText = `${remainingGrams} gr remaining`;
+    //     rxDed.innerText = `${totalGrams} gr remaining`;
+    //     const pathSegments = window.location.pathname.split('/').filter(Boolean);
+    //     const lastSegment = pathSegments[pathSegments.length - 1];
 
+    //     if (lastSegment === 'cart' || lastSegment === 'checkout') {
+    //         var percentage = (usedGrams / totalGrams) * 100;
+    //         // Update the skill bar
+    //         var skillPerElement = document.querySelector('.skill-per');
+    //         skillPerElement.style.width = percentage + '%';
+    //         skillPerElement.setAttribute('data-per', remainingGrams);
+    //         skillPerElement.setAttribute('data-max', totalGrams);
+    //         document.querySelector(".gr.max").innerText = totalGrams + " gr";
+    //     }
+        
+    // }
+
+    function updateBar(totalGrams) {
+        // rxDed.innerText = `${remainingGrams} gr remaining`;
+        // console.log("totalGrams: ", totalGrams);
+        rxDed.innerText = `${totalGrams} gr remaining`;
+        
+        
         const pathSegments = window.location.pathname.split('/').filter(Boolean);
         const lastSegment = pathSegments[pathSegments.length - 1];
 
-        if (lastSegment === 'cart' || lastSegment === 'checkout') {
-            var percentage = (usedGrams / totalGrams) * 100;
-            // Update the skill bar
-            var skillPerElement = document.querySelector('.skill-per');
-            skillPerElement.style.width = percentage + '%';
-            skillPerElement.setAttribute('data-per', remainingGrams);
-            skillPerElement.setAttribute('data-max', totalGrams);
-            document.querySelector(".gr.max").innerText = totalGrams + " gr";
+        if (lastSegment === 'cart') {
+            const skillvalue = document.getElementById('skillvalue');
+            skillvalue.innerHTML = `<div class="skillBar">
+							You have <strong class="skillvalue" >${totalGrams}g</strong> left in your prescription.
+						</div>`;
         }
         
     }
-
 
     function fetchQuota() {
         fetch(GramQuotaAjax.ajax_url + '?action=get_gram_quota_data', {
@@ -29,9 +47,9 @@
         })
         .then(res => res.json())
         .then(data => {
-            // console.log("data: ", data);
-            if (data && typeof data.used === 'number' && typeof data.total === 'number') {
-            updateBar(data.used, data.total);
+            console.log("data: ", data);
+            if (data && typeof data.total === 'number') {
+                updateBar(data.total);
             }
         })
         .catch(err => {
@@ -39,11 +57,20 @@
         });
     }
 
-    window.addEventListener('resize', () => {
-        fetchQuota(); // Optional: re-fetch on resize
-    });
+    // window.addEventListener('resize', () => {
+    //     fetchQuota(); // Optional: re-fetch on resize
+    // });
 
     fetchQuota();
+
+    
+    setTimeout(function () {
+        const checkbox = document.querySelector('input.apply-policy-discount[value="134"]');
+        if (checkbox) {
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event('change', { bubbles: true })); // Trigger change event
+        }
+    }, 500);
 
 })();
 
@@ -100,3 +127,38 @@ if (window.location.pathname.includes('/featured-filter/')) {
         }
     });
 }
+
+
+jQuery(document).ready(function($) {
+    $('.shop-variation-swatches').each(function() {
+        var container = $(this);
+        var variationsData = container.data('variations');
+
+        container.on('click', '.swatch-item', function() {
+            var attribute = $(this).data('attribute');
+            var value = $(this).data('value');
+
+            // Mark selected swatch
+            $(this).siblings().removeClass('selected');
+            $(this).addClass('selected');
+
+            // Find matching variation
+            var matched = variationsData.find(function(v) {
+                return v.attributes[attribute] === value;
+            });
+
+            if (matched) {
+                if (!matched.is_in_stock) {
+                    container.find('.single_add_to_cart_button')
+                        .replaceWith('<button type="button" class="button notify-me-button">NOTIFY ME</button>');
+                } else {
+                    container.find('.notify-me-button')
+                        .replaceWith('<button type="submit" class="single_add_to_cart_button button alt">ADD TO CART</button>');
+                }
+            }
+        });
+    });
+});
+
+
+

@@ -192,6 +192,24 @@
 
     </div>
 </nav>
+<?php
+$categories = get_woocommerce_categories_hierarchy_with_slugs();
+$tags = get_tag_subcategory_structure();
+// foreach ($categories as $parent => $subcategories) {
+//     echo '<h3>' . esc_html($parent) . '</h3>';
+    
+//     if (!empty($subcategories)) {
+//         echo '<ul>';
+//         foreach ($subcategories as $subcategory) {
+//             echo '<li>' . esc_html($subcategory) . '</li>';
+//         }
+//         echo '</ul>';
+//     } else {
+//         echo '<p>No sub-categories</p>';
+//     }
+// }
+?>
+
 <div id="productMenu" class="megaMenu productMenu">
   <div class="btnWrapper">
     <i class="bi bi-chevron-left backMenu"></i>
@@ -210,16 +228,24 @@
       <div class="col">
         <h5>Flower</h5>
         <div class="labelGroup">
-          <label for="newdriedFlower"><input class="inputCheck" type="checkbox" id="newdriedFlower" value="dried-flower-dried-flower">Dried Flower</label>
-          <label for="newpreRolls"><input class="inputCheck" type="checkbox" id="newpreRolls" value="pre-rolls">Pre-Rolls</label>
+          <?php 
+              $sc = $categories['Dried Flower'];
+              foreach($sc as $s):
+          ?>
+
+          <label for="<?php echo esc_attr($s['slug']); ?>"><input class="inputCheck" type="checkbox" id="<?php echo esc_attr($s['slug']); ?>" value="<?php echo esc_attr($s['slug']); ?>"><?php echo esc_html($s['name']); ?></label>
+          <?php endforeach; ?>
           <label for="newshopAllFlower"><input class="inputCheck inputCheckAll" type="checkbox" id="newshopAllFlower" value="Flow">Shop All Flower</label>
         </div>
         <div class="labelGroup">
           <h5>Vapes</h5>
-          <label for="disposableVapes"><input class="inputCheck" type="checkbox" id="disposableVapes" value="disposable-vapes">Disposable Vapes</label>
-          <label for="510ThreadCartridg"><input class="inputCheck" type="checkbox" id="510ThreadCartridg" value="510-thread-cartridges">510 Thread Cartridges</label>
-          <label for="paxPods"><input class="inputCheck" type="checkbox" id="paxPods" value="pax-pods">Pax Pods</label>
-          <label for="closedLoopPods"><input class="inputCheck" type="checkbox" id="closedLoopPods" value="closed-loop-pods">Closed Loop Pods</label>
+          <?php 
+              $sc = $categories['Vapes'];
+              foreach($sc as $s):
+          ?>
+
+          <label for="<?php echo esc_attr($s['slug']); ?>"><input class="inputCheck" type="checkbox" id="<?php echo esc_attr($s['slug']); ?>" value="<?php echo esc_attr($s['slug']); ?>"><?php echo esc_html($s['name']); ?></label>
+          <?php endforeach; ?>
           <label for="shopAllVap"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllVap" value="Vap">Shop All Vapes</label>
         </div>
       </div>
@@ -227,13 +253,13 @@
       <div class="col">
         <h5>Concentrates</h5>
         <div class="labelGroup">
-          <label for="infusedFlower"><input class="inputCheck" type="checkbox" id="infusedFlower" value="infused-pre-rolls-flower">Infused Pre-Rolls & Flower</label>
-          <label for="hash"><input class="inputCheck" type="checkbox" id="hash" value="hash">Hash</label>
-          <label for="shatter"><input class="inputCheck" type="checkbox" id="shatter" value="shatter">Shatter</label>
-          <label for="rosin"><input class="inputCheck" type="checkbox" id="rosin" value="rosin">Rosin</label>
-          <label for="wax"><input class="inputCheck" type="checkbox" id="wax" value="wax">Wax</label>
-          <label for="kief"><input class="inputCheck" type="checkbox" id="kief" value="kief">Kief</label>
-          <label for="resin"><input class="inputCheck" type="checkbox" id="resin" value="resin">Resin</label>
+          <?php 
+              $sc = $categories['Concentrates'];
+              foreach($sc as $s):
+          ?>
+
+          <label for="<?php echo esc_attr($s['slug']); ?>"><input class="inputCheck" type="checkbox" id="<?php echo esc_attr($s['slug']); ?>" value="<?php echo esc_attr($s['slug']); ?>"><?php echo esc_html($s['name']); ?></label>
+          <?php endforeach; ?>
           <label for="shopAllConcentrates"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllConcentrates" value="Concentrates">Shop All Concentrates</label>
         </div>
       </div>
@@ -241,12 +267,13 @@
       <div class="col">
         <h5>Edibles</h5>
         <div class="labelGroup">
-          <label for="Edibleschocalates"><input class="inputCheck" type="checkbox" id="Edibleschocalates" value="chocalates">Chocalates</label>
-          <label for="EdiblesbackedGoods"><input class="inputCheck" type="checkbox" id="EdiblesbackedGoods" value="baked-goods">Baked Goods</label>
-          <label for="Ediblesgummies"><input class="inputCheck" type="checkbox" id="Ediblesgummies" value="gummies">Gummies</label>
-          <label for="EdibleshardEdibles"><input class="inputCheck" type="checkbox" id="EdibleshardEdibles" value="hard-edibles">Hard Edibles</label>
-          <label for="Ediblespantry"><input class="inputCheck" type="checkbox" id="Ediblespantry" value="pantry">Pantry</label>
-          <label for="EdiblessavarySnacks"><input class="inputCheck" type="checkbox" id="EdiblessavarySnacks" value="savary-snacks">Savary Snacks</label>
+          <?php 
+              $sc = $categories['Edibles'];
+              foreach($sc as $s):
+          ?>
+
+          <label for="<?php echo esc_attr($s['slug']); ?>"><input class="inputCheck" type="checkbox" id="<?php echo esc_attr($s['slug']); ?>" value="<?php echo esc_attr($s['slug']); ?>"><?php echo esc_html($s['name']); ?></label>
+          <?php endforeach; ?>
           <label for="EdiblesshopAllEdibles"><input class="inputCheck inputCheckAll" type="checkbox" id="EdiblesshopAllEdibles" value="Edibles">Shop All Edibles</label>
         </div>
       </div>
@@ -254,9 +281,13 @@
       <div class="col">
         <h5>Extracts</h5>
         <div class="labelGroup">
-          <label for="extraoils"><input class="inputCheck" type="checkbox" id="extraoils" value="oils">Oils</label>
-          <label for="extracapsules"><input class="inputCheck" type="checkbox" id="extracapsules" value="capsules">Capsules</label>
-          <label for="extrasublingualStrips"><input class="inputCheck" type="checkbox" id="extrasublingualStrips" value="cublingual-strips">Sublingual Strips</label>
+          <?php 
+              $sc = $categories['Extracts'];
+              foreach($sc as $s):
+          ?>
+
+          <label for="<?php echo esc_attr($s['slug']); ?>"><input class="inputCheck" type="checkbox" id="<?php echo esc_attr($s['slug']); ?>" value="<?php echo esc_attr($s['slug']); ?>"><?php echo esc_html($s['name']); ?></label>
+          <?php endforeach; ?>
           <label for="extrashopAllExtracts"><input class="inputCheck inputCheckAll" type="checkbox" id="extrashopAllExtracts" value="extracts">Shop All Extracts</label>
         </div>
       </div>
@@ -264,12 +295,13 @@
       <div class="col">
         <h5>Beverages</h5>
         <div class="labelGroup">
-          <label for="coffeesTeas"><input class="inputCheck" type="checkbox" id="coffeesTeas" value="coffees-teas">Coffees & Teas</label>
-          <label for="softDrinks"><input class="inputCheck" type="checkbox" id="softDrinks" value="soft-drinks">Soft Drinks</label>
-          <label for="sparklingWaters"><input class="inputCheck" type="checkbox" id="sparklingWaters" value="sparkling-waters">Sparkling Waters</label>
-          <label for="beverageMixers"><input class="inputCheck" type="checkbox" id="beverageMixers" value="beverage-mixers">Beverage Mixers</label>
-          <label for="juices"><input class="inputCheck" type="checkbox" id="juices" value="juices">Juices</label>
-          <label for="dealcoholized"><input class="inputCheck" type="checkbox" id="dealcoholized" value="dealcoholized">Dealcoholized</label>
+          <?php 
+              $sc = $categories['Beverages'];
+              foreach($sc as $s):
+          ?>
+
+          <label for="<?php echo esc_attr($s['slug']); ?>"><input class="inputCheck" type="checkbox" id="<?php echo esc_attr($s['slug']); ?>" value="<?php echo esc_attr($s['slug']); ?>"><?php echo esc_html($s['name']); ?></label>
+          <?php endforeach; ?>
           <label for="shopAllBeverages"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllBeverages" value="beverages">Shop All Beverages</label>
         </div>
       </div>
@@ -277,10 +309,13 @@
       <div class="col">
         <h5>Topicals</h5>
         <div class="labelGroup">
-          <label for="creams"><input class="inputCheck" type="checkbox" id="creams" value="creams-lotions">Creams & Lotions</label>
-          <label for="bathShower"><input class="inputCheck" type="checkbox" id="bathShower" value="bath-shower">Bath & Shower</label>
-          <label for="intimacyOils"><input class="inputCheck" type="checkbox" id="intimacyOils" value="intimacy-oils">Intimacy Oils</label>
-          <label for="transdermalGels"><input class="inputCheck" type="checkbox" id="transdermalGels" value="transdermal-gels">Transdermal Gels</label>
+          <?php 
+              $sc = $categories['Topicals'];
+              foreach($sc as $s):
+          ?>
+
+          <label for="<?php echo esc_attr($s['slug']); ?>"><input class="inputCheck" type="checkbox" id="<?php echo esc_attr($s['slug']); ?>" value="<?php echo esc_attr($s['slug']); ?>"><?php echo esc_html($s['name']); ?></label>
+          <?php endforeach; ?>
           <label for="shopAllTopicals"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllTopicals" value="topicals">Shop All Topicals</label>
         </div>
       </div>
@@ -300,49 +335,26 @@
   
   <form id="featured-category-filter-form" class="featuredCategoryFilterForm" method="get">
     <div class="colGroup">
-      <div class="col">
-        <h5>New Releases</h5>
-        <div class="labelGroup">
-          <label for="driedFlower"><input class="inputCheck" type="checkbox" id="driedFlower" value="newrelease_dried-flower-dried-flower">Dried Flower</label>
-          <label for="preRolls"><input class="inputCheck" type="checkbox" id="preRolls" value="newrelease_pre-rolls">Pre-Rolls</label>
-          <label for="shopAllFlower"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllFlower" value="Shop All Flow">Shop All Flower</label>       
-        </div>
-      </div>
+      <?php 
+        
+        foreach($tags as $tag):
+          $sc = $tag['subcategories'];
 
-      <div class="col">
-        <h5>Shop by potency</h5>
-        <div class="labelGroup">        
-          <label for="vapes"><input class="inputCheck" type="checkbox" id="vapes" value="shopbypotency_disposable-vapes">Disposable Vapes</label>
-          <label for="cartridges"><input class="inputCheck" type="checkbox" id="cartridges" value="shopbypotency_510-thread-cartridges">510 Thread Cartridges</label>
-          <label for="paxpods"><input class="inputCheck" type="checkbox" id="paxpods" value="shopbypotency_paxpods">Pax Pods</label>
-          <label for="looppods"><input class="inputCheck" type="checkbox" id="looppods" value="shopbypotency_looppods">Closed Loop Pods</label>
-          <label for="shopAllVapes"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllVapes" value="Shop All Concentrates">Shop All Vapes</label>
-        </div>
-      </div>
-
-      <div class="col">
-        <h5>Trending</h5>
-        <div class="labelGroup">
-          <label for="chocalates"><input class="inputCheck" type="checkbox" id="chocalates" value="trending_chocalates">Chocalates</label>
-          <label for="bakedGoods"><input class="inputCheck" type="checkbox" id="bakedGoods" value="trending_baked-goods">Baked Goods</label>
-          <label for="gummies"><input class="inputCheck" type="checkbox" id="gummies" value="trending_gummies">Gummies</label>
-          <label for="hardEdibles"><input class="inputCheck" type="checkbox" id="hardEdibles" value="trending_hard-edibles">Hard Edibles</label>
-          <label for="pantry"><input class="inputCheck" type="checkbox" id="pantry" value="trending_pantry">Pantry</label>
-          <label for="savarySnacks"><input class="inputCheck" type="checkbox" id="savarySnacks" value="trending_savary-snacks">Savary Snacks</label>
-          <label for="shopAllEdibles"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllEdibles" value="Shop All Edibles">Shop All Edibles</label>
-        </div>
-      </div>
-
-      <div class="col">
-        <h5>Extracts</h5>
-        <div class="labelGroup">
-          <label for="oils"><input class="inputCheck" type="checkbox" id="oils" value="extracts_oils">Oils</label>
-          <label for="capsules"><input class="inputCheck" type="checkbox" id="capsules" value="extracts_capsules">Capsules</label>
-          <label for="sublingualStrips"><input class="inputCheck" type="checkbox" id="sublingualStrips" value="extracts_sublingual-strips">Sublingual Strips</label>
-          <label for="shopAllExtracts"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllExtracts" value="Shop All Extracts">Shop All Extracts</label>
-        </div>
-      </div>
-
+      ?>
+          <div class="col">
+            <h5><?php echo esc_html($tag['tag']['name']); ?></h5>
+            <div class="labelGroup">
+      <?php 
+            foreach($sc as $s):
+      ?>
+            <label for="<?php echo esc_attr($s['slug']); ?>"><input class="inputCheck" type="checkbox" id="<?php echo esc_attr($s['slug']); ?>" value="<?php echo esc_attr($tag['tag']['slug']). '_' . esc_attr($s['slug']); ?>"><?php echo esc_html($s['name']); ?></label>  
+            <?php endforeach; ?>
+              <label for="shopAllFlower"><input class="inputCheck inputCheckAll" type="checkbox" id="shopAllFlower" value="Shop All Flow">Shop All Flower</label>
+            
+            </div>
+          </div>
+            
+        <?php endforeach; ?>
     </div>
 
     <div class="menuFooter">

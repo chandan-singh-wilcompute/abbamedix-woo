@@ -86,6 +86,16 @@
 
 </footer><!-- #site-footer -->
 
+<!-- Modal for Notify me -->
+<div id="notifyMeModal" class="notify-me-modal" style="display:none;">
+    <div class="notify-me-content">
+        <span class="close">&times;</span>
+        <h5>Get Notified When Available</h3>
+        <input type="email" id="notifyEmail" placeholder="Enter your email">
+        <button id="notifySubmit">Submit</button>
+        <p id="notifyMessage"></p>
+    </div>
+</div>
 <?php wp_footer(); ?>
 
 <script>
@@ -217,26 +227,111 @@
     });
 
 
+    // jQuery(document).ready(function ($) {
+    //     $('.swatch-item').on('click', function () {
+    //         // Reset ALL other swatches
+    //         $('.swatch-item').removeClass('active');
+
+    //         // 🔁 Reset all product cards' quantity and price to default
+    //         $('li.product').each(function () {
+    //             const priceWrapper = $(this).find('.price.prodcard-price');
+    //             const basePrice = priceWrapper.data('base-price');
+    //             priceWrapper.find('.price-html').text(basePrice);
+    //             $(this).find('.quantity').val(1); // Reset quantity
+    //             $(this).find('.productQuantity').removeClass('active');
+    //             $(this).find('.single_add_to_cart_button').removeClass('active').text('SELECT SIZE');
+    //         });
+
+    //         // ✅ Now apply "active" state only to this card
+    //         $(this).addClass('active');
+    //         const productCard = $(this).closest('li.product');
+    //         productCard.find('.productQuantity').addClass('active');
+    //         productCard.find('.single_add_to_cart_button').addClass('active').text('Add to cart');
+    //     });
+    // });
+    
     jQuery(document).ready(function ($) {
         $('.swatch-item').on('click', function () {
-            // Reset ALL other swatches
-            $('.swatch-item').removeClass('active');
 
-            // 🔁 Reset all product cards' quantity and price to default
+            // If swatch is disabled, stop here
+            if ($(this).hasClass('disabled')) {
+                return;
+            }
+
+            const productCard = $(this).closest('li.product');
+
+            // Skip if this product card has only "Notify Me"
+            if (productCard.find('.notify-me-button').length) {
+                return;
+            }
+
+            // Reset swatches only for in-stock products
             $('li.product').each(function () {
-                const priceWrapper = $(this).find('.price.prodcard-price');
-                const basePrice = priceWrapper.data('base-price');
-                priceWrapper.find('.price-html').text(basePrice);
-                $(this).find('.quantity').val(1); // Reset quantity
-                $(this).find('.productQuantity').removeClass('active');
-                $(this).find('.single_add_to_cart_button').removeClass('active').text('SELECT SIZE');
+                if (!$(this).find('.notify-me-button').length) {
+                    $(this).find('.swatch-item').removeClass('active');
+
+                    const priceWrapper = $(this).find('.price.prodcard-price');
+                    const basePrice = priceWrapper.data('base-price');
+                    priceWrapper.find('.price-html').text(basePrice);
+
+                    $(this).find('.quantity').val(1);
+                    $(this).find('.productQuantity').removeClass('active');
+                    $(this).find('.single_add_to_cart_button')
+                        .removeClass('active')
+                        .text('SELECT SIZE');
+                }
             });
 
-            // ✅ Now apply "active" state only to this card
+            // Activate current swatch
             $(this).addClass('active');
-            const productCard = $(this).closest('li.product');
             productCard.find('.productQuantity').addClass('active');
-            productCard.find('.single_add_to_cart_button').addClass('active').text('Add to cart');
+            productCard.find('.single_add_to_cart_button')
+                    .addClass('active')
+                    .text('Add to cart');
+        });
+    });
+
+
+    // Notify user about the product.
+    jQuery(document).ready(function ($) {
+
+        let selectedProductId = null;
+
+        // Open popup on Notify Me click
+        $(document).on('click', '.notify-me-button', function () {
+            selectedProductId = $(this).data('product-id');
+            console.log("I got licked", selectedProductId);
+            $('#notifyMeModal').fadeIn();
+        });
+
+        // Close popup
+        $(document).on('click', '.close', function () {
+            $('#notifyMeModal').fadeOut();
+            $('#notifyMessage').text('');
+            $('#notifyEmail').val('');
+        });
+
+        // Submit email
+        $('#notifySubmit').on('click', function () {
+            let email = $('#notifyEmail').val().trim();
+
+            if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+                $('#notifyMessage').text('Please enter a valid email.').css('color', 'red');
+                return;
+            }
+
+            $.post(wc_add_to_cart_params.ajax_url, {
+                action: 'add_to_notify_list',
+                product_id: selectedProductId,
+                email: email
+            }, function (response) {
+                if (response.success) {
+                    $('#notifyMessage').text('You will be notified!').css('color', 'green');
+                    setTimeout(() => { $('#notifyMeModal').fadeOut(); }, 1500);
+                } else {
+                    $('#notifyMessage').text(response.data).css('color', 'red');
+                }
+            });
         });
     });
 
@@ -421,11 +516,63 @@ jQuery(document.body).on('updated_wc_div wc_fragments_refreshed', function () {
 });
 
 
+// confirmation receipt and shipped receipt
+jQuery(document).ready(function($) {
+
+    function downloadDocument(orderId, docType) {
+        $.ajax({
+            url: wc_add_to_cart_params.ajax_url,
+            method: 'POST',
+            data: {
+                action: 'view_receipt_documents',
+                order_id: orderId,
+                doc_type: docType
+            },
+            xhrFields: {
+                responseType: 'blob' // important for binary files
+            },
+            success: function(blob) {
+                let fileURL = URL.createObjectURL(blob);
+                let a = document.createElement('a');
+                a.href = fileURL;
+                a.download = `${docType}-${orderId}.pdf`; // filename for download
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(fileURL); // clean up
+            },
+            error: function(err) {
+                console.error('Error fetching document', err);
+            }
+        });
+    }
+
+    // Handle Order Confirmation button
+    $(document).on('click', '#order-confirmation', function() {
+        let orderId = $(this).data('order-id');
+        console.log("order id: ", orderId);
+        downloadDocument(orderId, 'order-confirmation');
+    });
+
+    // Handle Shipped Receipt button
+    $(document).on('click', '#shipped-receipt', function() {
+        let orderId = $(this).data('order-id');
+        downloadDocument(orderId, 'shipped-receipt');
+    });
+
+});
+
+
+
+
 </script>
 
 <?php if (is_product()) : ?>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    
+
+
     function updateQuantity(button, change) {
         const group = button.closest('.group');
         if (!group) return;
@@ -540,6 +687,109 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
+
+jQuery(function($){
+
+  // Enable/disable controls inside a given form (.variations_form or .cart)
+  function setQuantityButtonsState($form, isInStock) {
+    // find the add-to-cart wrapper for this form (fallback to first matching)
+    var $wrap = $form.find('.woocommerce-variation-add-to-cart').first();
+    if (!$wrap.length) {
+      $wrap = $('.woocommerce-variation-add-to-cart').first();
+    }
+
+    // toggle wrapper class (WooCommerce uses this class when showing unavailable UI)
+    $wrap.toggleClass('woocommerce-variation-add-to-cart-disabled', !isInStock);
+
+    // quantity input and +/- buttons
+    $wrap.find('input[name="quantity"]').prop('disabled', !isInStock);
+    $wrap.find('.increase, .decrease').prop('disabled', !isInStock).toggleClass('disabled', !isInStock);
+
+    // also disable the Add to cart button
+    var $addBtn = $wrap.find('.single_add_to_cart_button');
+    $addBtn.prop('disabled', !isInStock);
+    $addBtn.toggleClass('disabled', !isInStock);
+    if (!isInStock) {
+      // optional: show unavailable text if you want
+      // $addBtn.text('Out of stock');
+    } else {
+      // restore original text if needed (depends on your theme)
+      // $addBtn.text($addBtn.data('original-text') || 'Add to cart');
+    }
+  }
+
+  // ===========================
+  // 1) Variable products
+  // ===========================
+  var $variationsForm = $('form.variations_form');
+
+  if ($variationsForm.length) {
+
+    // Disable until a variation is selected (safe default)
+    setQuantityButtonsState($variationsForm, false);
+
+    // When a variation is found by WooCommerce
+    $variationsForm.on('found_variation', function(event, variation) {
+      // variation.is_in_stock is a boolean
+      setQuantityButtonsState($(this), !!variation.is_in_stock);
+
+      // update rx reduction UI (your existing logic)
+      if (variation.rx_reduction) {
+        $('#rxDeductionAmnt').text(variation.rx_reduction + 'g');
+      } else {
+        $('#rxDeductionAmnt').text('—');
+      }
+    });
+
+    // When variations are reset
+    $variationsForm.on('reset_data', function() {
+      setQuantityButtonsState($(this), false);
+      $('#rxDeductionAmnt').text('—');
+    });
+
+    // If the page already displays an availability element (some themes do),
+    // set initial state accordingly (handles server-rendered selected variation)
+    var $avail = $variationsForm.find('.woocommerce-variation-availability .stock');
+    if ($avail.length) {
+      var inStock = !$avail.hasClass('out-of-stock');
+      setQuantityButtonsState($variationsForm, inStock);
+    }
+  }
+
+  // ===========================
+  // 2) Simple products (single)
+  // ===========================
+  var $simpleForm = $('form.cart').not('.variations_form');
+  if ($simpleForm.length) {
+    var isInStock = $('p.stock').hasClass('in-stock'); // adjust selector if theme differs
+    setQuantityButtonsState($simpleForm, isInStock);
+  }
+
+  // ===========================
+  // 3) Safeguard +/- handlers (delegated)
+  //    they won't do anything when disabled
+  // ===========================
+//   $(document).on('click', '.increase', function(e) {
+//     var $btn = $(this);
+//     if ($btn.prop('disabled')) return;
+//     var $wrap = $btn.closest('.woocommerce-variation-add-to-cart');
+//     var $input = $wrap.find('input[name="quantity"]');
+//     var val = parseInt($input.val()) || 1;
+//     var max = parseInt($input.attr('max')) || 999;
+//     if (val < max) $input.val(val + 1).trigger('change');
+//   });
+
+//   $(document).on('click', '.decrease', function(e) {
+//     var $btn = $(this);
+//     if ($btn.prop('disabled')) return;
+//     var $wrap = $btn.closest('.woocommerce-variation-add-to-cart');
+//     var $input = $wrap.find('input[name="quantity"]');
+//     var val = parseInt($input.val()) || 1;
+//     var min = parseInt($input.attr('min')) || 1;
+//     if (val > min) $input.val(val - 1).trigger('change');
+//   });
+
+});
 
 </script>
 

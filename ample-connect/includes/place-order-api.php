@@ -262,7 +262,7 @@ function apply_discount_after_api( $cart ) {
             $original_price = $cart_item['data']->get_price();
             
             // Calculate the discount amount
-            $discount_amount = ( $original_price * $discount_percentage ) / 100;
+            $discount_amount = ( (float)($original_price) * (float)$discount_percentage ) / 100;
             
             // Calculate the new price
             $new_price = $original_price - $discount_amount;

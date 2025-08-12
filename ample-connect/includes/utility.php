@@ -96,6 +96,7 @@ function handle_response($response, $log = false) {
     // if ($log)
     //     ample_connect_log($response, true);
 
+    ample_connect_log($response);
     if (is_wp_error($response)) {
         return ['error' => $response->get_error_message()];
     }
@@ -160,3 +161,4 @@ function clear_customer_cart( $customer_id ) {
     );
     return 1;
 }
+

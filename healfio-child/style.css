@@ -482,12 +482,14 @@ td.product-remove a {
     background-color: #e8e8e8;
     color: black !important;
     padding: 20px;
-    display: flex
+    display: flex;
+    margin-bottom: 10px;
 }
 
 .prescription-wrapper {
     overflow-y: scroll;
-    height: 670px;
+    /* height: 670px; */
+    height: 535px;
     display: flex;
     flex-direction: column;
     background-color: white;
@@ -565,6 +567,11 @@ td.product-remove a {
 .woocommerce-customer-details p {
   margin-bottom: 5px;
   font-size: 18px;
+}
+
+.woocommerce-MyAccount-content {
+    padding-top: 0;
+    padding-bottom: 0;
 }
 
 .woocommerce-MyAccount-content .woocommerce-notices-wrapper + p {
@@ -926,4 +933,44 @@ a.page-numbers {
 
 .skill-per.skill-second::before {
     content:  attr(data-per) '   gr   remaining' !important;
+}
+
+.swatch-item.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.notify-me-modal {
+    position: fixed;
+    z-index: 9999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.4);
+    display: flex; justify-content: center; align-items: center;
+}
+.notify-me-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    text-align: center;
+}
+.notify-me-content input {
+    width: 100%; padding: 8px; margin-bottom: 10px;
+}
+.notify-me-content button {
+    background: #333; color: #fff; border: none; padding: 8px 16px;
+    cursor: pointer;
+}
+.notify-me-content .close {
+    float: right; font-size: 20px; cursor: pointer;
+}
+
+.woocommerce-variation-availability {
+    min-width: 250px;
+}
+.woocommerce div.product p.stock.out-of-stock {
+  font-size: 1.2em;
+  font-weight: bold;
 }

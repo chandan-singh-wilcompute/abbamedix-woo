@@ -42,7 +42,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 					<tr class="tbbody">
 						<!-- <td><?php echo $order->id;?></td> -->
 						 <td>
-							<a href="<?php echo esc_url( home_url( '/?order_id=' . $order->get_id() ) ); ?>"><?php echo esc_html( $order->get_id() ); ?></a>
+							<a href="<?php echo esc_url( home_url( '/my-account/view-order/' . $order->get_id() ) ); ?>"><?php echo esc_html( $order->get_id() ); ?></a>
 						</td>
 
 						<td><time datetime="<?php echo esc_attr( $order->get_date_created()->date( 'c' ) ); ?>"><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></time></td>
@@ -51,7 +51,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 						<td><?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?></td>
 						<td><?php echo  $order->get_formatted_order_total(); ?></td>			
 					</tr>
-					<tr class="tbfoot"><td colspan="2">Order Confirmation</td><td colspan="4">Shipped Receipt</td></tr>
+					<tr class="tbfoot"><td colspan="2"><button type="button" id="order-confirmation" data-order-id="<?php echo esc_html( $order->get_id() ); ?>">Order Confirmation</button></td><td colspan="4"><button type="button" id="shipped-receipt" data-order-id="<?php echo esc_html( $order->get_id() ); ?>">Shipped Receipt</button></td></tr>
 				</table>
 				<?php endforeach; ?>
 			</div>

@@ -26,6 +26,7 @@ jQuery(document).ready(function($) {
                 console.log('Data saved. Starting batch processing...');
                 num_of_products = 0;
                 //product_batch_count = 1;
+                
                 runBatch(); // this function calls the batch processor via AJAX
             } else {
                 alert('Error: ' + response.data);
