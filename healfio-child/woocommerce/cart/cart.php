@@ -153,15 +153,20 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 			<?php do_action( 'woocommerce_cart_contents' ); ?>
 			<tr>
-				<td colspan="12" style="border: none!important;padding: 0px;">
-					<div class="skill-main">
+				<td colspan="12" style="border: none!important; padding: 0px;">
+					<!-- <div class="skill-main">
 						<div class="skill-wrrap">
 							<div class="skill-bar">
 								<div class="skill-per" data-min="0" data-per="" data-max="" style=""></div>
 							</div>
 							<div class="skill-name"><span class="gr max"></span><span class="gr min">0&nbsp;gr</span></div>
 						</div>
+					</div> -->
+
+					<div style="padding: 50px 0 0" id="skillvalue">
+						
 					</div>
+
 				</td>
 			</tr>
 			<tr>

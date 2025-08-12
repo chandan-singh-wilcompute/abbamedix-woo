@@ -3,6 +3,43 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Function to register a customer on ample
+function register_patient_on_ample($patient_data) {
+    ample_connect_log("register patient ample called");
+    $body = array (
+        "language_id" => "EN",
+        "registration_attributes" => [
+            "first_name" => $patient_data['first_name'],
+            "middle_name" => $patient_data['middle_name'],
+            "last_name" => $patient_data['last_name'],
+            "telephone_1" => "555-555-5555",
+            "date_of_birth" => $patient_data['date_of_birth'],
+            "email" => $patient_data['email'],
+            "status" => 'Lead'
+        ],
+        "password" => $patient_data['password'],
+        "password_confirmation" => $patient_data['password']
+    );
+
+    ample_connect_log("Body contents = ");
+    ample_connect_log($body);
+    
+    $response = ample_request(AMPLE_CONNECT_CLIENTS_URL, 'POST', $body);
+
+    return $response;
+}
+
+// Function to update other details of patient on ample 
+function update_registration_details_on_ample($client_id, $active_reg_id, $reg_data) {
+
+    ample_connect_log("update registration details ample called");
+    $api_url = AMPLE_CONNECT_CLIENTS_URL . "/$client_id/registrations/$active_reg_id";
+
+    $response = ample_request($api_url, 'PUT', $reg_dat);
+
+    return $response;
+}
+
 // Function to get purchasable products for a patient/customer/client
 function get_purchasable_products_and_store_in_session($user_id = "") {
 
@@ -143,9 +180,10 @@ function get_shipping_rates_and_store_in_session($user_id = "") {
     // ample_connect_log("Shipping methods - \n");
     // ample_connect_log($shipping_options);
 
-    // Ample_Session_Cache::set('custom_shipping_rates', $shipping_options);
+    Ample_Session_Cache::set('custom_shipping_rates', $shipping_options);
 
-    return $shipping_options;
+    // return $shipping_options;
+    return;
 }
 
 // Function to ger an Order Details
@@ -172,7 +210,7 @@ function get_order_from_api_and_update_session($user_id = "") {
 }
 
 function store_current_order_to_session($data) {
-    
+
     // Retrive order_id and store it in wc session
     Ample_Session_Cache::set('order_id', $data['id']);
 

@@ -1,6 +1,6 @@
 <?php
 	/**
-	 * Template Name: Product filter
+	 * Template Name: Featured filter
 	 *
 	 * @package WordPress
 	 * @subpackage Healfio-child

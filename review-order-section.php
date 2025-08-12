@@ -67,12 +67,12 @@ $is_sidebar_widget = true;
 
 	</div>
 </div>
-<div class="skill-main">
+<!-- <div class="skill-main">
 	<div class="skill-wrrap">
 		<div class="skill-bar">
 			<div class="skill-per skill-second" data-per="0" data-min="0" data-max=""></div>
 		</div>
 		<div class="skill-name"><span class="gr max">150 gr </span><span style="float: inline-end;">0 gr</span></div>
 	</div>
-</div>
+</div> -->
 <?php do_action( 'fc_checkout_after_order_review', $is_sidebar_widget ); ?>

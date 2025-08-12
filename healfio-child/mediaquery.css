@@ -81,7 +81,8 @@
   .viewAllProducts .container-fluid {
     max-width: 1488px;
   }
-  .productFilterResultWrapper .container-fluid {
+  .productFilterResultWrapper .container-fluid,
+  .featuredFilterResultWrapper .container-fluid {
     max-width: 1488px;
   }
 }

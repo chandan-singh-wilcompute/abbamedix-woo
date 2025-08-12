@@ -156,6 +156,7 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
              </div>';
         echo '</div>';
     }
+
 }
 
 add_action( 'init', 'custom_remove_default_loop_price' );
@@ -671,8 +672,8 @@ function custom_product_filter_results_shortcode() {
         foreach ($term_results as $entry) {
             $term = $entry['term'];
             $query = $entry['query'];
-
-            echo '<div class="titleWrapper">
+            $color_class = 'category-' . sanitize_html_class($term->slug);
+            echo '<div class="titleWrapper '. $color_class .'">
                     <div class="container-fluid">
                         <a id="goback" class="backBtn" style="display:none">Back</a>
                         <h5>' . esc_html($term->name) . '</h5>
@@ -845,8 +846,8 @@ function custom_featured_filter_results_shortcode() {
         foreach ($term_results as $entry) {
             $term = $entry['term'];
             $query = $entry['query'];
-
-            echo '<div class="titleWrapper">
+            $color_class = 'category-' . sanitize_html_class($term->slug);
+            echo '<div class="titleWrapper '. $color_class .'">
                     <div class="container-fluid">
                         <a id="goback" class="backBtn" style="display:none">Back</a>
                         <h5>' . esc_html($term->name) . '</h5>
@@ -1381,6 +1382,90 @@ function add_main_category_to_product_class($classes, $product) {
 
 // Display variation swatches on shop page
 add_action('woocommerce_after_shop_loop_item', 'display_variation_swatches', 15);
+// function display_variation_swatches() {
+//     global $product;
+    
+//     if (!$product->is_type('variable')) {
+//         return;
+//     }
+    
+//     $attributes = $product->get_variation_attributes();
+//     $available_variations = $product->get_available_variations();
+    
+//     if (empty($attributes)) {
+//         return;
+//     }
+    
+//     echo '<div class="shop-variation-swatches" data-product-id="' . $product->get_id() . '">';
+//     $currency_symbol = get_woocommerce_currency_symbol();
+//     $price_html = $product->get_price_html();
+//     $price = '';
+
+//     if ($price_html) {
+//         libxml_use_internal_errors(true);
+//         $dom = new DOMDocument();
+//         $dom->loadHTML($price_html);
+//         libxml_clear_errors();
+
+//         $price_elements = $dom->getElementsByTagName('span');
+//         foreach ($price_elements as $element) {
+//             if ($element->getAttribute('class') === 'woocommerce-Price-currencySymbol') {
+//                 $price_node = $element->nextSibling;
+//                 $price = $price_node->nodeValue;
+//                 break;
+//             }
+//         }
+//     }
+
+//     foreach ($attributes as $attribute_name => $options) {
+//         $attribute_label = wc_attribute_label($attribute_name);
+        
+//         echo '<div class="swatch-group">';
+//         // echo '<span class="swatch-label">Select' . $attribute_label . ':</span>';
+//         echo '<div class="swatches">';
+        
+//         foreach ($options as $option) {
+//             $class = 'swatch-item';
+//             $attribute_slug = str_replace('pa_', '', $attribute_name);
+            
+//             // Check if this is a color attribute
+//             if (strpos($attribute_name, 'color') !== false || strpos($attribute_name, 'colour') !== false) {
+//                 $class .= ' color-swatch';
+//                 $color_value = get_color_value($option);
+//                 $style = 'background-color: ' . $color_value . ';';
+//                 echo '<span class="' . $class . '" data-attribute="' . esc_attr($attribute_name) . '" data-value="' . esc_attr($option) . '" style="' . $style . '" title="' . esc_attr($option) . '"></span>';
+//             } else {
+//                 $class .= ' text-swatch';
+//                 echo '<span class="' . $class . '" data-attribute="' . esc_attr($attribute_name) . '" data-value="' . esc_attr($option) . '">' . esc_html($option) . '</span>';
+//             }
+//         }
+        
+//         echo '</div>';
+//         echo '</div>';
+//     }
+
+//     echo '<input type="hidden" id="prod-cur" value="' . esc_attr($currency_symbol) . '">';
+//     echo '<input type="hidden" id="prod-price" value="' . esc_attr($price) . '">';
+
+
+//     echo '<div class="variation-info">';
+//     echo '<span class="variation-price"></span>';
+//     echo '<span class="variation-stock"></span>';
+//     echo '</div>';
+    
+//     echo '<div class="variation-add-to-cart">';
+//     echo '<form class="cart" method="post" enctype="multipart/form-data">';
+//     echo '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '">';
+//     echo '<input type="hidden" name="product_id" value="' . $product->get_id() . '">';
+//     echo '<input type="hidden" name="variation_id" class="variation_id" value="">';    
+//     echo '<input type="hidden" name="quantity" value="1">';
+//     echo '<button type="submit" class="single_add_to_cart_button button alt">SELECT SIZE</button>';
+//     echo '</form>';
+//     echo '</div>';
+    
+//     echo '</div>';
+// }
+// Display variation swatches on shop page
 function display_variation_swatches() {
     global $product;
     
@@ -1416,26 +1501,51 @@ function display_variation_swatches() {
         }
     }
 
+    // Check if ALL variations are out of stock
+    $all_oos = true;
+    foreach ($available_variations as $variation) {
+        if ($variation['is_in_stock']) {
+            $all_oos = false;
+            break;
+        }
+    }
+
     foreach ($attributes as $attribute_name => $options) {
         $attribute_label = wc_attribute_label($attribute_name);
         
         echo '<div class="swatch-group">';
-        // echo '<span class="swatch-label">Select' . $attribute_label . ':</span>';
         echo '<div class="swatches">';
         
         foreach ($options as $option) {
             $class = 'swatch-item';
             $attribute_slug = str_replace('pa_', '', $attribute_name);
             
-            // Check if this is a color attribute
+            // Check stock for this option
+            $in_stock_option = false;
+            foreach ($available_variations as $variation) {
+                if (isset($variation['attributes']["attribute_$attribute_name"]) && strtolower($variation['attributes']["attribute_$attribute_name"]) === strtolower($option)) {
+                    if ($variation['is_in_stock']) {
+                        $in_stock_option = true;
+                    }
+                    break;
+                }
+            }
+            
+            if (!$in_stock_option) {
+                $class .= ' disabled';
+            }
+            
+            $stock_status = $in_stock_option ? 'in' : 'out';
+            
+            // Render swatch
             if (strpos($attribute_name, 'color') !== false || strpos($attribute_name, 'colour') !== false) {
                 $class .= ' color-swatch';
                 $color_value = get_color_value($option);
                 $style = 'background-color: ' . $color_value . ';';
-                echo '<span class="' . $class . '" data-attribute="' . esc_attr($attribute_name) . '" data-value="' . esc_attr($option) . '" style="' . $style . '" title="' . esc_attr($option) . '"></span>';
+                echo '<span class="' . $class . '" data-attribute="' . esc_attr($attribute_name) . '" data-value="' . esc_attr($option) . '" data-stock-status="' . $stock_status . '" style="' . $style . '" title="' . esc_attr($option) . '"></span>';
             } else {
                 $class .= ' text-swatch';
-                echo '<span class="' . $class . '" data-attribute="' . esc_attr($attribute_name) . '" data-value="' . esc_attr($option) . '">' . esc_html($option) . '</span>';
+                echo '<span class="' . $class . '" data-attribute="' . esc_attr($attribute_name) . '" data-value="' . esc_attr($option) . '" data-stock-status="' . $stock_status . '">' . esc_html($option) . '</span>';
             }
         }
         
@@ -1446,24 +1556,34 @@ function display_variation_swatches() {
     echo '<input type="hidden" id="prod-cur" value="' . esc_attr($currency_symbol) . '">';
     echo '<input type="hidden" id="prod-price" value="' . esc_attr($price) . '">';
 
-
     echo '<div class="variation-info">';
     echo '<span class="variation-price"></span>';
     echo '<span class="variation-stock"></span>';
     echo '</div>';
     
     echo '<div class="variation-add-to-cart">';
-    echo '<form class="cart" method="post" enctype="multipart/form-data">';
-    echo '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '">';
-    echo '<input type="hidden" name="product_id" value="' . $product->get_id() . '">';
-    echo '<input type="hidden" name="variation_id" class="variation_id" value="">';    
-    echo '<input type="hidden" name="quantity" value="1">';
-    echo '<button type="submit" class="single_add_to_cart_button button alt">SELECT SIZE</button>';
-    echo '</form>';
-    echo '</div>';
     
-    echo '</div>';
+    if ($all_oos) {
+        // All variations out of stock → show Notify Me
+        echo '<button type="button" class="single_add_to_cart_button button alt notify-me-button active" data-product-id="' . $product->get_id() . '">NOTIFY ME</button>';
+    } else {
+        // Normal form when some variations are in stock
+        echo '<form class="cart" method="post" enctype="multipart/form-data">';
+        echo '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '">';
+        echo '<input type="hidden" name="product_id" value="' . $product->get_id() . '">';
+        echo '<input type="hidden" name="variation_id" class="variation_id" value="">';    
+        echo '<input type="hidden" name="quantity" value="1">';
+        echo '<button type="submit" class="single_add_to_cart_button button alt">SELECT SIZE</button>';
+        echo '</form>';
+    }
+
+    echo '</div>'; // .variation-add-to-cart
+    echo '</div>'; // .shop-variation-swatches
+
 }
+
+
+
 
 add_action('wp_ajax_get_variations_for_product', 'get_variations_for_product');
 add_action('wp_ajax_nopriv_get_variations_for_product', 'get_variations_for_product');
@@ -1509,6 +1629,7 @@ function enqueue_custom_scripts() {
     wp_enqueue_script('wc-add-to-cart-variation'); // Needed for variation handling
     wp_localize_script('jquery', 'wc_add_to_cart_params', array(
         'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('view_order_doc_nonce'),
     ));
 }
 
@@ -1658,3 +1779,136 @@ function custom_user_order_history_shortcode() {
     return ob_get_clean();
 }
 add_shortcode('user_order_history', 'custom_user_order_history_shortcode');
+
+
+// Function to get array of category and related sub-categories
+function get_woocommerce_categories_hierarchy_with_slugs() {
+    /*
+    [
+        'Parent Category 1' => [
+            ['name' => 'Sub Category 1', 'slug' => 'sub-category-1'],
+            ['name' => 'Sub Category 2', 'slug' => 'sub-category-2'],
+        ],
+        ...
+    ]
+    */
+
+    $categories_hierarchy = [];
+
+    // Get all parent product categories
+    $parent_categories = get_terms([
+        'taxonomy'   => 'product_cat',
+        'hide_empty' => false,
+        'parent'     => 0
+    ]);
+
+    foreach ($parent_categories as $parent_cat) {
+        // Get sub-categories for each parent
+        $sub_categories = get_terms([
+            'taxonomy'   => 'product_cat',
+            'hide_empty' => false,
+            'parent'     => $parent_cat->term_id
+        ]);
+
+        $sub_data = [];
+
+        foreach ($sub_categories as $sub_cat) {
+            $sub_data[] = [
+                'name' => $sub_cat->name,
+                'slug' => $sub_cat->slug
+            ];
+        }
+
+        $categories_hierarchy[$parent_cat->name] = $sub_data;
+    }
+
+    return $categories_hierarchy;
+}
+
+// Function to get array of product-tags and related sub-categories
+function get_tag_subcategory_structure() {
+    /*
+        [
+            [
+                'tag' => ['name' => 'Outdoor', 'slug' => 'outdoor'],
+                'subcategories' => [
+                ['name' => 'Sativa', 'slug' => 'sativa'],
+                ['name' => 'Hybrid', 'slug' => 'hybrid'],
+                ]
+            ],
+            ...
+            ]
+    */
+
+    $structured_data = [];
+
+    // Get all product tags
+    $tags = get_terms([
+        'taxonomy'   => 'product_tag',
+        'hide_empty' => true,
+    ]);
+
+    foreach ($tags as $tag) {
+        $tag_slug = $tag->slug;
+        $tag_name = $tag->name;
+
+        // Get all products associated with this tag
+        $products = get_posts([
+            'post_type'      => 'product',
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'tax_query'      => [
+                [
+                    'taxonomy' => 'product_tag',
+                    'field'    => 'slug',
+                    'terms'    => $tag_slug,
+                ],
+            ],
+        ]);
+
+        $subcategory_map = [];
+
+        foreach ($products as $product_id) {
+            $categories = get_the_terms($product_id, 'product_cat');
+
+            if (!empty($categories) && !is_wp_error($categories)) {
+                foreach ($categories as $cat) {
+                    if ($cat->parent != 0) {
+                        $slug = $cat->slug;
+                        // Prevent duplicates by slug
+                        $subcategory_map[$slug] = [
+                            'name' => $cat->name,
+                            'slug' => $slug
+                        ];
+                    }
+                }
+            }
+        }
+
+        $structured_data[] = [
+            'tag' => [
+                'name' => $tag_name,
+                'slug' => $tag_slug
+            ],
+            'subcategories' => array_values($subcategory_map)
+        ];
+    }
+
+    return $structured_data;
+}
+
+// Shortcode for registration error messages
+add_shortcode('reg_form_message', function () {
+    if (isset($_GET['reg_msg'])){
+        if ($_GET['reg_msg'] === 'email_exists') {
+            return '<div class="alert alert-danger">An account with this email already exists.</div>';
+        } else {
+            return '<div class="alert alert-danger">Something went wrong. Please try again.</div>';
+        } 
+    } 
+    return '';
+});
+
+
+
+

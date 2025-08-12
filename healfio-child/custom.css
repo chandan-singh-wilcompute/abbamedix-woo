@@ -60,6 +60,11 @@ body .elementor-button:hover,
 body .elementor-button:focus {
   box-shadow: none !important;
 }
+body.elementor-page-9:not(.elementor-motion-effects-element-type-background),
+body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-effects-layer {
+  background-color: transparent;
+  background-image: linear-gradient(271deg, #4D732A 0%, #939F31 85%) !important;
+}
 @media (min-width: 1200px) {
   :root #main-header {
     margin-top: 120px;
@@ -376,12 +381,17 @@ body .elementor-button:focus {
 .myProfile {
   color: #ffffff;
 }
+.myProfile h1 {
+  margin-bottom: 50px;
+}
 .myProfile p:empty {
   display: none;
 }
 .myProfile h5,
 .myProfile h6 {
   font-weight: bold;
+  font-size: 20px;
+  text-transform: uppercase;
 }
 .myProfile h6 {
   display: flex;
@@ -389,19 +399,13 @@ body .elementor-button:focus {
 }
 .myProfile p {
   display: flex;
-  margin-bottom: 10px;
-  background: rgba(0, 0, 0, 0.1);
-  padding: 5px 10px;
-  margin-bottom: 4px;
-  border: solid rgba(255, 255, 255, 0.6);
-  border-width: thin;
+  margin-bottom: 20px;
 }
 .myProfile p strong {
   display: inline-block;
   position: relative;
-  max-width: 250px;
-  width: 100%;
   margin-right: 10px;
+  padding-right: 10px;
 }
 .myProfile p strong:after {
   position: absolute;
@@ -409,13 +413,30 @@ body .elementor-button:focus {
   content: ':';
   top: 0;
 }
+.myProfile .group2 {
+  margin-top: 60px;
+}
+.myProfile .group2 h5 {
+  margin-bottom: 5px;
+}
+.myProfile .group2 p {
+  margin-bottom: 10px;
+}
+.myProfile .group3 {
+  margin-top: 60px;
+  margin-bottom: 50px;
+}
 .myProfile .ccinfoContainer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  font-size: 12px;
+  padding: 2px 10px;
+  font-size: 16px;
   background-color: #0000007a;
+  margin-bottom: 15px;
+}
+.myProfile .ccinfoContainer:last-child {
+  margin-bottom: 0;
 }
 .myProfile .ccinfoContainer label {
   margin-bottom: 0;
@@ -443,10 +464,14 @@ body .elementor-button:focus {
   align-items: center;
   color: #000000;
 }
+.myProfile .ccinfoContainer p {
+  margin: 5px 0;
+  width: 100%;
+}
 .myProfile .badgeApproved {
   padding: 5px 10px;
   font-weight: bold;
-  background-color: #007866;
+  background: #9da632;
   display: inline-block;
 }
 .myProfile .btnManageCard {
@@ -461,6 +486,22 @@ body .elementor-button:focus {
 }
 .myProfile .btnManageCard:hover {
   background-color: #32350A;
+}
+.myProfile .prescriptionInformation .group1 {
+  min-height: 310px;
+}
+.myProfile .prescriptionInformation h6 {
+  margin-top: 0;
+}
+.scriptHistoryWrapper {
+  background: url(../healfio-child/img//history-bg.png) 0 center no-repeat;
+  background-size: cover;
+  padding: 50px 0 70px;
+}
+.scriptHistoryWrapper h6 {
+  color: #000000;
+  margin-top: 0;
+  font-weight: 600;
 }
 .scriptHistoryWrapper .verified {
   width: 24px;
@@ -544,6 +585,14 @@ body .elementor-button:focus {
 }
 .orderHistory table {
   font-size: 14px;
+}
+.orderHistory .tbfoot button {
+  font-weight: bold;
+  text-decoration: underline;
+  text-underline-position: under;
+  cursor: pointer;
+  background: transparent;
+  border: none;
 }
 .age-gate__remember {
   line-height: 22px;
@@ -2375,6 +2424,144 @@ input[type=number] {
   max-width: 1458px;
   margin: 15px 0 10px;
 }
+.featuredFilterResultWrapper .titleWrapper h5,
+.productFilterResultWrapper .titleWrapper h5,
+.viewAllProducts .titleWrapper h5 {
+  text-transform: capitalize;
+  margin: 0;
+  font-family: "Comfortaa", sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  color: #000000;
+  line-height: 24px;
+}
+.featuredFilterResultWrapper .titleWrapper.category-dried,
+.productFilterResultWrapper .titleWrapper.category-dried,
+.viewAllProducts .titleWrapper.category-dried,
+.featuredFilterResultWrapper .titleWrapper.category-pre-rolls,
+.productFilterResultWrapper .titleWrapper.category-pre-rolls,
+.viewAllProducts .titleWrapper.category-pre-rolls,
+.featuredFilterResultWrapper .titleWrapper.category-dried-flower-dried-flower,
+.productFilterResultWrapper .titleWrapper.category-dried-flower-dried-flower,
+.viewAllProducts .titleWrapper.category-dried-flower-dried-flower {
+  background-color: #A1D9E6;
+}
+.featuredFilterResultWrapper .titleWrapper.category-juices,
+.productFilterResultWrapper .titleWrapper.category-juices,
+.viewAllProducts .titleWrapper.category-juices,
+.featuredFilterResultWrapper .titleWrapper.category-sparklin,
+.productFilterResultWrapper .titleWrapper.category-sparklin,
+.viewAllProducts .titleWrapper.category-sparklin,
+.featuredFilterResultWrapper .titleWrapper.category-sof,
+.productFilterResultWrapper .titleWrapper.category-sof,
+.viewAllProducts .titleWrapper.category-sof,
+.featuredFilterResultWrapper .titleWrapper.category-beverages,
+.productFilterResultWrapper .titleWrapper.category-beverages,
+.viewAllProducts .titleWrapper.category-beverages,
+.featuredFilterResultWrapper .titleWrapper.category-dealcoholized,
+.productFilterResultWrapper .titleWrapper.category-dealcoholized,
+.viewAllProducts .titleWrapper.category-dealcoholized {
+  background-color: #FFCCCC;
+}
+.featuredFilterResultWrapper .titleWrapper.category-edible,
+.productFilterResultWrapper .titleWrapper.category-edible,
+.viewAllProducts .titleWrapper.category-edible,
+.featuredFilterResultWrapper .titleWrapper.category-pantry,
+.productFilterResultWrapper .titleWrapper.category-pantry,
+.viewAllProducts .titleWrapper.category-pantry,
+.featuredFilterResultWrapper .titleWrapper.category-gummies,
+.productFilterResultWrapper .titleWrapper.category-gummies,
+.viewAllProducts .titleWrapper.category-gummies,
+.featuredFilterResultWrapper .titleWrapper.category-hard-edibles,
+.productFilterResultWrapper .titleWrapper.category-hard-edibles,
+.viewAllProducts .titleWrapper.category-hard-edibles,
+.featuredFilterResultWrapper .titleWrapper.category-baked-goods,
+.productFilterResultWrapper .titleWrapper.category-baked-goods,
+.viewAllProducts .titleWrapper.category-baked-goods,
+.featuredFilterResultWrapper .titleWrapper.category-savary-snacks,
+.productFilterResultWrapper .titleWrapper.category-savary-snacks,
+.viewAllProducts .titleWrapper.category-savary-snacks,
+.featuredFilterResultWrapper .titleWrapper.category-chocalates,
+.productFilterResultWrapper .titleWrapper.category-chocalates,
+.viewAllProducts .titleWrapper.category-chocalates,
+.featuredFilterResultWrapper .titleWrapper.category-edibles-edibles,
+.productFilterResultWrapper .titleWrapper.category-edibles-edibles,
+.viewAllProducts .titleWrapper.category-edibles-edibles {
+  background-color: #E0E6A1;
+}
+.featuredFilterResultWrapper .titleWrapper.category-transdermal-gets,
+.productFilterResultWrapper .titleWrapper.category-transdermal-gets,
+.viewAllProducts .titleWrapper.category-transdermal-gets,
+.featuredFilterResultWrapper .titleWrapper.category-intimacy-oils,
+.productFilterResultWrapper .titleWrapper.category-intimacy-oils,
+.viewAllProducts .titleWrapper.category-intimacy-oils,
+.featuredFilterResultWrapper .titleWrapper.category-bath-shower,
+.productFilterResultWrapper .titleWrapper.category-bath-shower,
+.viewAllProducts .titleWrapper.category-bath-shower,
+.featuredFilterResultWrapper .titleWrapper.category-creams-lotions,
+.productFilterResultWrapper .titleWrapper.category-creams-lotions,
+.viewAllProducts .titleWrapper.category-creams-lotions,
+.featuredFilterResultWrapper .titleWrapper.category-topical,
+.productFilterResultWrapper .titleWrapper.category-topical,
+.viewAllProducts .titleWrapper.category-topical {
+  background-color: #FFECE5;
+}
+.featuredFilterResultWrapper .titleWrapper.category-capsules,
+.productFilterResultWrapper .titleWrapper.category-capsules,
+.viewAllProducts .titleWrapper.category-capsules,
+.featuredFilterResultWrapper .titleWrapper.category-extracts-inhaled,
+.productFilterResultWrapper .titleWrapper.category-extracts-inhaled,
+.viewAllProducts .titleWrapper.category-extracts-inhaled,
+.featuredFilterResultWrapper .titleWrapper.category-sublingual-strips,
+.productFilterResultWrapper .titleWrapper.category-sublingual-strips,
+.viewAllProducts .titleWrapper.category-sublingual-strips {
+  background-color: #C5CFDE;
+}
+.featuredFilterResultWrapper .titleWrapper.category-oils,
+.productFilterResultWrapper .titleWrapper.category-oils,
+.viewAllProducts .titleWrapper.category-oils {
+  background-color: #DB934C;
+}
+.featuredFilterResultWrapper .titleWrapper.category-closed-loop-pods,
+.productFilterResultWrapper .titleWrapper.category-closed-loop-pods,
+.viewAllProducts .titleWrapper.category-closed-loop-pods,
+.featuredFilterResultWrapper .titleWrapper.category-pax-pods,
+.productFilterResultWrapper .titleWrapper.category-pax-pods,
+.viewAllProducts .titleWrapper.category-pax-pods,
+.featuredFilterResultWrapper .titleWrapper.category-510-thread-cartridges,
+.productFilterResultWrapper .titleWrapper.category-510-thread-cartridges,
+.viewAllProducts .titleWrapper.category-510-thread-cartridges,
+.featuredFilterResultWrapper .titleWrapper.category-disposable-vapes,
+.productFilterResultWrapper .titleWrapper.category-disposable-vapes,
+.viewAllProducts .titleWrapper.category-disposable-vapes,
+.featuredFilterResultWrapper .titleWrapper.category-vapes,
+.productFilterResultWrapper .titleWrapper.category-vapes,
+.viewAllProducts .titleWrapper.category-vapes {
+  background-color: #7F9E6C;
+}
+.featuredFilterResultWrapper .titleWrapper.category-resin,
+.productFilterResultWrapper .titleWrapper.category-resin,
+.viewAllProducts .titleWrapper.category-resin,
+.featuredFilterResultWrapper .titleWrapper.category-kief,
+.productFilterResultWrapper .titleWrapper.category-kief,
+.viewAllProducts .titleWrapper.category-kief,
+.featuredFilterResultWrapper .titleWrapper.category-wax,
+.productFilterResultWrapper .titleWrapper.category-wax,
+.viewAllProducts .titleWrapper.category-wax,
+.featuredFilterResultWrapper .titleWrapper.category-rosin,
+.productFilterResultWrapper .titleWrapper.category-rosin,
+.viewAllProducts .titleWrapper.category-rosin,
+.featuredFilterResultWrapper .titleWrapper.category-shatter,
+.productFilterResultWrapper .titleWrapper.category-shatter,
+.viewAllProducts .titleWrapper.category-shatter,
+.featuredFilterResultWrapper .titleWrapper.category-hash,
+.productFilterResultWrapper .titleWrapper.category-hash,
+.viewAllProducts .titleWrapper.category-hash,
+.featuredFilterResultWrapper .titleWrapper.category-concentrates,
+.productFilterResultWrapper .titleWrapper.category-concentrates,
+.viewAllProducts .titleWrapper.category-concentrates {
+  background-color: #6095A3;
+}
 .featuredFilterResultWrapper .titleWrapper .container-fluid,
 .productFilterResultWrapper .titleWrapper .container-fluid,
 .viewAllProducts .titleWrapper .container-fluid {
@@ -2410,17 +2597,6 @@ input[type=number] {
   top: 0;
   right: 0;
   content: '';
-}
-.featuredFilterResultWrapper .titleWrapper h5,
-.productFilterResultWrapper .titleWrapper h5,
-.viewAllProducts .titleWrapper h5 {
-  text-transform: capitalize;
-  margin: 0;
-  font-family: "Comfortaa", sans-serif;
-  font-size: 20px;
-  font-weight: bold;
-  color: #FFFFFF;
-  line-height: 20px;
 }
 .featuredFilterResultWrapper .productFilter,
 .productFilterResultWrapper .productFilter {
@@ -2717,131 +2893,250 @@ li .swatch-item.selected {
   background-color: #6EB0BE;
 }
 li.category-dried:hover,
+li.category-pre-rolls:hover,
 li.category-dried-flower-dried-flower:hover {
   box-shadow: 1px 1px 10px 5px rgba(99, 167, 182, 0.7) !important;
 }
 li.category-dried .price,
+li.category-pre-rolls .price,
 li.category-dried-flower-dried-flower .price {
   background-color: #A1D9E6 !important;
   color: #000000 !important;
 }
 li.category-dried .prodcard-brand,
+li.category-pre-rolls .prodcard-brand,
 li.category-dried-flower-dried-flower .prodcard-brand {
   border-color: #6EB0BE;
   color: #6EB0BE;
 }
 li.category-dried .prodcard-attributes,
+li.category-pre-rolls .prodcard-attributes,
 li.category-dried-flower-dried-flower .prodcard-attributes {
   background-color: #A1D9E6;
 }
 li.category-dried .swatch-item:hover,
+li.category-pre-rolls .swatch-item:hover,
 li.category-dried-flower-dried-flower .swatch-item:hover {
   color: #6EB0BE;
   border-color: #6EB0BE;
 }
 li.category-dried .swatch-item.active,
+li.category-pre-rolls .swatch-item.active,
 li.category-dried-flower-dried-flower .swatch-item.active,
 li.category-dried .swatch-item.selected,
+li.category-pre-rolls .swatch-item.selected,
 li.category-dried-flower-dried-flower .swatch-item.selected {
   border-color: #6EB0BE;
   background-color: #6EB0BE;
 }
-li.category-beverages:hover {
+li.category-juices:hover,
+li.category-sparklin:hover,
+li.category-sof:hover,
+li.category-beverages:hover,
+li.category-dealcoholized:hover {
   box-shadow: 1px 1px 10px 5px rgba(197, 142, 142, 0.7) !important;
 }
-li.category-beverages .price {
+li.category-juices .price,
+li.category-sparklin .price,
+li.category-sof .price,
+li.category-beverages .price,
+li.category-dealcoholized .price {
   background-color: #FFCCCC !important;
   color: #000000 !important;
 }
-li.category-beverages .prodcard-brand {
+li.category-juices .prodcard-brand,
+li.category-sparklin .prodcard-brand,
+li.category-sof .prodcard-brand,
+li.category-beverages .prodcard-brand,
+li.category-dealcoholized .prodcard-brand {
   border-color: #CC9999;
   color: #CC9999;
 }
-li.category-beverages .prodcard-attributes {
+li.category-juices .prodcard-attributes,
+li.category-sparklin .prodcard-attributes,
+li.category-sof .prodcard-attributes,
+li.category-beverages .prodcard-attributes,
+li.category-dealcoholized .prodcard-attributes {
   background-color: #FFCCCC;
 }
-li.category-beverages .swatch-item:hover {
+li.category-juices .swatch-item:hover,
+li.category-sparklin .swatch-item:hover,
+li.category-sof .swatch-item:hover,
+li.category-beverages .swatch-item:hover,
+li.category-dealcoholized .swatch-item:hover {
   color: #CC9999;
   border-color: #CC9999;
 }
+li.category-juices .swatch-item.active,
+li.category-sparklin .swatch-item.active,
+li.category-sof .swatch-item.active,
 li.category-beverages .swatch-item.active,
-li.category-beverages .swatch-item.selected {
+li.category-dealcoholized .swatch-item.active,
+li.category-juices .swatch-item.selected,
+li.category-sparklin .swatch-item.selected,
+li.category-sof .swatch-item.selected,
+li.category-beverages .swatch-item.selected,
+li.category-dealcoholized .swatch-item.selected {
   border-color: #CC9999;
   background-color: #CC9999;
 }
-li.category-edibles-edibles:hover,
-li.category-edible:hover {
+li.category-edible:hover,
+li.category-pantry:hover,
+li.category-gummies:hover,
+li.category-hard-edibles:hover,
+li.category-baked-goods:hover,
+li.category-savary-snacks:hover,
+li.category-chocalates:hover,
+li.category-edibles-edibles:hover {
   box-shadow: 1px 1px 10px 5px rgba(157, 166, 50, 0.7) !important;
 }
-li.category-edibles-edibles .price,
-li.category-edible .price {
+li.category-edible .price,
+li.category-pantry .price,
+li.category-gummies .price,
+li.category-hard-edibles .price,
+li.category-baked-goods .price,
+li.category-savary-snacks .price,
+li.category-chocalates .price,
+li.category-edibles-edibles .price {
   background-color: #E0E6A1 !important;
   color: #000000 !important;
 }
-li.category-edibles-edibles .prodcard-brand,
-li.category-edible .prodcard-brand {
+li.category-edible .prodcard-brand,
+li.category-pantry .prodcard-brand,
+li.category-gummies .prodcard-brand,
+li.category-hard-edibles .prodcard-brand,
+li.category-baked-goods .prodcard-brand,
+li.category-savary-snacks .prodcard-brand,
+li.category-chocalates .prodcard-brand,
+li.category-edibles-edibles .prodcard-brand {
   border-color: #A7AF39;
   color: #A7AF39;
 }
-li.category-edibles-edibles .prodcard-attributes,
-li.category-edible .prodcard-attributes {
+li.category-edible .prodcard-attributes,
+li.category-pantry .prodcard-attributes,
+li.category-gummies .prodcard-attributes,
+li.category-hard-edibles .prodcard-attributes,
+li.category-baked-goods .prodcard-attributes,
+li.category-savary-snacks .prodcard-attributes,
+li.category-chocalates .prodcard-attributes,
+li.category-edibles-edibles .prodcard-attributes {
   background-color: #E0E6A1;
 }
-li.category-edibles-edibles .swatch-item:hover,
-li.category-edible .swatch-item:hover {
+li.category-edible .swatch-item:hover,
+li.category-pantry .swatch-item:hover,
+li.category-gummies .swatch-item:hover,
+li.category-hard-edibles .swatch-item:hover,
+li.category-baked-goods .swatch-item:hover,
+li.category-savary-snacks .swatch-item:hover,
+li.category-chocalates .swatch-item:hover,
+li.category-edibles-edibles .swatch-item:hover {
   color: #A7AF39;
   border-color: #A7AF39;
 }
-li.category-edibles-edibles .swatch-item.active,
 li.category-edible .swatch-item.active,
-li.category-edibles-edibles .swatch-item.selected,
-li.category-edible .swatch-item.selected {
+li.category-pantry .swatch-item.active,
+li.category-gummies .swatch-item.active,
+li.category-hard-edibles .swatch-item.active,
+li.category-baked-goods .swatch-item.active,
+li.category-savary-snacks .swatch-item.active,
+li.category-chocalates .swatch-item.active,
+li.category-edibles-edibles .swatch-item.active,
+li.category-edible .swatch-item.selected,
+li.category-pantry .swatch-item.selected,
+li.category-gummies .swatch-item.selected,
+li.category-hard-edibles .swatch-item.selected,
+li.category-baked-goods .swatch-item.selected,
+li.category-savary-snacks .swatch-item.selected,
+li.category-chocalates .swatch-item.selected,
+li.category-edibles-edibles .swatch-item.selected {
   border-color: #A7AF39;
   background-color: #A7AF39;
 }
+li.category-transdermal-gets:hover,
+li.category-intimacy-oils:hover,
+li.category-bath-shower:hover,
+li.category-creams-lotions:hover,
 li.category-topical:hover {
   box-shadow: 1px 1px 10px 5px rgba(245, 143, 59, 0.7) !important;
 }
+li.category-transdermal-gets .price,
+li.category-intimacy-oils .price,
+li.category-bath-shower .price,
+li.category-creams-lotions .price,
 li.category-topical .price {
   background-color: #FFECE5 !important;
   color: #000000 !important;
 }
+li.category-transdermal-gets .prodcard-brand,
+li.category-intimacy-oils .prodcard-brand,
+li.category-bath-shower .prodcard-brand,
+li.category-creams-lotions .prodcard-brand,
 li.category-topical .prodcard-brand {
   color: #F58F3B;
   border-color: #F58F3B;
 }
+li.category-transdermal-gets .prodcard-attributes,
+li.category-intimacy-oils .prodcard-attributes,
+li.category-bath-shower .prodcard-attributes,
+li.category-creams-lotions .prodcard-attributes,
 li.category-topical .prodcard-attributes {
   background-color: #FFECE5;
 }
+li.category-transdermal-gets .swatch-item:hover,
+li.category-intimacy-oils .swatch-item:hover,
+li.category-bath-shower .swatch-item:hover,
+li.category-creams-lotions .swatch-item:hover,
 li.category-topical .swatch-item:hover {
   color: #F58F3B;
   border-color: #F58F3B;
 }
+li.category-transdermal-gets .swatch-item.active,
+li.category-intimacy-oils .swatch-item.active,
+li.category-bath-shower .swatch-item.active,
+li.category-creams-lotions .swatch-item.active,
 li.category-topical .swatch-item.active,
+li.category-transdermal-gets .swatch-item.selected,
+li.category-intimacy-oils .swatch-item.selected,
+li.category-bath-shower .swatch-item.selected,
+li.category-creams-lotions .swatch-item.selected,
 li.category-topical .swatch-item.selected {
   border-color: #F58F3B;
   background-color: #F58F3B;
 }
-li.category-extracts-inhaled:hover {
+li.category-capsules:hover,
+li.category-extracts-inhaled:hover,
+li.category-sublingual-strips:hover {
   box-shadow: 1px 1px 10px 5px rgba(173, 187, 208, 0.7) !important;
 }
-li.category-extracts-inhaled .price {
+li.category-capsules .price,
+li.category-extracts-inhaled .price,
+li.category-sublingual-strips .price {
   background-color: #C5CFDE !important;
   color: #000000 !important;
 }
-li.category-extracts-inhaled .prodcard-brand {
+li.category-capsules .prodcard-brand,
+li.category-extracts-inhaled .prodcard-brand,
+li.category-sublingual-strips .prodcard-brand {
   border-color: #ADBBD0;
   color: #ADBBD0;
 }
-li.category-extracts-inhaled .prodcard-attributes {
+li.category-capsules .prodcard-attributes,
+li.category-extracts-inhaled .prodcard-attributes,
+li.category-sublingual-strips .prodcard-attributes {
   background-color: #C5CFDE;
 }
-li.category-extracts-inhaled .swatch-item:hover {
+li.category-capsules .swatch-item:hover,
+li.category-extracts-inhaled .swatch-item:hover,
+li.category-sublingual-strips .swatch-item:hover {
   color: #ADBBD0;
   border-color: #ADBBD0;
 }
+li.category-capsules .swatch-item.active,
 li.category-extracts-inhaled .swatch-item.active,
-li.category-extracts-inhaled .swatch-item.selected {
+li.category-sublingual-strips .swatch-item.active,
+li.category-capsules .swatch-item.selected,
+li.category-extracts-inhaled .swatch-item.selected,
+li.category-sublingual-strips .swatch-item.selected {
   border-color: #ADBBD0;
   background-color: #ADBBD0;
 }
@@ -2868,48 +3163,118 @@ li.category-oils .swatch-item.selected {
   border-color: #CC6600;
   background-color: #CC6600;
 }
+li.category-closed-loop-pods:hover,
+li.category-pax-pods:hover,
+li.category-510-thread-cartridges:hover,
+li.category-disposable-vapes:hover,
 li.category-vapes:hover {
   box-shadow: 1px 1px 10px 5px rgba(61, 133, 11, 0.7) !important;
 }
+li.category-closed-loop-pods .price,
+li.category-pax-pods .price,
+li.category-510-thread-cartridges .price,
+li.category-disposable-vapes .price,
 li.category-vapes .price {
   background-color: #7F9E6C !important;
   color: #000000 !important;
 }
+li.category-closed-loop-pods .prodcard-brand,
+li.category-pax-pods .prodcard-brand,
+li.category-510-thread-cartridges .prodcard-brand,
+li.category-disposable-vapes .prodcard-brand,
 li.category-vapes .prodcard-brand {
   border-color: #3D850B;
   color: #3D850B;
 }
+li.category-closed-loop-pods .prodcard-attributes,
+li.category-pax-pods .prodcard-attributes,
+li.category-510-thread-cartridges .prodcard-attributes,
+li.category-disposable-vapes .prodcard-attributes,
 li.category-vapes .prodcard-attributes {
   background-color: #7F9E6C;
 }
+li.category-closed-loop-pods .swatch-item:hover,
+li.category-pax-pods .swatch-item:hover,
+li.category-510-thread-cartridges .swatch-item:hover,
+li.category-disposable-vapes .swatch-item:hover,
 li.category-vapes .swatch-item:hover {
   color: #3D850B;
   border-color: #3D850B;
 }
+li.category-closed-loop-pods .swatch-item.active,
+li.category-pax-pods .swatch-item.active,
+li.category-510-thread-cartridges .swatch-item.active,
+li.category-disposable-vapes .swatch-item.active,
 li.category-vapes .swatch-item.active,
+li.category-closed-loop-pods .swatch-item.selected,
+li.category-pax-pods .swatch-item.selected,
+li.category-510-thread-cartridges .swatch-item.selected,
+li.category-disposable-vapes .swatch-item.selected,
 li.category-vapes .swatch-item.selected {
   border-color: #3D850B;
   background-color: #3D850B;
 }
+li.category-resin:hover,
+li.category-kief:hover,
+li.category-wax:hover,
+li.category-rosin:hover,
+li.category-shatter:hover,
+li.category-hash:hover,
 li.category-concentrates:hover {
   box-shadow: 1px 1px 10px 5px rgba(29, 104, 125, 0.7) !important;
 }
+li.category-resin .price,
+li.category-kief .price,
+li.category-wax .price,
+li.category-rosin .price,
+li.category-shatter .price,
+li.category-hash .price,
 li.category-concentrates .price {
   background-color: #6095A3 !important;
   color: #000000 !important;
 }
+li.category-resin .prodcard-brand,
+li.category-kief .prodcard-brand,
+li.category-wax .prodcard-brand,
+li.category-rosin .prodcard-brand,
+li.category-shatter .prodcard-brand,
+li.category-hash .prodcard-brand,
 li.category-concentrates .prodcard-brand {
   border-color: #1D687D;
   color: #1D687D;
 }
+li.category-resin .prodcard-attributes,
+li.category-kief .prodcard-attributes,
+li.category-wax .prodcard-attributes,
+li.category-rosin .prodcard-attributes,
+li.category-shatter .prodcard-attributes,
+li.category-hash .prodcard-attributes,
 li.category-concentrates .prodcard-attributes {
   background-color: #6095A3;
 }
+li.category-resin .swatch-item:hover,
+li.category-kief .swatch-item:hover,
+li.category-wax .swatch-item:hover,
+li.category-rosin .swatch-item:hover,
+li.category-shatter .swatch-item:hover,
+li.category-hash .swatch-item:hover,
 li.category-concentrates .swatch-item:hover {
   color: #1D687D;
   border-color: #1D687D;
 }
+li.category-resin .swatch-item.active,
+li.category-kief .swatch-item.active,
+li.category-wax .swatch-item.active,
+li.category-rosin .swatch-item.active,
+li.category-shatter .swatch-item.active,
+li.category-hash .swatch-item.active,
 li.category-concentrates .swatch-item.active,
+li.category-resin .swatch-item.selected,
+li.category-kief .swatch-item.selected,
+li.category-wax .swatch-item.selected,
+li.category-rosin .swatch-item.selected,
+li.category-shatter .swatch-item.selected,
+li.category-hash .swatch-item.selected,
 li.category-concentrates .swatch-item.selected {
   border-color: #1D687D;
   background-color: #1D687D;
@@ -2973,29 +3338,45 @@ li.category-concentrates .swatch-item.selected {
 .woocommerce ul.products li.product .button:hover.active:hover {
   color: #ffffff;
 }
+.woocommerce ul.products li.category-pre-rolls .button,
+.woocommerce ul.products li.category-pre-rolls .button:hover,
 .woocommerce ul.products li.category-dried .button,
-.woocommerce ul.products li.category-dried-flower-dried-flower .button,
 .woocommerce ul.products li.category-dried .button:hover,
+.woocommerce ul.products li.category-dried-flower-dried-flower .button,
 .woocommerce ul.products li.category-dried-flower-dried-flower .button:hover {
   background: #EEEFED !important;
   border-color: #EEEFED !important;
   color: #000000;
   pointer-events: none;
 }
+.woocommerce ul.products li.category-pre-rolls .button.active,
+.woocommerce ul.products li.category-pre-rolls .button:hover.active,
 .woocommerce ul.products li.category-dried .button.active,
-.woocommerce ul.products li.category-dried-flower-dried-flower .button.active,
 .woocommerce ul.products li.category-dried .button:hover.active,
+.woocommerce ul.products li.category-dried-flower-dried-flower .button.active,
 .woocommerce ul.products li.category-dried-flower-dried-flower .button:hover.active {
   background: #6EB0BE !important;
   border-color: #6EB0BE !important;
   pointer-events: all;
 }
+.woocommerce ul.products li.category-pre-rolls .button.active:hover,
+.woocommerce ul.products li.category-pre-rolls .button:hover.active:hover,
 .woocommerce ul.products li.category-dried .button.active:hover,
-.woocommerce ul.products li.category-dried-flower-dried-flower .button.active:hover,
 .woocommerce ul.products li.category-dried .button:hover.active:hover,
+.woocommerce ul.products li.category-dried-flower-dried-flower .button.active:hover,
 .woocommerce ul.products li.category-dried-flower-dried-flower .button:hover.active:hover {
   color: #ffffff;
 }
+.woocommerce ul.products li.category-dealcoholized .button,
+.woocommerce ul.products li.category-dealcoholized .button:hover,
+.woocommerce ul.products li.category-juices .button,
+.woocommerce ul.products li.category-juices .button:hover,
+.woocommerce ul.products li.category-beverages-mixers .button,
+.woocommerce ul.products li.category-beverages-mixers .button:hover,
+.woocommerce ul.products li.category-sparkling-waters .button,
+.woocommerce ul.products li.category-sparkling-waters .button:hover,
+.woocommerce ul.products li.category-soft-drinks .button,
+.woocommerce ul.products li.category-soft-drinks .button:hover,
 .woocommerce ul.products li.category-beverages .button,
 .woocommerce ul.products li.category-beverages .button:hover {
   background: #EEEFED !important;
@@ -3003,39 +3384,103 @@ li.category-concentrates .swatch-item.selected {
   color: #000000;
   pointer-events: none;
 }
+.woocommerce ul.products li.category-dealcoholized .button.active,
+.woocommerce ul.products li.category-dealcoholized .button:hover.active,
+.woocommerce ul.products li.category-juices .button.active,
+.woocommerce ul.products li.category-juices .button:hover.active,
+.woocommerce ul.products li.category-beverages-mixers .button.active,
+.woocommerce ul.products li.category-beverages-mixers .button:hover.active,
+.woocommerce ul.products li.category-sparkling-waters .button.active,
+.woocommerce ul.products li.category-sparkling-waters .button:hover.active,
+.woocommerce ul.products li.category-soft-drinks .button.active,
+.woocommerce ul.products li.category-soft-drinks .button:hover.active,
 .woocommerce ul.products li.category-beverages .button.active,
 .woocommerce ul.products li.category-beverages .button:hover.active {
   background: #CC9999 !important;
   border-color: #CC9999 !important;
   pointer-events: all;
 }
+.woocommerce ul.products li.category-dealcoholized .button.active:hover,
+.woocommerce ul.products li.category-dealcoholized .button:hover.active:hover,
+.woocommerce ul.products li.category-juices .button.active:hover,
+.woocommerce ul.products li.category-juices .button:hover.active:hover,
+.woocommerce ul.products li.category-beverages-mixers .button.active:hover,
+.woocommerce ul.products li.category-beverages-mixers .button:hover.active:hover,
+.woocommerce ul.products li.category-sparkling-waters .button.active:hover,
+.woocommerce ul.products li.category-sparkling-waters .button:hover.active:hover,
+.woocommerce ul.products li.category-soft-drinks .button.active:hover,
+.woocommerce ul.products li.category-soft-drinks .button:hover.active:hover,
 .woocommerce ul.products li.category-beverages .button.active:hover,
 .woocommerce ul.products li.category-beverages .button:hover.active:hover {
   color: #ffffff;
 }
+.woocommerce ul.products li.category-savary-snacks .button,
+.woocommerce ul.products li.category-savary-snacks .button:hover,
+.woocommerce ul.products li.category-pantry .button,
+.woocommerce ul.products li.category-pantry .button:hover,
+.woocommerce ul.products li.category-hard-edibles .button,
+.woocommerce ul.products li.category-hard-edibles .button:hover,
+.woocommerce ul.products li.category-gummies .button,
+.woocommerce ul.products li.category-gummies .button:hover,
+.woocommerce ul.products li.category-baked-goods .button,
+.woocommerce ul.products li.category-baked-goods .button:hover,
+.woocommerce ul.products li.category-chocalates .button,
+.woocommerce ul.products li.category-chocalates .button:hover,
 .woocommerce ul.products li.category-edible .button,
-.woocommerce ul.products li.category-edibles-edibles .button,
 .woocommerce ul.products li.category-edible .button:hover,
+.woocommerce ul.products li.category-edibles-edibles .button,
 .woocommerce ul.products li.category-edibles-edibles .button:hover {
   background: #EEEFED !important;
   border-color: #EEEFED !important;
   color: #000000;
   pointer-events: none;
 }
+.woocommerce ul.products li.category-savary-snacks .button.active,
+.woocommerce ul.products li.category-savary-snacks .button:hover.active,
+.woocommerce ul.products li.category-pantry .button.active,
+.woocommerce ul.products li.category-pantry .button:hover.active,
+.woocommerce ul.products li.category-hard-edibles .button.active,
+.woocommerce ul.products li.category-hard-edibles .button:hover.active,
+.woocommerce ul.products li.category-gummies .button.active,
+.woocommerce ul.products li.category-gummies .button:hover.active,
+.woocommerce ul.products li.category-baked-goods .button.active,
+.woocommerce ul.products li.category-baked-goods .button:hover.active,
+.woocommerce ul.products li.category-chocalates .button.active,
+.woocommerce ul.products li.category-chocalates .button:hover.active,
 .woocommerce ul.products li.category-edible .button.active,
-.woocommerce ul.products li.category-edibles-edibles .button.active,
 .woocommerce ul.products li.category-edible .button:hover.active,
+.woocommerce ul.products li.category-edibles-edibles .button.active,
 .woocommerce ul.products li.category-edibles-edibles .button:hover.active {
   background: #A7AF39 !important;
   border-color: #A7AF39 !important;
   pointer-events: all;
 }
+.woocommerce ul.products li.category-savary-snacks .button.active:hover,
+.woocommerce ul.products li.category-savary-snacks .button:hover.active:hover,
+.woocommerce ul.products li.category-pantry .button.active:hover,
+.woocommerce ul.products li.category-pantry .button:hover.active:hover,
+.woocommerce ul.products li.category-hard-edibles .button.active:hover,
+.woocommerce ul.products li.category-hard-edibles .button:hover.active:hover,
+.woocommerce ul.products li.category-gummies .button.active:hover,
+.woocommerce ul.products li.category-gummies .button:hover.active:hover,
+.woocommerce ul.products li.category-baked-goods .button.active:hover,
+.woocommerce ul.products li.category-baked-goods .button:hover.active:hover,
+.woocommerce ul.products li.category-chocalates .button.active:hover,
+.woocommerce ul.products li.category-chocalates .button:hover.active:hover,
 .woocommerce ul.products li.category-edible .button.active:hover,
-.woocommerce ul.products li.category-edibles-edibles .button.active:hover,
 .woocommerce ul.products li.category-edible .button:hover.active:hover,
+.woocommerce ul.products li.category-edibles-edibles .button.active:hover,
 .woocommerce ul.products li.category-edibles-edibles .button:hover.active:hover {
   color: #ffffff;
 }
+.woocommerce ul.products li.category-transdermal-gets .button,
+.woocommerce ul.products li.category-transdermal-gets .button:hover,
+.woocommerce ul.products li.category-intimacy-oils .button,
+.woocommerce ul.products li.category-intimacy-oils .button:hover,
+.woocommerce ul.products li.category-bath-shower .button,
+.woocommerce ul.products li.category-bath-shower .button:hover,
+.woocommerce ul.products li.category-creams-lotions .button,
+.woocommerce ul.products li.category-creams-lotions .button:hover,
 .woocommerce ul.products li.category-topical .button,
 .woocommerce ul.products li.category-topical .button:hover {
   background: #EEEFED !important;
@@ -3043,16 +3488,36 @@ li.category-concentrates .swatch-item.selected {
   color: #000000;
   pointer-events: none;
 }
+.woocommerce ul.products li.category-transdermal-gets .button.active,
+.woocommerce ul.products li.category-transdermal-gets .button:hover.active,
+.woocommerce ul.products li.category-intimacy-oils .button.active,
+.woocommerce ul.products li.category-intimacy-oils .button:hover.active,
+.woocommerce ul.products li.category-bath-shower .button.active,
+.woocommerce ul.products li.category-bath-shower .button:hover.active,
+.woocommerce ul.products li.category-creams-lotions .button.active,
+.woocommerce ul.products li.category-creams-lotions .button:hover.active,
 .woocommerce ul.products li.category-topical .button.active,
 .woocommerce ul.products li.category-topical .button:hover.active {
   background: #FF9933 !important;
   border-color: #FF9933 !important;
   pointer-events: all;
 }
+.woocommerce ul.products li.category-transdermal-gets .button.active:hover,
+.woocommerce ul.products li.category-transdermal-gets .button:hover.active:hover,
+.woocommerce ul.products li.category-intimacy-oils .button.active:hover,
+.woocommerce ul.products li.category-intimacy-oils .button:hover.active:hover,
+.woocommerce ul.products li.category-bath-shower .button.active:hover,
+.woocommerce ul.products li.category-bath-shower .button:hover.active:hover,
+.woocommerce ul.products li.category-creams-lotions .button.active:hover,
+.woocommerce ul.products li.category-creams-lotions .button:hover.active:hover,
 .woocommerce ul.products li.category-topical .button.active:hover,
 .woocommerce ul.products li.category-topical .button:hover.active:hover {
   color: #ffffff;
 }
+.woocommerce ul.products li.category-sublingual-strips .button,
+.woocommerce ul.products li.category-sublingual-strips .button:hover,
+.woocommerce ul.products li.category-capsules .button,
+.woocommerce ul.products li.category-capsules .button:hover,
 .woocommerce ul.products li.category-extracts-inhaled .button,
 .woocommerce ul.products li.category-extracts-inhaled .button:hover {
   background: #EEEFED !important;
@@ -3060,12 +3525,20 @@ li.category-concentrates .swatch-item.selected {
   color: #000000;
   pointer-events: none;
 }
+.woocommerce ul.products li.category-sublingual-strips .button.active,
+.woocommerce ul.products li.category-sublingual-strips .button:hover.active,
+.woocommerce ul.products li.category-capsules .button.active,
+.woocommerce ul.products li.category-capsules .button:hover.active,
 .woocommerce ul.products li.category-extracts-inhaled .button.active,
 .woocommerce ul.products li.category-extracts-inhaled .button:hover.active {
   background: #ADBBD0 !important;
   border-color: #ADBBD0 !important;
   pointer-events: all;
 }
+.woocommerce ul.products li.category-sublingual-strips .button.active:hover,
+.woocommerce ul.products li.category-sublingual-strips .button:hover.active:hover,
+.woocommerce ul.products li.category-capsules .button.active:hover,
+.woocommerce ul.products li.category-capsules .button:hover.active:hover,
 .woocommerce ul.products li.category-extracts-inhaled .button.active:hover,
 .woocommerce ul.products li.category-extracts-inhaled .button:hover.active:hover {
   color: #ffffff;
@@ -3087,6 +3560,14 @@ li.category-concentrates .swatch-item.selected {
 .woocommerce ul.products li.category-oils .button:hover.active:hover {
   color: #ffffff;
 }
+.woocommerce ul.products li.category-closed-loop-pods .button,
+.woocommerce ul.products li.category-closed-loop-pods .button:hover,
+.woocommerce ul.products li.category-pax-pods .button,
+.woocommerce ul.products li.category-pax-pods .button:hover,
+.woocommerce ul.products li.category-510-thread-cartridges .button,
+.woocommerce ul.products li.category-510-thread-cartridges .button:hover,
+.woocommerce ul.products li.category-disposable-vapes .button,
+.woocommerce ul.products li.category-disposable-vapes .button:hover,
 .woocommerce ul.products li.category-vapes .button,
 .woocommerce ul.products li.category-vapes .button:hover {
   background: #EEEFED !important;
@@ -3094,16 +3575,44 @@ li.category-concentrates .swatch-item.selected {
   color: #000000;
   pointer-events: none;
 }
+.woocommerce ul.products li.category-closed-loop-pods .button.active,
+.woocommerce ul.products li.category-closed-loop-pods .button:hover.active,
+.woocommerce ul.products li.category-pax-pods .button.active,
+.woocommerce ul.products li.category-pax-pods .button:hover.active,
+.woocommerce ul.products li.category-510-thread-cartridges .button.active,
+.woocommerce ul.products li.category-510-thread-cartridges .button:hover.active,
+.woocommerce ul.products li.category-disposable-vapes .button.active,
+.woocommerce ul.products li.category-disposable-vapes .button:hover.active,
 .woocommerce ul.products li.category-vapes .button.active,
 .woocommerce ul.products li.category-vapes .button:hover.active {
   background: #3D850B !important;
   border-color: #3D850B !important;
   pointer-events: all;
 }
+.woocommerce ul.products li.category-closed-loop-pods .button.active:hover,
+.woocommerce ul.products li.category-closed-loop-pods .button:hover.active:hover,
+.woocommerce ul.products li.category-pax-pods .button.active:hover,
+.woocommerce ul.products li.category-pax-pods .button:hover.active:hover,
+.woocommerce ul.products li.category-510-thread-cartridges .button.active:hover,
+.woocommerce ul.products li.category-510-thread-cartridges .button:hover.active:hover,
+.woocommerce ul.products li.category-disposable-vapes .button.active:hover,
+.woocommerce ul.products li.category-disposable-vapes .button:hover.active:hover,
 .woocommerce ul.products li.category-vapes .button.active:hover,
 .woocommerce ul.products li.category-vapes .button:hover.active:hover {
   color: #ffffff;
 }
+.woocommerce ul.products li.category-resin .button,
+.woocommerce ul.products li.category-resin .button:hover,
+.woocommerce ul.products li.category-kief .button,
+.woocommerce ul.products li.category-kief .button:hover,
+.woocommerce ul.products li.category-wax .button,
+.woocommerce ul.products li.category-wax .button:hover,
+.woocommerce ul.products li.category-rosin .button,
+.woocommerce ul.products li.category-rosin .button:hover,
+.woocommerce ul.products li.category-shatter .button,
+.woocommerce ul.products li.category-shatter .button:hover,
+.woocommerce ul.products li.category-hash .button,
+.woocommerce ul.products li.category-hash .button:hover,
 .woocommerce ul.products li.category-concentrates .button,
 .woocommerce ul.products li.category-concentrates .button:hover {
   background: #EEEFED !important;
@@ -3111,19 +3620,43 @@ li.category-concentrates .swatch-item.selected {
   color: #000000;
   pointer-events: none;
 }
+.woocommerce ul.products li.category-resin .button.active,
+.woocommerce ul.products li.category-resin .button:hover.active,
+.woocommerce ul.products li.category-kief .button.active,
+.woocommerce ul.products li.category-kief .button:hover.active,
+.woocommerce ul.products li.category-wax .button.active,
+.woocommerce ul.products li.category-wax .button:hover.active,
+.woocommerce ul.products li.category-rosin .button.active,
+.woocommerce ul.products li.category-rosin .button:hover.active,
+.woocommerce ul.products li.category-shatter .button.active,
+.woocommerce ul.products li.category-shatter .button:hover.active,
+.woocommerce ul.products li.category-hash .button.active,
+.woocommerce ul.products li.category-hash .button:hover.active,
 .woocommerce ul.products li.category-concentrates .button.active,
 .woocommerce ul.products li.category-concentrates .button:hover.active {
   background: #1D687D !important;
   border-color: #1D687D !important;
   pointer-events: all;
 }
+.woocommerce ul.products li.category-resin .button.active:hover,
+.woocommerce ul.products li.category-resin .button:hover.active:hover,
+.woocommerce ul.products li.category-kief .button.active:hover,
+.woocommerce ul.products li.category-kief .button:hover.active:hover,
+.woocommerce ul.products li.category-wax .button.active:hover,
+.woocommerce ul.products li.category-wax .button:hover.active:hover,
+.woocommerce ul.products li.category-rosin .button.active:hover,
+.woocommerce ul.products li.category-rosin .button:hover.active:hover,
+.woocommerce ul.products li.category-shatter .button.active:hover,
+.woocommerce ul.products li.category-shatter .button:hover.active:hover,
+.woocommerce ul.products li.category-hash .button.active:hover,
+.woocommerce ul.products li.category-hash .button:hover.active:hover,
 .woocommerce ul.products li.category-concentrates .button.active:hover,
 .woocommerce ul.products li.category-concentrates .button:hover.active:hover {
   color: #ffffff;
 }
 .page-template-manage-card {
   background: transparent;
-  background-image: linear-gradient(271deg, #4D732A 0%, #939F31 65%);
+  background-image: linear-gradient(271deg, #4D732A 0%, #939F31 75%);
 }
 .manageCardWrapper {
   color: #ffffff;
@@ -3263,7 +3796,7 @@ li.category-concentrates .swatch-item.selected {
 }
 .rxDeduInfo {
   position: absolute;
-  right: -210px;
+  right: -230px;
   top: 15px;
   color: #ffffff;
   white-space: nowrap;
@@ -3278,4 +3811,17 @@ li.category-concentrates .swatch-item.selected {
     position: static;
     width: auto;
   }
+}
+.skillBar {
+  border: solid 2px #9da632;
+  color: #000000;
+  padding: 10px 15px;
+  font-size: 16px;
+  background: #e0e0b6;
+  border-radius: 2px;
+}
+.skillBar .skillvalue {
+  font-weight: bold;
+  color: #9da632;
+  font-size: 20px;
 }

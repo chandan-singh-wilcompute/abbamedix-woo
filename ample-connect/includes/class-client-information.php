@@ -30,9 +30,11 @@ class  Client_Information {
         }
 
         $prescriptions = $client['prescriptions'];
+        Ample_Session_Cache::set('prescriptions', $prescriptions);
         $available_to_order = 0;
         foreach ($prescriptions as $prescription) {
             if ($prescription['is_current'] == 1) {
+                Ample_Session_Cache::set('current_prescription', $prescription);
                 $available_to_order = $prescription['available_to_order'];
                 break;
             }

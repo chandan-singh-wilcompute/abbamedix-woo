@@ -36,6 +36,12 @@ body .elementor-button:focus {
   box-shadow: none !important;
 }
 
+body.elementor-page-9:not(.elementor-motion-effects-element-type-background), 
+body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-effects-layer {
+  background-color: transparent;
+  background-image: linear-gradient(271deg, #4D732A 0%, #939F31 85%) !important;
+}
+
 @media (min-width: 1200px) {
   :root #main-header {
     margin-top: 120px;
@@ -442,12 +448,18 @@ body .elementor-button:focus {
 
   color: @white;
 
+  h1 {
+    margin-bottom: 50px;
+  }
+
   p:empty {
     display: none;
   }
 
   h5, h6 {
     font-weight: bold;
+    font-size: 20px;
+    text-transform: uppercase;
   }
 
   h6 {
@@ -458,20 +470,20 @@ body .elementor-button:focus {
   p {
 
     display: flex;
-    margin-bottom: 10px;
-    background: rgba(0, 0, 0, 0.1);
-    padding: 5px 10px;
-    margin-bottom: 4px;
-    
-    border: solid rgba(255, 255, 255, 0.6);
-    border-width: thin;
+    margin-bottom: 20px;
+    // padding: 5px 10px;
+    // margin-bottom: 4px;    
+    // background: rgba(0, 0, 0, 0.1);
+    // border: solid rgba(255, 255, 255, 0.6);
+    // border-width: thin;
 
     strong {
       display: inline-block;
       position: relative;
-      max-width: 250px;
-      width: 100%;
+      // max-width: 250px;
+      // width: 100%;
       margin-right: 10px;
+      padding-right: 10px;
 
       &:after {
         position: absolute;
@@ -482,13 +494,33 @@ body .elementor-button:focus {
     }
   }
 
+  .group2 {
+    margin-top: 60px;
+    h5 {
+      margin-bottom: 5px;
+    }
+    p {
+      margin-bottom: 10px;
+    }
+  }
+
+  .group3 {
+    margin-top: 60px;
+    margin-bottom: 50px;
+  }
+
   .ccinfoContainer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
-    font-size: 12px;
+    padding: 2px 10px;
+    font-size: 16px;
     background-color: #0000007a;
+    margin-bottom: 15px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
 
     label {
       margin-bottom: 0;
@@ -519,12 +551,18 @@ body .elementor-button:focus {
       align-items: center;
       color: @black;
     }
+
+    p {
+      margin: 5px 0;
+      width: 100%;
+    }
   }
 
   .badgeApproved {
     padding: 5px 10px;
     font-weight: bold;
-    background-color: #007866;
+    // background-color: #007866;
+    background: #9da632;
     display: inline-block;
   }
 
@@ -542,18 +580,28 @@ body .elementor-button:focus {
       background-color: #32350A;
     }
   }
+
+  .prescriptionInformation {
+    .group1 {
+      min-height: 310px;     
+    }
+
+    h6 {
+      margin-top: 0;
+    }
+  }
 }
 
 .scriptHistoryWrapper {
-  // background: url(../healfio-child/img//history-bg.png) 0 center no-repeat;
-  // background-size: cover;
-  // padding: 20px 0 70px;
+  background: url(../healfio-child/img//history-bg.png) 0 center no-repeat;
+  background-size: cover;
+  padding: 50px 0 70px;
 
-  // h6 {
-  //   color: @black;
-  //   margin-top: 0;
-  //   font-weight: 600;
-  // }
+  h6 {
+    color: @black;
+    margin-top: 0;
+    font-weight: 600;
+  }
 
   .verified {
     width: 24px;
@@ -663,6 +711,17 @@ body .elementor-button:focus {
 
   table {
     font-size: 14px;
+  }
+
+  .tbfoot {
+    button {
+      font-weight: bold;
+      text-decoration: underline;
+      text-underline-position: under;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+    }
   }
 
 }
@@ -2960,11 +3019,82 @@ input[type=number] {
     max-width: 1458px;
     margin: 15px 0 10px;
 
+    h5 {
+      text-transform: capitalize;
+      margin: 0;
+      font-family: @Comfortaa;
+      font-size: 24px;
+      font-weight: bold;
+      color: #000000;
+      line-height: 24px;
+    }
+
+    &.category-dried,
+    &.category-pre-rolls,
+    &.category-dried-flower-dried-flower {
+      background-color: #A1D9E6;
+    }
+
+    &.category-juices,
+    &.category-sparklin,
+    &.category-sof,
+    &.category-beverages,
+    &.category-dealcoholized {         
+      background-color: #FFCCCC;
+    }
+    
+    &.category-edible,
+    &.category-pantry, 
+    &.category-gummies,   
+    &.category-hard-edibles,
+    &.category-baked-goods,
+    &.category-savary-snacks, 
+    &.category-chocalates,   
+    &.category-edibles-edibles {
+      background-color: #E0E6A1;
+    }
+
+    &.category-transdermal-gets,
+    &.category-intimacy-oils,
+    &.category-bath-shower,
+    &.category-creams-lotions,
+    &.category-topical {
+      background-color: #FFECE5;
+    }
+    
+    &.category-capsules,  
+    &.category-extracts-inhaled,
+    &.category-sublingual-strips {
+      background-color: #C5CFDE;
+    }
+
+
+    &.category-oils {
+      background-color: #DB934C;
+    }
+
+    &.category-closed-loop-pods,
+    &.category-pax-pods,
+    &.category-510-thread-cartridges,
+    &.category-disposable-vapes,
+    &.category-vapes {
+      background-color: #7F9E6C;
+    }
+
+    &.category-resin,
+    &.category-kief,
+    &.category-wax,
+    &.category-rosin,
+    &.category-shatter,
+    &.category-hash,
+    &.category-concentrates {
+      background-color: #6095A3;
+    }
+
     .container-fluid {
       display: flex;
       align-items: center;
       justify-content: flex-start;
-
     }
 
     .backBtn {
@@ -2991,15 +3121,6 @@ input[type=number] {
         right: 0;
         content: '';
       }
-    }
-    h5 {
-      text-transform: capitalize;
-      margin: 0;
-      font-family: @Comfortaa;
-      font-size: 20px;
-      font-weight: bold;
-      color: #FFFFFF;
-      line-height: 20px;
     }
   }
 }
@@ -3396,9 +3517,9 @@ li {
     }
   }
 
-
-
+  
   &.category-dried,
+  &.category-pre-rolls,
   &.category-dried-flower-dried-flower {
     
     &:hover {
@@ -3434,7 +3555,11 @@ li {
 
   }
 
-  &.category-beverages {     
+  &.category-juices,
+  &.category-sparklin,
+  &.category-sof,
+  &.category-beverages,
+  &.category-dealcoholized {     
     
     &:hover {
       box-shadow: 1px 1px 10px 5px rgba(197, 142, 142, 0.7) !important;
@@ -3468,8 +3593,15 @@ li {
     }
   }
   
-  &.category-edibles-edibles,
-  &.category-edible {
+  
+  &.category-edible,
+  &.category-pantry, 
+  &.category-gummies,   
+  &.category-hard-edibles,
+  &.category-baked-goods,
+  &.category-savary-snacks, 
+  &.category-chocalates,   
+  &.category-edibles-edibles {
     
     &:hover {
       box-shadow: 1px 1px 10px 5px rgba(157, 166, 50, 0.7) !important;
@@ -3503,6 +3635,10 @@ li {
     }
   }
 
+  &.category-transdermal-gets,
+  &.category-intimacy-oils,
+  &.category-bath-shower,
+  &.category-creams-lotions,
   &.category-topical {
     &:hover {
       box-shadow: 1px 1px 10px 5px rgba(245, 143, 59, 0.7) !important;
@@ -3536,7 +3672,11 @@ li {
     }
   }
 
-  &.category-extracts-inhaled {
+
+  
+  &.category-capsules,  
+  &.category-extracts-inhaled,
+  &.category-sublingual-strips {
     &:hover {
       box-shadow: 1px 1px 10px 5px rgba(173, 187, 208, 0.7) !important;
     }
@@ -3568,6 +3708,7 @@ li {
       }
     }
   }
+
 
   &.category-oils {
     &:hover {
@@ -3602,6 +3743,10 @@ li {
     }
   }
 
+  &.category-closed-loop-pods,
+  &.category-pax-pods,
+  &.category-510-thread-cartridges,
+  &.category-disposable-vapes,
   &.category-vapes {
     &:hover {
       box-shadow: 1px 1px 10px 5px rgba(61, 133, 11, 0.7) !important;
@@ -3635,6 +3780,12 @@ li {
     }
   }
 
+  &.category-resin,
+  &.category-kief,
+  &.category-wax,
+  &.category-rosin,
+  &.category-shatter,
+  &.category-hash,
   &.category-concentrates {
     &:hover {
       box-shadow: 1px 1px 10px 5px rgba(29, 104, 125, 0.7) !important;
@@ -3744,9 +3895,12 @@ li {
   
 }
 
+// Flower
+.woocommerce ul.products li.category-pre-rolls .button,
+.woocommerce ul.products li.category-pre-rolls .button:hover,
 .woocommerce ul.products li.category-dried .button,
-.woocommerce ul.products li.category-dried-flower-dried-flower .button,
 .woocommerce ul.products li.category-dried .button:hover,
+.woocommerce ul.products li.category-dried-flower-dried-flower .button,
 .woocommerce ul.products li.category-dried-flower-dried-flower .button:hover {
 
   background: #EEEFED !important;
@@ -3764,6 +3918,17 @@ li {
   }
 }
 
+// Beverages
+.woocommerce ul.products li.category-dealcoholized .button,
+.woocommerce ul.products li.category-dealcoholized .button:hover,
+.woocommerce ul.products li.category-juices .button,
+.woocommerce ul.products li.category-juices .button:hover,
+.woocommerce ul.products li.category-beverages-mixers .button,
+.woocommerce ul.products li.category-beverages-mixers .button:hover,
+.woocommerce ul.products li.category-sparkling-waters .button,
+.woocommerce ul.products li.category-sparkling-waters .button:hover,
+.woocommerce ul.products li.category-soft-drinks .button,
+.woocommerce ul.products li.category-soft-drinks .button:hover,
 .woocommerce ul.products li.category-beverages .button,
 .woocommerce ul.products li.category-beverages .button:hover {
   background: #EEEFED !important;
@@ -3781,9 +3946,22 @@ li {
   }
 }
 
+// Edibles
+.woocommerce ul.products li.category-savary-snacks .button,
+.woocommerce ul.products li.category-savary-snacks .button:hover,
+.woocommerce ul.products li.category-pantry .button,
+.woocommerce ul.products li.category-pantry .button:hover,
+.woocommerce ul.products li.category-hard-edibles .button,
+.woocommerce ul.products li.category-hard-edibles .button:hover,
+.woocommerce ul.products li.category-gummies .button,
+.woocommerce ul.products li.category-gummies .button:hover,
+.woocommerce ul.products li.category-baked-goods .button,
+.woocommerce ul.products li.category-baked-goods .button:hover,
+.woocommerce ul.products li.category-chocalates .button,
+.woocommerce ul.products li.category-chocalates .button:hover,
 .woocommerce ul.products li.category-edible .button,
-.woocommerce ul.products li.category-edibles-edibles .button,
 .woocommerce ul.products li.category-edible .button:hover,
+.woocommerce ul.products li.category-edibles-edibles .button,
 .woocommerce ul.products li.category-edibles-edibles .button:hover {
   background: #EEEFED !important;
   border-color: #EEEFED !important;
@@ -3800,6 +3978,15 @@ li {
   }
 }
 
+// Topicals
+.woocommerce ul.products li.category-transdermal-gets .button,
+.woocommerce ul.products li.category-transdermal-gets .button:hover,
+.woocommerce ul.products li.category-intimacy-oils .button,
+.woocommerce ul.products li.category-intimacy-oils .button:hover,
+.woocommerce ul.products li.category-bath-shower .button,
+.woocommerce ul.products li.category-bath-shower .button:hover,
+.woocommerce ul.products li.category-creams-lotions .button,
+.woocommerce ul.products li.category-creams-lotions .button:hover,
 .woocommerce ul.products li.category-topical .button,
 .woocommerce ul.products li.category-topical .button:hover {
   background: #EEEFED !important;
@@ -3817,6 +4004,11 @@ li {
   }
 }
 
+// Extracts
+.woocommerce ul.products li.category-sublingual-strips .button,
+.woocommerce ul.products li.category-sublingual-strips .button:hover,
+.woocommerce ul.products li.category-capsules .button,
+.woocommerce ul.products li.category-capsules .button:hover,
 .woocommerce ul.products li.category-extracts-inhaled .button,
 .woocommerce ul.products li.category-extracts-inhaled .button:hover {
   background: #EEEFED !important;
@@ -3851,6 +4043,15 @@ li {
   }
 }
 
+// Vapes
+.woocommerce ul.products li.category-closed-loop-pods .button,
+.woocommerce ul.products li.category-closed-loop-pods .button:hover,
+.woocommerce ul.products li.category-pax-pods .button,
+.woocommerce ul.products li.category-pax-pods .button:hover,
+.woocommerce ul.products li.category-510-thread-cartridges .button,
+.woocommerce ul.products li.category-510-thread-cartridges .button:hover,
+.woocommerce ul.products li.category-disposable-vapes .button,
+.woocommerce ul.products li.category-disposable-vapes .button:hover,
 .woocommerce ul.products li.category-vapes .button,
 .woocommerce ul.products li.category-vapes .button:hover {
   background: #EEEFED !important;
@@ -3868,6 +4069,19 @@ li {
   }
 }
 
+// Concentrates
+.woocommerce ul.products li.category-resin .button,
+.woocommerce ul.products li.category-resin .button:hover,
+.woocommerce ul.products li.category-kief .button,
+.woocommerce ul.products li.category-kief .button:hover,
+.woocommerce ul.products li.category-wax .button,
+.woocommerce ul.products li.category-wax .button:hover,
+.woocommerce ul.products li.category-rosin .button,
+.woocommerce ul.products li.category-rosin .button:hover,
+.woocommerce ul.products li.category-shatter .button,
+.woocommerce ul.products li.category-shatter .button:hover,
+.woocommerce ul.products li.category-hash .button,
+.woocommerce ul.products li.category-hash .button:hover,
 .woocommerce ul.products li.category-concentrates .button,
 .woocommerce ul.products li.category-concentrates .button:hover {
   background: #EEEFED !important;
@@ -3888,7 +4102,7 @@ li {
 
 .page-template-manage-card {
   background: transparent;
-  background-image: linear-gradient(271deg, #4D732A 0%, #939F31 65%);
+  background-image: linear-gradient(271deg, #4D732A 0%, #939F31 75%);
 }
 
 .manageCardWrapper {
@@ -4071,7 +4285,7 @@ li {
 
 .rxDeduInfo {
   position: absolute;
-  right: -210px;
+  right: -230px;
   top: 15px;
   color: @white;
   white-space: nowrap;
@@ -4087,3 +4301,17 @@ li {
   }
 }
 
+.skillBar {
+  border: solid 2px #9da632;
+  color: #000000;
+  padding: 10px 15px;
+  font-size: 16px;
+  background: #e0e0b6;
+  border-radius: 2px;
+
+  .skillvalue {
+    font-weight: bold;
+    color: #9da632;
+    font-size: 20px;
+  }
+}

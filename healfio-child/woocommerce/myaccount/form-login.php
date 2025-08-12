@@ -24,7 +24,6 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 <?php if ( 'yes' === get_option( 'woocommerce_enable_myaccount_registration' ) ) : ?>
 
 
-
 <div class="u-columns col2-set" id="customer_login">
     <div class="row">
 
@@ -41,6 +40,11 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
         </div>
         <div class="loginWrapper">
             <div class="container">
+                <?php    if ( isset($_GET['registration']) && $_GET['registration'] === 'success' ) : ?>
+                    <div class="woocommerce-message" role="alert">
+                        Registration successful! Please log in.
+                    </div>
+                <?php endif; ?>
                 <form class="woocommerce-form woocommerce-form-login login" method="post">
 
                     <h5 class="mt-0 mb-3 h5-styled"><?php esc_html_e( 'Login', 'healfio' ); ?></h5>

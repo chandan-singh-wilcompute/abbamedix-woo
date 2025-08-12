@@ -536,12 +536,12 @@ function add_meta_query_to_customer_search($args, $request) {
 add_shortcode('my_manage_cards_ui', 'display_saved_cards');
 function display_saved_cards() {
     
-    $credit_cards = Client_Information::get_credit_cards();
+    // $credit_cards = Client_Information::get_credit_cards();
     $credit_cards = Ample_Session_Cache::get('credit_cards');
-    $user_id = get_current_user_id();
+    // $user_id = get_current_user_id();
 
-    // Get the client id of the customer
-    $client_id = get_user_meta($user_id, "client_id", true);
+    // // Get the client id of the customer
+    // $client_id = get_user_meta($user_id, "client_id", true);
     echo '<h3>Your Saved Cards</h3>';
     if (empty($credit_cards)) {
         echo '<p class="alert alert-info">No saved cards found.</p>';
@@ -1447,7 +1447,7 @@ function show_selectable_discounts_on_checkout() {
     if (empty($discount_codes) && empty($policy_data)) return;
 
     echo '<div class="woocommerce-checkout-discounts">';
-    echo '<h3>Available Discounts</h3>';
+    echo '<h4>Available Discounts</h4>';
     echo '<ul style="list-style: none; padding-left: 0;">';
 
     // Discount codes with checkboxes
@@ -1643,21 +1643,21 @@ function get_gram_quota_data() {
         $available_grams = 0;
     }
 
-    $used_grams = 0;
+    // $used_grams = 0;
 
-    foreach (WC()->cart->get_cart() as $cart_item) {
-        $product = $cart_item['data'];
-        $grams = $product->get_meta('RX Reduction');
-        // $package_size_raw = $product->get_attribute('pa_package-sizes'); // "3.5 g"
-        // $grams = floatval($package_size_raw);
-        if ($grams) {
-            $used_grams += floatval($grams) * $cart_item['quantity'];
-        }
-    }
+    // foreach (WC()->cart->get_cart() as $cart_item) {
+    //     $product = $cart_item['data'];
+    //     $grams = $product->get_meta('RX Reduction');
+    //     // $package_size_raw = $product->get_attribute('pa_package-sizes'); // "3.5 g"
+    //     // $grams = floatval($package_size_raw);
+    //     if ($grams) {
+    //         $used_grams += floatval($grams) * $cart_item['quantity'];
+    //     }
+    // }
 
     wp_send_json([
         'total' => $available_grams,
-        'used' => $used_grams,
+        // 'used' => $used_grams,
     ]);
 }
 
@@ -1826,3 +1826,42 @@ function ample_connect_debug_session_data() {
 }
 
 
+// Confirmation Receipt 
+add_action('wp_ajax_view_receipt_documents', 'view_receipt_documents');
+add_action('wp_ajax_nopriv_view_receipt_documents', 'view_receipt_documents');
+function view_receipt_documents() {
+    //check_ajax_referer('view_order_doc_nonce', 'nonce');
+
+    $order_id = intval($_POST['order_id']);
+    $doc_type = sanitize_text_field($_POST['doc_type']); 
+
+    // Optional: verify logged-in user owns the order
+    // $order = wc_get_order($order_id);
+    $order_id = '2684';
+    // if (!$order || $order->get_user_id() !== get_current_user_id()) {
+    //     wp_die('Not allowed', 'Error', ['response' => 403]);
+    // }
+
+    // Decide API URL based on document type
+    if ($doc_type === 'order-confirmation') {
+        $url = AMPLE_CONNECT_PORTAL_URL . '/orders/' . $order_id . '/confirmation_receipt';
+    } elseif ($doc_type === 'shipped-receipt') {
+        $url = AMPLE_CONNECT_PORTAL_URL . '/orders/' . $order_id . '/shipping_receipt';
+    } else {
+        wp_die('Invalid document type', 'Error', ['response' => 400]);
+    }
+
+    
+    $api_url = add_query_arg (
+        array( 'client_id' => $client_id ),
+        $url
+    );
+
+    $body = ample_request($api_url);
+
+    // Output PDF headers
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: inline; filename="order-'.$order_id.'.pdf"');
+    echo $body;
+    wp_die(); // required to end AJAX
+}
