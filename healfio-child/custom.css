@@ -488,10 +488,17 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
   background-color: #32350A;
 }
 .myProfile .prescriptionInformation .group1 {
-  min-height: 310px;
+  min-height: 300px;
 }
 .myProfile .prescriptionInformation h6 {
   margin-top: 0;
+}
+.myProfile .prescriptionInformation ul {
+  margin-bottom: 0;
+  min-height: 88px;
+}
+.myProfile .prescriptionInformation ul li {
+  list-style-position: inside;
 }
 .scriptHistoryWrapper {
   background: url(../healfio-child/img//history-bg.png) 0 center no-repeat;
@@ -931,6 +938,24 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
   width: 100%;
   position: absolute;
 }
+.woocommerce ul.products li.product.outofstock::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 91%;
+  background: rgba(0, 0, 0, 0.6);
+  content: 'Out of stock';
+  font-size: 24px;
+  font-weight: bold;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  border-radius: 16px 16px 0 0;
+  z-index: 3;
+}
 .woocommerce ul.products li.product .price {
   color: white;
   display: flex;
@@ -1067,6 +1092,10 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
 .orderDetailWrapper h4 {
   margin-top: 0;
   color: #ffffff;
+}
+.orderDetailWrapper .orderDetail .attachment-woocommerce_thumbnail {
+  width: 100% !important;
+  object-fit: fill !important;
 }
 .orderDetailWrapper .orderSummary h4 {
   text-transform: uppercase;
@@ -1207,6 +1236,7 @@ a.button.thankyou-button {
   color: white;
   padding: 5px 10px;
   display: inline-block;
+  transition: all 0.45s;
 }
 .stepsWrapper .customerCare .ccBtn:hover {
   background-color: #007866;
@@ -1621,7 +1651,6 @@ a.button.thankyou-button {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  position: relative;
 }
 .productQuantity .btn {
   border-radius: 100%;
@@ -2045,6 +2074,7 @@ div[role="tablist"] button:last-child span:after {
   margin: 0;
   top: -50px;
   text-transform: capitalize;
+  font-size: 1.2em !important;
 }
 .input-text.qty {
   background: transparent;
@@ -2179,6 +2209,7 @@ input[type=number] {
 .productDetails .single_variation_wrap {
   display: flex;
   align-items: center;
+  position: relative;
 }
 .productDetails .single_variation_wrap .group {
   display: flex;
@@ -2186,7 +2217,7 @@ input[type=number] {
 }
 .productDetails .single_variation_wrap .addToCartGroup {
   position: absolute;
-  left: -170px;
+  right: 0;
   top: 42px;
   white-space: nowrap;
 }
@@ -2244,6 +2275,24 @@ input[type=number] {
 }
 .singleProductContainer {
   padding: 60px 0;
+}
+.singleProductContainer.outofstock .slick-dotted::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  content: 'Out of stock';
+  font-size: 24px;
+  font-weight: bold;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  border-radius: 16px;
+  z-index: 3;
 }
 .singleProductContainer .productTitleWrapper {
   max-width: 1170px;
@@ -3796,7 +3845,7 @@ li.category-concentrates .swatch-item.selected {
 }
 .rxDeduInfo {
   position: absolute;
-  right: -230px;
+  right: -220px;
   top: 15px;
   color: #ffffff;
   white-space: nowrap;
@@ -3824,4 +3873,42 @@ li.category-concentrates .swatch-item.selected {
   font-weight: bold;
   color: #9da632;
   font-size: 20px;
+}
+.btnGoBack {
+  background-color: #A7AF39;
+  color: white;
+  padding: 5px 10px;
+  display: inline-block;
+  transition: all 0.45s;
+}
+.btnGoBack:hover {
+  background-color: #54595f;
+  color: white;
+}
+#order_received_page > .elementor-container {
+  max-width: 1170px;
+  padding: 50px 15px 0;
+}
+#order-received-section .login {
+  max-width: 1170px;
+  padding: 0 15px;
+}
+#order-received-section .lost_password {
+  margin: 0;
+  height: 44px;
+  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 20px;
+}
+#order-received-section .woocommerce-info {
+  max-width: 1170px;
+  padding: 0 15px;
+  margin: 0 auto;
+}
+.woocommerce-ResetPassword {
+  border-radius: 0;
+  height: 100%;
+  max-width: 1170px;
+  margin: 100px auto 0;
 }

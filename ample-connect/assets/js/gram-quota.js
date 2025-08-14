@@ -22,19 +22,26 @@
         
     // }
 
-    function updateBar(totalGrams) {
+    function updateBar(policyGrams, presGrams) {
+        console.log("I am called");
         // rxDed.innerText = `${remainingGrams} gr remaining`;
         // console.log("totalGrams: ", totalGrams);
-        rxDed.innerText = `${totalGrams} gr remaining`;
+        rxDed.innerText = `${presGrams} gr remaining`;
         
         
         const pathSegments = window.location.pathname.split('/').filter(Boolean);
         const lastSegment = pathSegments[pathSegments.length - 1];
 
         if (lastSegment === 'cart') {
-            const skillvalue = document.getElementById('skillvalue');
-            skillvalue.innerHTML = `<div class="skillBar">
-							You have <strong class="skillvalue" >${totalGrams}g</strong> left in your prescription.
+            const policyvalue = document.getElementById('policyvalue');
+            const prescvalue = document.getElementById('prescvalue');
+
+            prescvalue.innerHTML = `<div class="skillBar">
+							You have <strong class="skillvalue" >${presGrams}g</strong> left in your prescription.
+						</div>`;
+
+            policyvalue.innerHTML = `<div class="skillBar">
+							You have <strong class="skillvalue" >${policyGrams}g</strong> left in your policy.
 						</div>`;
         }
         
@@ -48,8 +55,8 @@
         .then(res => res.json())
         .then(data => {
             console.log("data: ", data);
-            if (data && typeof data.total === 'number') {
-                updateBar(data.total);
+            if (data && typeof data.policy_grams === 'number' && typeof data.prescription_grams === 'number') {
+                updateBar(data.policy_grams, data.prescription_grams);
             }
         })
         .catch(err => {
@@ -129,36 +136,36 @@ if (window.location.pathname.includes('/featured-filter/')) {
 }
 
 
-jQuery(document).ready(function($) {
-    $('.shop-variation-swatches').each(function() {
-        var container = $(this);
-        var variationsData = container.data('variations');
+// jQuery(document).ready(function($) {
+//     $('.shop-variation-swatches').each(function() {
+//         var container = $(this);
+//         var variationsData = container.data('variations');
 
-        container.on('click', '.swatch-item', function() {
-            var attribute = $(this).data('attribute');
-            var value = $(this).data('value');
+//         container.on('click', '.swatch-item', function() {
+//             var attribute = $(this).data('attribute');
+//             var value = $(this).data('value');
 
-            // Mark selected swatch
-            $(this).siblings().removeClass('selected');
-            $(this).addClass('selected');
+//             // Mark selected swatch
+//             $(this).siblings().removeClass('selected');
+//             $(this).addClass('selected');
 
-            // Find matching variation
-            var matched = variationsData.find(function(v) {
-                return v.attributes[attribute] === value;
-            });
+//             // Find matching variation
+//             var matched = variationsData.find(function(v) {
+//                 return v.attributes[attribute] === value;
+//             });
 
-            if (matched) {
-                if (!matched.is_in_stock) {
-                    container.find('.single_add_to_cart_button')
-                        .replaceWith('<button type="button" class="button notify-me-button">NOTIFY ME</button>');
-                } else {
-                    container.find('.notify-me-button')
-                        .replaceWith('<button type="submit" class="single_add_to_cart_button button alt">ADD TO CART</button>');
-                }
-            }
-        });
-    });
-});
+//             if (matched) {
+//                 if (!matched.is_in_stock) {
+//                     container.find('.single_add_to_cart_button')
+//                         .replaceWith('<button type="button" class="button notify-me-button">NOTIFY ME</button>');
+//                 } else {
+//                     container.find('.notify-me-button')
+//                         .replaceWith('<button type="submit" class="single_add_to_cart_button button alt">ADD TO CART</button>');
+//                 }
+//             }
+//         });
+//     });
+// });
 
 
 

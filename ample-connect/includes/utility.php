@@ -96,12 +96,21 @@ function handle_response($response, $log = false) {
     // if ($log)
     //     ample_connect_log($response, true);
 
-    ample_connect_log($response);
+    // ample_connect_log($response);
     if (is_wp_error($response)) {
         return ['error' => $response->get_error_message()];
     }
 
-    $body = json_decode(wp_remote_retrieve_body($response), true);
+    $content_type = wp_remote_retrieve_header($response, 'content-type');
+
+    if (strpos($content_type, 'application/json') !== false) {
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+    } else {
+        // Return raw body (PDF, image, etc.)
+        $body = wp_remote_retrieve_body($response);
+    }
+
+    // $body = json_decode(wp_remote_retrieve_body($response), true);
     $status = wp_remote_retrieve_response_code($response);
 
     // echo '<pre>';
@@ -116,6 +125,11 @@ function handle_response($response, $log = false) {
         WC()->session->__unset('cached_order_data');
         $user_id = get_current_user_id();
         clear_customer_cart($user_id);
+    } else if (isset($body['error_code'])) {
+        wp_send_json_error([
+            'message' => 'Document not found.',
+            'error_code' => $body['error_code']
+        ]);
     }
 
     return $body;

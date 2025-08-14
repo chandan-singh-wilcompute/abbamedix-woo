@@ -18,6 +18,11 @@
 </section> -->
 
 	<section class="woocommerce productFilterResultWrapper">
+		<?php
+			if ( function_exists( 'wc_print_notices' ) ) {
+				wc_print_notices();
+			}
+		?>
 		<?php echo do_shortcode('[my_custom_filter]');?>
 		
 		<?php // echo do_shortcode('[products paginate="true" columns="4" per_page="12"]');
