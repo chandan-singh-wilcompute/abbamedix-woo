@@ -163,10 +163,13 @@ do_action( 'woocommerce_before_cart' ); ?>
 						</div>
 					</div> -->
 
-					<div style="padding: 50px 0 0" id="skillvalue">
+					<div style="padding: 50px 0 0" id="prescvalue">
 						
 					</div>
 
+					<div style="padding: 10px 0 0" id="policyvalue">
+						
+					</div>
 				</td>
 			</tr>
 			<tr>

@@ -1637,10 +1637,18 @@ add_action('wp_ajax_nopriv_get_gram_quota_data', 'get_gram_quota_data');
 
 function get_gram_quota_data() {
     $details = Ample_Session_Cache::get('policy_details');
+    $current_prescription = Ample_Session_Cache::get('current_prescription');
+
     if ($details) {
-        $available_grams = floatval($details['remaining_amount_for_current_period']);
+        $policy_available_grams = floatval($details['remaining_amount_for_current_period']);
     } else {
-        $available_grams = 0;
+        $policy_available_grams = 0;
+    }
+
+    if ($current_prescription) {
+        $prescription_available_grams = $current_prescription['available_to_order'];
+    } else {
+        $prescription_available_grams = 0;
     }
 
     // $used_grams = 0;
@@ -1656,7 +1664,8 @@ function get_gram_quota_data() {
     // }
 
     wp_send_json([
-        'total' => $available_grams,
+        'policy_grams' => $policy_available_grams,
+        'prescription_grams' => $prescription_available_grams
         // 'used' => $used_grams,
     ]);
 }
@@ -1827,9 +1836,9 @@ function ample_connect_debug_session_data() {
 
 
 // Confirmation Receipt 
-add_action('wp_ajax_view_receipt_documents', 'view_receipt_documents');
-add_action('wp_ajax_nopriv_view_receipt_documents', 'view_receipt_documents');
-function view_receipt_documents() {
+add_action('wp_ajax_view_order_document', 'view_order_document');
+add_action('wp_ajax_nopriv_view_order_document', 'view_order_document');
+function view_order_document() {
     //check_ajax_referer('view_order_doc_nonce', 'nonce');
 
     $order_id = intval($_POST['order_id']);
@@ -1841,6 +1850,11 @@ function view_receipt_documents() {
     // if (!$order || $order->get_user_id() !== get_current_user_id()) {
     //     wp_die('Not allowed', 'Error', ['response' => 403]);
     // }
+
+    $user_id = get_current_user_id();
+    // Get the client id of the customer
+    $client_id = get_user_meta($user_id, 'client_id', true);
+
 
     // Decide API URL based on document type
     if ($doc_type === 'order-confirmation') {
@@ -1859,9 +1873,14 @@ function view_receipt_documents() {
 
     $body = ample_request($api_url);
 
+    if (is_array($body)) {
+        // This means JSON was returned
+        wp_send_json_error($body); // sends JSON back to JS
+    }
+
     // Output PDF headers
     header('Content-Type: application/pdf');
-    header('Content-Disposition: inline; filename="order-'.$order_id.'.pdf"');
+    // header('Content-Disposition: inline; filename="order-'.$order_id.'.pdf"');
     echo $body;
     wp_die(); // required to end AJAX
 }

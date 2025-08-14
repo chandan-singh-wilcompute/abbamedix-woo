@@ -76,7 +76,10 @@ $show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_a
             }
         ?>
         <?php endif; ?>
-            <p style="word-break: break-word;"><strong>Delivery Option :</strong> <?php echo wp_kses_post( $order->get_payment_method_title() ); ?> - <?php echo $order->get_formatted_order_total(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+            <p style="word-break: break-word; margin-bottom:20px"><strong>Delivery Option :</strong> <?php echo wp_kses_post( $order->get_payment_method_title() ); ?> - <?php echo $order->get_formatted_order_total(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
+
+            <a href="<?php bloginfo('url'); ?>" class="btnGoBack">Go back Shopping</a>
+
         </section>
 
         <?php do_action( 'woocommerce_order_details_after_customer_details', $order ); ?>

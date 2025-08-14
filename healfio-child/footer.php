@@ -516,52 +516,118 @@ jQuery(document.body).on('updated_wc_div wc_fragments_refreshed', function () {
 });
 
 
-// confirmation receipt and shipped receipt
+// // confirmation receipt and shipped receipt
+// jQuery(document).ready(function($) {
+
+//     function downloadDocument(orderId, docType) {
+//         $.ajax({
+//             url: wc_add_to_cart_params.ajax_url,
+//             method: 'POST',
+//             data: {
+//                 action: 'view_order_document',
+//                 order_id: orderId,
+//                 doc_type: docType
+//             },
+//             xhrFields: {
+//                 responseType: 'blob' 
+//             },
+//             success: function(blob) {
+//                 let fileURL = URL.createObjectURL(blob);
+//                 let a = document.createElement('a');
+//                 a.href = fileURL;
+//                 a.download = `${docType}-${orderId}.pdf`; 
+//                 document.body.appendChild(a);
+//                 a.click();
+//                 document.body.removeChild(a);
+//                 URL.revokeObjectURL(fileURL); // clean up
+//             },
+//             error: function(err) {
+//                 console.error('Error fetching document', err);
+//             }
+//         });
+//     }
+
+//     // Handle Order Confirmation button
+//     $(document).on('click', '#order-confirmation', function() {
+//         let orderId = $(this).data('order-id');
+//         console.log("order id: ", orderId);
+//         downloadDocument(orderId, 'order-confirmation');
+//     });
+
+//     // Handle Shipped Receipt button
+//     $(document).on('click', '#shipped-receipt', function() {
+//         let orderId = $(this).data('order-id');
+//         downloadDocument(orderId, 'shipped-receipt');
+//     });
+// });
+
 jQuery(document).ready(function($) {
 
-    function downloadDocument(orderId, docType) {
+    function downloadDocument(orderId, docType, button) {
+        // Disable button and show loading state
+        button.prop('disabled', true).text('Loading...');
+
         $.ajax({
             url: wc_add_to_cart_params.ajax_url,
             method: 'POST',
             data: {
-                action: 'view_receipt_documents',
+                action: 'view_order_document',
                 order_id: orderId,
                 doc_type: docType
             },
             xhrFields: {
-                responseType: 'blob' // important for binary files
+                responseType: 'blob'
             },
-            success: function(blob) {
-                let fileURL = URL.createObjectURL(blob);
-                let a = document.createElement('a');
-                a.href = fileURL;
-                a.download = `${docType}-${orderId}.pdf`; // filename for download
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(fileURL); // clean up
+            success: function (data, status, xhr) {
+                const contentType = xhr.getResponseHeader('Content-Type');
+                
+                if (contentType && contentType.indexOf('application/json') !== -1) {
+                    // JSON error
+                    const reader = new FileReader();
+                    reader.onload = function () {
+                        const json = JSON.parse(reader.result);
+                        alert(json.confirmation_receipt?.[0] || 'No PDF available.');
+                    };
+                    reader.readAsText(data);
+                } else {
+                    // PDF download
+                    const blob = new Blob([data], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'order-' + orderId + '.pdf';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
             },
             error: function(err) {
                 console.error('Error fetching document', err);
+                alert('Unable to fetch the document.');
+            },
+            complete: function() {
+                // Re-enable button and reset text
+                button.prop('disabled', false).text(button.data('original-text'));
             }
         });
     }
 
     // Handle Order Confirmation button
     $(document).on('click', '#order-confirmation', function() {
-        let orderId = $(this).data('order-id');
-        console.log("order id: ", orderId);
-        downloadDocument(orderId, 'order-confirmation');
+        let button = $(this);
+        button.data('original-text', button.text());
+        let orderId = button.data('order-id');
+        downloadDocument(orderId, 'order-confirmation', button);
     });
 
     // Handle Shipped Receipt button
     $(document).on('click', '#shipped-receipt', function() {
-        let orderId = $(this).data('order-id');
-        downloadDocument(orderId, 'shipped-receipt');
+        let button = $(this);
+        button.data('original-text', button.text());
+        let orderId = button.data('order-id');
+        downloadDocument(orderId, 'shipped-receipt', button);
     });
 
 });
-
 
 
 
@@ -712,9 +778,11 @@ jQuery(function($){
     if (!isInStock) {
       // optional: show unavailable text if you want
       // $addBtn.text('Out of stock');
+      $('.singleProductContainer').addClass('outofstock');
     } else {
       // restore original text if needed (depends on your theme)
       // $addBtn.text($addBtn.data('original-text') || 'Add to cart');
+      $('.singleProductContainer').removeClass('outofstock');
     }
   }
 
