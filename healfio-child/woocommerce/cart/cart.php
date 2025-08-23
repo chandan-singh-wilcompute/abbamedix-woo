@@ -205,45 +205,88 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 <?php do_action( 'woocommerce_after_cart' ); ?>
 <script>
-    document.querySelectorAll('.product-quantity').forEach(function(quantityWrapper) {
-        const quantityNumber = quantityWrapper.querySelector('.quantity-number');
-        const minusButton = quantityWrapper.querySelector('.quantity-minus');
-        const plusButton = quantityWrapper.querySelector('.quantity-plus');
-        const hiddenInput = quantityWrapper.querySelector('input.qty');
-		const updateButton = document.querySelector('button[name="update_cart"]');
-		let timer;
+    // document.querySelectorAll('.product-quantity').forEach(function(quantityWrapper) {
+    //     const quantityNumber = quantityWrapper.querySelector('.quantity-number');
+    //     const minusButton = quantityWrapper.querySelector('.quantity-minus');
+    //     const plusButton = quantityWrapper.querySelector('.quantity-plus');
+    //     const hiddenInput = quantityWrapper.querySelector('input.qty');
+	// 	const updateButton = document.querySelector('button[name="update_cart"]');
+	// 	let timer;
         
-        function updateQuantity() {
-            const currentValue = parseInt(quantityNumber.textContent, 10);
-            quantityNumber.textContent = currentValue;
-            hiddenInput.value = currentValue; 
+    //     function updateQuantity() {
+    //         const currentValue = parseInt(quantityNumber.textContent, 10);
+    //         quantityNumber.textContent = currentValue;
+    //         hiddenInput.value = currentValue; 
 			
-			const event = new Event('change', { bubbles: true });
-            hiddenInput.dispatchEvent(event);
-			setTimeout(() => {
-				updateButton.click();
-			}, 300);
+	// 		const event = new Event('change', { bubbles: true });
+    //         hiddenInput.dispatchEvent(event);
+	// 		setTimeout(() => {
+	// 			updateButton.click();
+	// 		}, 300);
+    //     }
+
+        
+    //     plusButton.addEventListener('click', function() {
+    //         let currentValue = parseInt(quantityNumber.textContent, 10);
+    //         if (currentValue < 100) { 
+    //             quantityNumber.textContent = currentValue + 1;
+    //         }
+    //         updateQuantity();
+    //     });
+
+        
+    //     minusButton.addEventListener('click', function() {
+    //         let currentValue = parseInt(quantityNumber.textContent, 10);
+    //         if (currentValue > 0) { 
+    //             quantityNumber.textContent = currentValue - 1;
+    //         }
+    //         updateQuantity(); 
+    //     });
+    // });
+
+	document.addEventListener('click', function (e) {
+        // Handle + button
+        if (e.target.classList.contains('quantity-plus') || e.target.closest('.quantity-plus')) {
+            const wrapper = e.target.closest('.product-quantity');
+            handleQuantity(wrapper, 1);
         }
 
-        
-        plusButton.addEventListener('click', function() {
-            let currentValue = parseInt(quantityNumber.textContent, 10);
-            if (currentValue < 100) { 
-                quantityNumber.textContent = currentValue + 1;
-            }
-            updateQuantity();
-        });
-
-        
-        minusButton.addEventListener('click', function() {
-            let currentValue = parseInt(quantityNumber.textContent, 10);
-            if (currentValue > 0) { 
-                quantityNumber.textContent = currentValue - 1;
-            }
-            updateQuantity(); 
-        });
+        // Handle - button
+        if (e.target.classList.contains('quantity-minus') || e.target.closest('.quantity-minus')) {
+            const wrapper = e.target.closest('.product-quantity');
+            handleQuantity(wrapper, -1);
+        }
     });
 
-	
+function handleQuantity(wrapper, change) {
+    if (!wrapper) return;
+
+    const quantityNumber = wrapper.querySelector('.quantity-number');
+    const hiddenInput = wrapper.querySelector('input.qty');
+    const updateButton = document.querySelector('button[name="update_cart"]');
+
+    if (!quantityNumber || !hiddenInput) return;
+
+    let currentValue = parseInt(quantityNumber.textContent, 10) || 0;
+    const min = hiddenInput.min ? parseInt(hiddenInput.min, 10) : 0;
+    const max = hiddenInput.max ? parseInt(hiddenInput.max, 10) : 100;
+
+    // Clamp the new value between min/max
+    currentValue = Math.max(min, Math.min(max, currentValue + change));
+
+    // Update UI + WooCommerce hidden input
+    quantityNumber.textContent = currentValue;
+    hiddenInput.value = currentValue;
+
+    // Trigger WooCommerce change event
+    hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // Trigger cart update (debounced a bit so multiple clicks don’t spam)
+    clearTimeout(hiddenInput.updateTimer);
+    hiddenInput.updateTimer = setTimeout(() => {
+        if (updateButton) updateButton.click();
+    }, 300);
+}
+
 
 </script>

@@ -711,8 +711,8 @@ function handle_shipping_method_selected() {
     }
 
     $shipping_method = sanitize_text_field($_POST['shipping_method']);
-    ample_connect_log("shipping method selected = ");
-    ample_connect_log($shipping_method);
+    // ample_connect_log("shipping method selected = ");
+    // ample_connect_log($shipping_method);
     $user_id = get_current_user_id();
     // Get the client id of the customer
     $client_id = get_user_meta($user_id, 'client_id', true);
@@ -720,17 +720,16 @@ function handle_shipping_method_selected() {
     // $order = get_order_id_from_api();
     $order_id = Ample_Session_Cache::get('order_id');
 
+    $api_url = AMPLE_CONNECT_PORTAL_URL . "/orders/{$order_id}/set_shipping_rate";
     $body = array(
         'shipping_rate_id' => $shipping_method,
         'client_id' => $client_id
     );
-
-    $api_url = AMPLE_CONNECT_PORTAL_URL . "/orders/{$order_id}/set_shipping_rate"; 
     $body_data = ample_request($api_url, 'PUT', $body);
     if ($body_data) {
         if (array_key_exists('id', $body_data)) {
             store_current_order_to_session($body_data);
-            // WC()->cart->calculate_totals();
+            WC()->cart->calculate_totals();
         }
         wp_send_json_success($body_data);
         
@@ -839,6 +838,26 @@ function custom_order_list_columns_with_external($columns) {
     ];
 }
 
+// Plugin function to provide data
+function get_ample_orders() {
+    $user_id = get_current_user_id();
+    // Get the client id of the customer
+    $client_id = get_user_meta($user_id, 'client_id', true);
+
+    $order_url = AMPLE_CONNECT_PORTAL_URL . '/orders';
+    $api_url = add_query_arg (
+        array( 'per_page' => 50,'client_id' => $client_id, 'order' => 'desc'  ),
+        $order_url
+    );
+
+    $external_orders = ample_request($api_url);
+
+    return $external_orders;
+}
+// Register filter
+add_filter( 'get_ample_orders', 'get_ample_orders' );
+
+add_shortcode( 'woo_ample_order_history', 'replace_woocommerce_orders_with_api_data' );
 // Add custom API-based order history list page
 function replace_woocommerce_orders_with_api_data() {
     $user_id = get_current_user_id();
@@ -871,30 +890,39 @@ function replace_woocommerce_orders_with_api_data() {
 
     foreach ($woocommerce_orders as $wc_order) {
         $wc_order_id = $wc_order->get_id();
+	    $item_count = $wc_order->get_item_count();
         $external_order_number = get_post_meta($wc_order_id, '_external_order_number', true);
         if ($external_order_number) {
-            $order_map[$external_order_number] = $wc_order_id;
+            $order_map[$external_order_number] = array(
+                'woo_order_id' => $wc_order_id,
+                'item_count' => $item_count
+            );
         }
     }
+
+    
 
     // Display the orders in WooCommerce's format
     echo '<table class="shop_table shop_table_responsive my_account_orders">';
     echo '<thead><tr>';
     echo '<th>' . __('Order ID', 'woocommerce') . '</th>';
-    echo '<th>' . __('Date', 'woocommerce') . '</th>';
+    echo '<th>' . __('Placed On', 'woocommerce') . '</th>';
+    echo '<th>' . __('Items', 'woocommerce') . '</th>';
+    echo '<th>' . __('Gram Deduction', 'woocommerce') . '</th>';
     echo '<th>' . __('Status', 'woocommerce') . '</th>';
     echo '<th>' . __('Total', 'woocommerce') . '</th>';
-    echo '<th>' . __('Actions', 'woocommerce') . '</th>';
     echo '</tr></thead>';
     echo '<tbody>';
 
     foreach ($external_orders as $ext_order) {
-        $wc_order_id = $order_map[$ext_order['id']] ?? 'N/A';
-        $order_url = $wc_order_id !== 'N/A' ? wc_get_endpoint_url('view-order', $wc_order_id) : '#';
+        $wc_order_details = $order_map[$ext_order['id']] ?? 'N/A';
+        $order_url = $wc_order_details['woo_order_id'] !== 'N/A' ? wc_get_endpoint_url('view-order', $wc_order_details['woo_order_id']) : '#';
 
         echo '<tr>';
         echo '<td><a class="order_number" href="' . esc_url($order_url) . '">#' . esc_html($wc_order_id) . '</a></td>';
         echo '<td>' . esc_html(date('F j, Y', strtotime($ext_order['created_at']))) . '</td>';
+        echo '<td>' . $wc_order_details['woo_order_id'] . '</td>';
+        echo '<td>' . $wc_order_details['woo_order_id'] . '</td>';
         echo '<td>' . esc_html($ext_order['status']) . '</td>';
         echo '<td>' . wc_price($ext_order['final_cost']) . '</td>';
         echo '<td><a href="' . esc_url($order_url) . '" class="button">View</a>';
@@ -1438,6 +1466,7 @@ function force_shipping_reset() {
 }
 
 
+
 // Customer discount and policies
 add_action('woocommerce_review_order_before_payment', 'show_selectable_discounts_on_checkout');
 function show_selectable_discounts_on_checkout() {
@@ -1456,7 +1485,7 @@ function show_selectable_discounts_on_checkout() {
         $code   = esc_attr($discount['code']);
         $id     = $discount['id'];
         $amount = number_format($discount['amount'] / 100, 2);
-        echo "<li><label><input type='checkbox' class='apply-discount' value='{$id}' data-amount='{$discount['amount']}'> {$desc} (-\${$amount})</label></li>";
+        echo "<li><label><input type='checkbox' class='apply-discount' value='{$id}' data-amount='{$discount['amount']}' data-desc='{$desc} (-\${$amount})'> {$desc} (-\${$amount})</label></li>";
     }
 
     // Policy discount checkbox
@@ -1465,16 +1494,16 @@ function show_selectable_discounts_on_checkout() {
         $covers_shipping   = esc_attr($policy['covers_shipping']);
         $id     = $policy['id'];
         $percent = esc_html($policy['percent']);
-        echo "<li><label><input type='checkbox' class='apply-policy-discount' data-shipping='{$covers_shipping}' value='{$id}' data-percentage='{$percent}'> {$label} ({$percent}% off)</label></li>";
+        echo "<li><label><input type='checkbox' class='apply-policy-discount' data-shipping='{$covers_shipping}' value='{$id}' data-percentage='{$percent}' data-desc='{$label} ({$percent}% off)'> {$label} ({$percent}% off)</label></li>";
     }
 
     echo '</ul>';
     echo '</div>';
 
     // Add hidden fields for AJAX
-    echo '<input type="hidden" name="applied_custom_discount" id="applied_custom_discount" value="">';
-    echo '<input type="hidden" name="applied_policy_discount" id="applied_policy_discount" value="">';
-    echo '<input type="hidden" name="applied_policy_id" id="applied_policy_id" value="">';
+    // echo '<input type="hidden" name="applied_custom_discount" id="applied_custom_discount" value="">';
+    // echo '<input type="hidden" name="applied_policy_discount" id="applied_policy_discount" value="">';
+    // echo '<input type="hidden" name="applied_policy_id" id="applied_policy_id" value="">';
 }
 
 
@@ -1483,70 +1512,253 @@ function custom_discount_ajax_script() {
     if (!is_checkout()) return;
     ?>
     <script>
-    jQuery(function($) {
-        function applyCustomDiscounts() {
-            var discountId = $('.apply-discount:checked').val() || '';
-            var policyPercent = $('.apply-policy-discount:checked').data('percentage') || '';
-            var policyId = $('.apply-policy-discount:checked').val() || '';
+    
+    jQuery(function($){
+        // Apply discounts/policies via AJAX
+        function applySelectedDiscounts() {
+            let discounts = [];
 
-            $('#applied_custom_discount').val(discountId);
-            $('#applied_policy_discount').val(policyPercent);
-            $('#applied_policy_id').val(policyId);
+            // Collect all currently checked checkboxes
+            $('.apply-discount:checked, .apply-policy-discount:checked').each(function(){
+                discounts.push({
+                    id: $(this).val(),
+                    amount: $(this).data('amount') || 0,
+                    percentage: $(this).data('percentage') || 0,
+                    type: $(this).hasClass('apply-policy-discount') ? 'policy' : 'discount',
+                    desc: $(this).data('desc') || ''
+                });
+            });
 
-            $('body').trigger('update_checkout');
+            $.ajax({
+                type: 'POST',
+                url: wc_checkout_params.ajax_url,
+                data: {
+                    action: 'update_discounts',
+                    discounts: discounts
+                },
+                success: function(response) {
+                    if(response.success){
+                        $(document.body).trigger('update_checkout'); // refresh totals
+                    } else {
+                        console.log('Failed to update discounts:', response);
+                    }
+                }
+            });
         }
 
-        $('.apply-discount, .apply-policy-discount').on('change', function () {
-            applyCustomDiscounts();
+        // Debounce for multiple quick changes
+        let discountTimer;
+        $(document).on('change', '.apply-discount, .apply-policy-discount', function(){
+            clearTimeout(discountTimer);
+            discountTimer = setTimeout(applySelectedDiscounts, 300); // 300ms delay
         });
+
+
+        // Run after checkout updates (includes shipping change, payment change, coupon apply etc.)
+        $(document.body).on('updated_checkout', function(){
+            refreshAppliedDiscounts();
+        });
+
+        function refreshAppliedDiscounts(){
+            $.ajax({
+                type: 'POST',
+                url: wc_checkout_params.ajax_url,
+                data: { action: 'get_applied_discounts' },
+                success: function(response){
+                    if(response.success){
+                        const applied = response.data.applied || [];
+                        applied.forEach(d => {
+                            $('input[value="'+d.id+'"]').prop('checked', true);
+                        });
+                    }
+                }
+            });
+        }
     });
+
+
+    // jQuery(function($) {
+    //     function applyCustomDiscounts() {
+    //         console.log("Apply custom discount is called");
+    //         var discountId = $('.apply-discount:checked').val() || '';
+    //         var policyPercent = $('.apply-policy-discount:checked').data('percentage') || '';
+    //         var policyId = $('.apply-policy-discount:checked').val() || '';
+
+    //         $('#applied_custom_discount').val(discountId);
+    //         $('#applied_policy_discount').val(policyPercent);
+    //         $('#applied_policy_id').val(policyId);
+
+    //         $('body').trigger('update_checkout');
+    //     }
+
+    //     $('.apply-discount, .apply-policy-discount').on('change', function () {
+    //         applyCustomDiscounts();
+    //     });
+    // });
     </script>
     <?php
 }
 
-add_action('woocommerce_checkout_update_order_review', 'save_custom_discounts_to_session');
-function save_custom_discounts_to_session($post_data) {
-    parse_str($post_data, $parsed_data);
 
-    $custom_discount = sanitize_text_field($parsed_data['applied_custom_discount'] ?? '');
-    $policy_discount = floatval($parsed_data['applied_policy_discount'] ?? 0);
-    $policy_id = floatval($parsed_data['applied_policy_id'] ?? 0);
+add_action('wp_ajax_update_discounts', 'handle_update_discounts');
+add_action('wp_ajax_nopriv_update_discounts', 'handle_update_discounts');
+function handle_update_discounts() {
+    if(!WC()->cart) wp_send_json_error('Cart not available');
 
-    Ample_Session_Cache::set('applied_custom_discount', $custom_discount);
-    Ample_Session_Cache::set('applied_policy_discount', $policy_discount);
-    Ample_Session_Cache::set('applied_policy_id', $policy_id);
-}
+    $discounts = isset($_POST['discounts']) ? (array) $_POST['discounts'] : [];
 
-add_action('woocommerce_cart_calculate_fees', 'apply_selected_custom_discount', 20, 1);
-function apply_selected_custom_discount($cart) {
-    if (is_admin() && !defined('DOING_AJAX')) return;
+    // Previous selections
+    $prev_discounts = Ample_Session_Cache::get('applied_discounts', []);
+    $prev_policies  = Ample_Session_Cache::get('applied_policies', []);
 
-    $discount_id = WC()->session->get('applied_custom_discount', '');
-    $policy_percent = floatval(WC()->session->get('applied_policy_discount', 0));
-    $policy_id = floatval(WC()->session->get('applied_policy_id', ''));
+    $new_discounts = [];
+    $new_policies  = [];
 
-    // Apply discount code amount
-    $discount_codes = Ample_Session_Cache::get('applicable_discounts', []);
-    $applied_discounts = Ample_Session_Cache::get('applied_discounts', []);
-    foreach($applied_discounts as $dis) {
-        remove_discount_from_order($dis['id']);
-    }
-    foreach ($discount_codes as $discount) {
-        if ($discount['id'] === $discount_id) {
-            add_discount_to_order($discount_id);
-            $amount = floatval($discount['amount']) / 100;
-            $desc = esc_html($discount['description'] ?? $discount['code']);
-            $cart->add_fee($desc, -$amount);
-            break;
+    foreach ($discounts as $d) {
+        if ($d['type'] === 'policy') {
+            $new_policies[$d['id']] = $d;
+        } else {
+            $new_discounts[$d['id']] = $d;
         }
     }
 
-    $policies = Ample_Session_Cache::get('applicable_policies', []);
-    // Apply percentage discount from policy
-    foreach ($policies as $policy) {
-        if ($policy['id'] == $policy_id) {
-            add_policy_to_order($policy_id);
-            $policy_percent = $policy['percent'];
+    // Determine genuine changes
+    $to_apply_discounts = array_diff_key($new_discounts, $prev_discounts);
+    $to_remove_discounts = array_diff_key($prev_discounts, $new_discounts);
+
+    $to_apply_policies = array_diff_key($new_policies, $prev_policies);
+    $to_remove_policies = array_diff_key($prev_policies, $new_policies);
+
+    // 🔹 API calls for discounts
+    if (!empty($to_apply_discounts)) {
+        foreach ($to_apply_discounts as $discount_id => $discount) {
+            add_discount_to_order($discount_id);
+        }
+    }
+    if (!empty($to_remove_discounts)) {
+        $app_dis_codes = Ample_Session_Cache::get('applied_discount_codes');
+        foreach ($to_remove_discounts as $discount_id => $discount) {
+            remove_discount_from_order($app_dis_codes[$discount_id]);
+        }
+    }
+
+    // 🔹 API calls for policies
+    if (!empty($to_apply_policies)) {
+        // $policy_events = Ample_Session_Cache::get('policy_events', $policy_events);
+        // foreach ($to_apply_policies as $policy_id => $policy) {
+        //     $flag = 1;
+        //     if(isset($policy_events) && is_array($policy_events)) {
+        //         foreach($policy_events as $p_e) {
+        //             if ($p_e['policy_id'] == $policy_id) {
+        //                 $flag = 0;
+        //                 break;
+        //             }
+                        
+        //         }
+        //     }
+        //     if($flag) { 
+        //         $policy_data = add_policy_to_order($policy_id);
+        //     }
+        // }
+        $policy_data = add_policy_to_order($policy_id);
+    }
+    if (!empty($to_remove_policies)) {
+        foreach ($to_remove_policies as $policy_id => $policy) {
+            remove_policy_from_order($policy_id);
+        }
+    }
+
+    // Update session
+    Ample_Session_Cache::set('applied_discounts', $new_discounts);
+    Ample_Session_Cache::set('applied_policies', $new_policies);
+
+    wp_send_json_success();
+}
+
+// Return applied discounts for UI restore
+add_action('wp_ajax_get_applied_discounts', 'get_applied_discounts');
+add_action('wp_ajax_nopriv_get_applied_discounts', 'get_applied_discounts');
+
+function get_applied_discounts() {
+    $applied = array_merge(
+        Ample_Session_Cache::get('applied_discounts', []),
+        Ample_Session_Cache::get('applied_policies', [])
+    );
+    wp_send_json_success(['applied' => $applied]);
+}
+
+
+// add_action('woocommerce_checkout_update_order_review', 'save_custom_discounts_to_session');
+// function save_custom_discounts_to_session($post_data) {
+//     parse_str($post_data, $parsed_data);
+
+//     $custom_discount = sanitize_text_field($parsed_data['applied_custom_discount'] ?? '');
+//     $policy_discount = floatval($parsed_data['applied_policy_discount'] ?? 0);
+//     $policy_id = floatval($parsed_data['applied_policy_id'] ?? 0);
+
+//     Ample_Session_Cache::set('applied_custom_discount', $custom_discount);
+//     Ample_Session_Cache::set('applied_policy_discount', $policy_discount);
+//     Ample_Session_Cache::set('applied_policy_id', $policy_id);
+// }
+
+add_filter( 'woocommerce_add_to_cart_fragments', 'healfio_update_cart_total_fragment' );
+function healfio_update_cart_total_fragment( $fragments ) {
+    ob_start();
+    ?>
+    <tr class="order-total">
+        <th><?php esc_html_e( 'Total:', 'healfio' ); ?></th>
+        <td data-title="<?php esc_attr_e( 'Total', 'healfio' ); ?>">
+            <?php
+            if ( WC()->cart->is_empty() ) {
+                echo wc_price( 0 );
+            } else {
+                wc_cart_totals_subtotal_html();
+            }
+            ?>
+        </td>
+    </tr>
+    <?php
+    $fragments['.order-total'] = ob_get_clean();
+    return $fragments;
+}
+
+
+add_action('woocommerce_cart_calculate_fees', 'apply_selected_custom_discount', 20, 1);
+function apply_selected_custom_discount($cart) {
+    // ample_connect_log("custon discount is being applied");
+    if (is_admin() && !defined('DOING_AJAX')) return;
+
+    if ($cart->is_empty()) {
+        $cart->fees_api()->remove_all_fees();
+        return;
+    }
+
+    $custom_taxes = Ample_Session_Cache::get('custom_tax_data');
+    if (!empty($custom_taxes) && is_array($custom_taxes)) {
+        // ample_connect_log("Custom taxes - ");
+        // ample_connect_log($custom_taxes);
+        foreach ($custom_taxes as $tax_label => $amount_cents) {
+            $amount_dollars = floatval($amount_cents) / 100;
+
+            // Add a fee labeled as tax
+            $cart->add_fee(ucfirst($tax_label), $amount_dollars, false); // true => taxable
+        }
+    }
+
+    $discounts = Ample_Session_Cache::get('applied_discounts', []);
+    $policies  = Ample_Session_Cache::get('applied_policies', []);
+
+    // Apply fixed amount discounts
+    if ($discounts) {
+        foreach($discounts as $d) {
+            $cart->add_fee($d['desc'], -floatval($d['amount']), false);
+        }
+    }
+    
+    if ($policies) {
+        // Apply percentage-based policies
+        foreach($policies as $p){
+            // $cart_total = $cart->get_subtotal() + $cart->get_shipping_total();
             $cart_total = 0;
             foreach ( $cart->get_cart() as $item ) {
                 $cart_total += $item['line_total'] + $item['line_tax'];
@@ -1557,16 +1769,75 @@ function apply_selected_custom_discount($cart) {
                 $fee_total += $fee->amount;
             }
             $cart_total += $fee_total;
-            $policy_discount = $cart_total * ($policy_percent / 100);
-            $cart->add_fee("{$policy['name']} ({$policy_percent}%)", -$policy_discount);
-            break;
+            $discount_amount = $cart_total * (floatval($p['percentage']) / 100);
+            $cart->add_fee($p['desc'], -$discount_amount, false);
         }
     }
+
+    
+
+    // $discount_id = WC()->session->get('applied_custom_discount', '');
+    // $policy_percent = floatval(WC()->session->get('applied_policy_discount', 0));
+    // $policy_id = WC()->session->get('applied_policy_id', '');
+
+    // // Apply discount code amount
+    // $discount_codes = Ample_Session_Cache::get('applicable_discounts', []);
+    // $applied_discounts = Ample_Session_Cache::get('applied_discounts', []);
+    // foreach($applied_discounts as $dis) {
+    //     remove_discount_from_order($dis['id']);
+    // }
+    // foreach ($discount_codes as $discount) {
+    //     if ($discount['id'] === $discount_id) {
+    //         add_discount_to_order($discount_id);
+    //         $amount = floatval($discount['amount']) / 100;
+    //         $desc = esc_html($discount['description'] ?? $discount['code']);
+    //         $cart->add_fee($desc, -$amount);
+    //         break;
+    //     }
+    // }
+
+    // $policies = Ample_Session_Cache::get('applicable_policies', []);
+    // $policy_events = Ample_Session_Cache::get('policy_events', $policy_events);
+    // // Apply percentage discount from policy
+    // foreach ($policies as $policy) {
+    //     if ($policy['id'] == $policy_id) {
+    //         $flag = 1;
+    //         if(isset($policy_events) && is_array($policy_events)) {
+    //             foreach($policy_events as $p_e) {
+    //                 if ($p_e['policy_id'] == $policy_id) {
+    //                     $flag = 0;
+    //                     break;
+    //                 }
+                        
+    //             }
+    //         }
+    //         if($flag) { 
+    //             $policy_data = add_policy_to_order($policy_id);
+    //         }
+
+    //         $policy_percent = $policy['percent'];
+    //         $cart_total = 0;
+    //         foreach ( $cart->get_cart() as $item ) {
+    //             $cart_total += $item['line_total'] + $item['line_tax'];
+    //         }
+    //         $cart_total += $cart->get_shipping_total() + $cart->get_shipping_tax();
+    //         $fee_total = 0;
+    //         foreach ( $cart->get_fees() as $fee ) {
+    //             $fee_total += $fee->amount;
+    //         }
+    //         $cart_total += $fee_total;
+    //         $policy_discount = $cart_total * ($policy_percent / 100);
+    //         $cart->add_fee("{$policy['name']} ({$policy_percent}%)", -$policy_discount);
+    //         break;
+    //     }
+    // }
 }
 
 function clear_custom_discount_session() {
-    WC()->session->__unset('applied_custom_discount');
-    WC()->session->__unset('applied_policy_discount');
+    // WC()->session->__unset('applied_custom_discount');
+    // WC()->session->__unset('applied_policy_discount');
+    Ample_Session_Cache::delete('applied_discounts');
+    Ample_Session_Cache::delete('applied_policies');
 }
 add_action('woocommerce_cart_emptied', 'clear_custom_discount_session');
 
@@ -1592,7 +1863,7 @@ function validate_checkout_with_external_api($posted_data, $errors) {
 
     $cart_total = floatval(WC()->cart->get_total('edit')); // float, e.g. 0.00
 
-    if ($cart_total !== 0.0) {
+    if ($cart_total > 0.0) {
         return;
     }
 
@@ -1637,6 +1908,7 @@ add_action('wp_ajax_nopriv_get_gram_quota_data', 'get_gram_quota_data');
 
 function get_gram_quota_data() {
     $details = Ample_Session_Cache::get('policy_details');
+    
     $current_prescription = Ample_Session_Cache::get('current_prescription');
 
     if ($details) {
@@ -1837,50 +2109,106 @@ function ample_connect_debug_session_data() {
 
 // Confirmation Receipt 
 add_action('wp_ajax_view_order_document', 'view_order_document');
-add_action('wp_ajax_nopriv_view_order_document', 'view_order_document');
 function view_order_document() {
-    //check_ajax_referer('view_order_doc_nonce', 'nonce');
+    if (!is_user_logged_in()) {
+        wp_die('Not allowed', 'Error', ['response' => 403]);
+    }
 
-    $order_id = intval($_POST['order_id']);
+    // Require nonce from client side for CSRF protection
+    check_ajax_referer('view_order_doc_nonce', 'nonce');
+
+    $woo_order_id = intval($_POST['order_id']);
     $doc_type = sanitize_text_field($_POST['doc_type']); 
 
-    // Optional: verify logged-in user owns the order
-    // $order = wc_get_order($order_id);
-    $order_id = '2684';
-    // if (!$order || $order->get_user_id() !== get_current_user_id()) {
-    //     wp_die('Not allowed', 'Error', ['response' => 403]);
-    // }
+    // Verify the logged-in user owns the WooCommerce order (or has capability)
+    $order = wc_get_order($woo_order_id);
+    if (!$order || ($order->get_user_id() !== get_current_user_id() && !current_user_can('manage_woocommerce'))) {
+        wp_die('Not allowed', 'Error', ['response' => 403]);
+    }
+
+    // Map to external Ample order ID stored on the Woo order
+    $external_order_number = get_post_meta($woo_order_id, '_external_order_number', true);
+    if (empty($external_order_number)) {
+        wp_die('External order not found', 'Error', ['response' => 400]);
+    }
 
     $user_id = get_current_user_id();
-    // Get the client id of the customer
     $client_id = get_user_meta($user_id, 'client_id', true);
-
 
     // Decide API URL based on document type
     if ($doc_type === 'order-confirmation') {
-        $url = AMPLE_CONNECT_PORTAL_URL . '/orders/' . $order_id . '/confirmation_receipt';
+        $url = AMPLE_CONNECT_PORTAL_URL . '/orders/' . $external_order_number . '/confirmation_receipt';
     } elseif ($doc_type === 'shipped-receipt') {
-        $url = AMPLE_CONNECT_PORTAL_URL . '/orders/' . $order_id . '/shipping_receipt';
+        $url = AMPLE_CONNECT_PORTAL_URL . '/orders/' . $external_order_number . '/shipping_receipt';
     } else {
         wp_die('Invalid document type', 'Error', ['response' => 400]);
     }
 
-    
-    $api_url = add_query_arg (
-        array( 'client_id' => $client_id ),
-        $url
-    );
+    $api_url = add_query_arg(array('client_id' => $client_id), $url);
 
     $body = ample_request($api_url);
 
     if (is_array($body)) {
-        // This means JSON was returned
-        wp_send_json_error($body); // sends JSON back to JS
+        wp_send_json_error($body);
     }
 
-    // Output PDF headers
     header('Content-Type: application/pdf');
-    // header('Content-Disposition: inline; filename="order-'.$order_id.'.pdf"');
     echo $body;
-    wp_die(); // required to end AJAX
+    wp_die();
+}
+
+
+// Notify user about product
+add_action('wp_ajax_add_to_notify_list', 'handle_add_to_notify_list');
+add_action('wp_ajax_nopriv_add_to_notify_list', 'handle_add_to_notify_list');
+function handle_add_to_notify_list() {
+
+    // Check login
+    if ( ! is_user_logged_in() ) {
+        // Get WooCommerce My Account login page
+        $login_url = wc_get_page_permalink( 'myaccount' );
+        
+        wp_send_json_error( [
+            'message'    => 'You must be logged in to use this feature.',
+            'redirect'   => $login_url,
+        ] );
+    }
+
+    // $email = sanitize_email($_POST['email']);
+    $product_id = intval($_POST['product_id']);
+
+    // if (!is_email($email)) {
+    //     wp_send_json_error('Invalid email address.');
+    // }
+
+    // Store in custom table or post meta
+    // $existing = get_post_meta($product_id, '_notify_me_list', true);
+    // if (!is_array($existing)) {
+    //     $existing = [];
+    // }
+
+    // if (!in_array($email, $existing)) {
+    //     $existing[] = $email;
+    //     update_post_meta($product_id, '_notify_me_list', $existing);
+    // }
+
+    wp_send_json_success('You will be notified!');
+
+    // if ( $was_successful ) {
+    //     wp_send_json_success( 'You will be notified when the product is back in stock.' );
+    // } else {
+    //     wp_send_json_error( 'Unable to process your request. Please try again later.' );
+    // }
+}
+
+
+add_filter('woocommerce_get_item_data', 'show_manual_discount_note', 10, 2);
+function show_manual_discount_note($item_data, $cart_item) {
+    if (isset($cart_item['custom_discount_note'])) {
+        $item_data[] = array(
+            'name'  => __('Discount'),
+            'value' => wc_clean($cart_item['custom_discount_note']),
+        );
+    }
+    return $item_data;
 }

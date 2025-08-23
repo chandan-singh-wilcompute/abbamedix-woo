@@ -37,8 +37,9 @@ global $product;
 
 	<div class="group addToCartGroup">
 		<span class="rxDeductionAmount">
-			<?php echo do_shortcode('[rx_deduction]') ?>			
-			RX Deduction Amount <span id="rxDeductionAmnt">10g</span>
+			<?php // echo do_shortcode('[rx_deduction]') ?>			
+			RX Deduction Amount <span id="rxDeductionAmnt"> - </span>
+			<input type="hidden" id="rxDeductionActual" value="0">
 		</span>
 		<button type="submit" class="single_add_to_cart_button button alt<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
 
@@ -84,54 +85,73 @@ window.addEventListener('load', function () {
 
 	
 	jQuery(document).ready(function($) {
+		// setTimeout(function() {
+		// 	// Save original unit price (for total calculation)
+		// 	let priceContainer = $('.woocommerce-Price-amount').first();
+		// 	let originalPrice = parseFloat(priceContainer.text().replace(/[^0-9.]/g, ''));
+		// 	//let rxDeductionBase = parseFloat($('#rxDeductionAmnt').text().replace(/[^0-9.]/g, '')) || 0;
+		// 	let rxDeductionBase = 0;
+			
+		// 	let rxText = $('#rxDeductionAmnt').text().trim();
+		// 	console.log("rxText: ", rxText);
+		// 	let match = rxText.match(/[\d.]+/);
+		// 	if (match) {
+		// 		rxDeductionBase = parseFloat(match[0]);
+		// 	}
+		// 	console.log("rxdeductiontotal: ", rxDeductionBase);
+		
 
-		// Save original unit price (for total calculation)
-		let priceContainer = $('.woocommerce-Price-amount').first();
-		let originalPrice = parseFloat(priceContainer.text().replace(/[^0-9.]/g, ''));
+		// 	// On quantity change
+		// 	$('form.cart').on('input change', 'input[name="quantity"]', function() {
+		// 		let qty = parseInt($(this).val()) || 1;
+		// 		let total = (originalPrice * qty).toFixed(2);
+		// 		priceContainer.html('<bdi><span class="woocommerce-Price-currencySymbol">$</span>' + total + '</bdi>');
+		// 		console.log("rxdeductiontotal2: ", rxDeductionBase);
+		// 		// Update RX Deduction
+		// 		if (rxDeductionBase > 0) {
+		// 			let rxTotal = (rxDeductionBase * qty).toFixed(2).replace(/\.00$/, ''); // remove .00 if integer
+		// 			console.log("rxtotal: ", rxTotal);
+		// 			$('#rxDeductionAmnt').text(rxTotal + 'g');
+		// 		}
+		// 	});
+		
 
-		// On quantity change
-		$('form.cart').on('input change', 'input[name="quantity"]', function() {
-			let qty = parseInt($(this).val()) || 1;
-			let total = (originalPrice * qty).toFixed(2);
-			priceContainer.html('<bdi><span class="woocommerce-Price-currencySymbol">$</span>' + total + '</bdi>');
-		});
+		// 	// Plus
+		// 	$('.increase').on('click', function() {
+		// 		let input = $(this).siblings('input[name="quantity"]');
+		// 		let val = parseInt(input.val()) || 1;
+		// 		let max = parseInt(input.attr('max')) || 999;
+		// 		if (val < max) {
+		// 			input.val(val + 1).trigger('change');
+		// 		}
+		// 	});
 
-		// Plus
-		$('.increase').on('click', function() {
-			let input = $(this).siblings('input[name="quantity"]');
-			let val = parseInt(input.val()) || 1;
-			let max = parseInt(input.attr('max')) || 999;
-			if (val < max) {
-				input.val(val + 1).trigger('change');
-			}
-		});
+		// 	// Minus
+		// 	$('.decrease').on('click', function() {
+		// 		let input = $(this).siblings('input[name="quantity"]');
+		// 		let val = parseInt(input.val()) || 1;
+		// 		let min = parseInt(input.attr('min')) || 1;
+		// 		if (val > min) {
+		// 			input.val(val - 1).trigger('change');
+		// 		}
+		// 	});
 
-		// Minus
-		$('.decrease').on('click', function() {
-			let input = $(this).siblings('input[name="quantity"]');
-			let val = parseInt(input.val()) || 1;
-			let min = parseInt(input.attr('min')) || 1;
-			if (val > min) {
-				input.val(val - 1).trigger('change');
-			}
-		});
-
-
+		// }, 800);
 
 		// Set Rx Deduction Amount on Product detail page
-		$('form.variations_form').on('found_variation', function(event, variation) {
-			console.log("I got triggered");
-			// Check if rx_reduction exists
-			if (variation.rx_reduction) {
-				$('#rxDeductionAmnt').text(variation.rx_reduction + 'g');
-			} else {
-				$('#rxDeductionAmnt').text('—');
-			}
-		});
+		// $('form.variations_form').on('found_variation', function(event, variation) {
+		// 	console.log("I got triggered");
+		// 	// Check if rx_reduction exists
+		// 	if (variation.rx_reduction) {
+		// 		$('#rxDeductionAmnt').text(variation.rx_reduction + 'g');
+		// 	} else {
+		// 		$('#rxDeductionAmnt').text('—');
+		// 	}
+		// });
 
 		// Optional: Reset RX deduction on reset variations
-		$('form.variations_form').on('reset_data', function() {
-			$('#rxDeductionAmnt').text('—');
-		});
+		// $('form.variations_form').on('reset_data', function() {
+		// 	$('#rxDeductionAmnt').text('—');
+		// });
 	});
 </script>

@@ -42,7 +42,7 @@ if ( $customer_orders ) : ?>
 ?>
 		<table class="myacc-order">
 			<tr class="tbhead">
-				<td>Order Id</td>
+				<td>Order2 Id</td>
 				<td>Placed On</td>
 				<td>Items</td>
 				<td>Gram Deduction</td>

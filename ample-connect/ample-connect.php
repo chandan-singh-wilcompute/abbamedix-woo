@@ -37,6 +37,23 @@ function ample_connect_log($message, $api=false) {
     file_put_contents($file, $log_message, FILE_APPEND);
 }
 
+// Load gateway class after WooCommerce is loaded
+add_action( 'plugins_loaded', 'myplugin_load_simple_gateway', 11 );
+
+function myplugin_load_simple_gateway() {
+    if ( class_exists( 'WC_Payment_Gateway' ) ) {
+        require_once plugin_dir_path( __FILE__ ) . 'includes/custom-payment-method.php';
+    }
+}
+
+/**
+ * Register the gateway with WooCommerce
+ */
+add_filter( 'woocommerce_payment_gateways', function ( $gateways ) {
+    $gateways[] = 'WC_Gateway_Token_Payment';
+    return $gateways;
+});
+
 // Define global configuration settings
 define('AMPLE_CONNECT_API_BASE_URL', 'https://abbatestbox.sandbox.onample.com/api');
 define('AMPLE_CONNECT_LOGIN_URL', AMPLE_CONNECT_API_BASE_URL . '/v1/users/login');

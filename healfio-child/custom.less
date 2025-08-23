@@ -1174,24 +1174,26 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
     li.product {
 
       &.outofstock {
-        &::before {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 91%;
-          background: rgba(0, 0, 0, 0.6);
+        a.woocommerce-LoopProduct-link {
+          &::before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 91%;
+            background: rgba(0, 0, 0, 0.6);
 
-          content: 'Out of stock';
-          font-size: 24px;
-          font-weight: bold;
-          text-transform: uppercase;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          color: #fff;
-          border-radius: 16px 16px 0 0;
-          z-index: 3;
+            content: 'Out of stock';
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            border-radius: 16px 16px 0 0;
+            z-index: 3;
+          }
         }
       }
 
@@ -3931,6 +3933,9 @@ li {
 .woocommerce ul.products li.product a {
   display: flex !important;
   flex-direction: column;
+
+
+
 }
 
 .woocommerce-loop-product__buttons {
@@ -4428,4 +4433,19 @@ li {
   height: 100%;
   max-width: 1170px;
   margin: 100px auto 0;
+}
+
+.registrationDcoument {
+  padding: 8px 15px;
+  border: 0;
+  box-shadow: none;
+
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease-in-out;
+
+  i {
+    font-size: 20px;
+    line-height: 20px;
+  }
 }

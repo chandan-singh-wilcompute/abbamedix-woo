@@ -110,7 +110,6 @@ function custom_shipping_api_init() {
             // }
 
             public function calculate_shipping($package = array()) {
-
                 // get_shipping_rates_and_store_in_session();
                 
                 if (!Ample_Session_Cache::has('custom_shipping_rates')) {
@@ -118,7 +117,7 @@ function custom_shipping_api_init() {
                 }
 
                 $shipping_options = Ample_Session_Cache::get('custom_shipping_rates');
-                //$shipping_options = get_shipping_rates_and_store_in_session();
+                // $shipping_options = get_shipping_rates_and_store_in_session();
 
                 // Add placeholder
                 $this->add_rate([
@@ -128,14 +127,15 @@ function custom_shipping_api_init() {
                 ]);
 
                 // Add real rates
-                foreach ($shipping_options as $option) {
-                    $this->add_rate([
-                        'id'    => $option['id'],
-                        'label' => preg_replace('/(?<!^)([A-Z])/', ' $1', $option['service']),
-                        'cost'  => (float)$option['rate'],
-                    ]);
+                if ($shipping_options) {
+                    foreach ($shipping_options as $option) {
+                        $this->add_rate([
+                            'id'    => $option['id'],
+                            'label' => preg_replace('/(?<!^)([A-Z])/', ' $1', $option['service']),
+                            'cost'  => (float)$option['rate'],
+                        ]);
+                    }
                 }
-                
             }
         }
     }

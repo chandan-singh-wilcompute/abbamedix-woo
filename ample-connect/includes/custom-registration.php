@@ -49,22 +49,37 @@ function custom_registration_enqueue_scripts() {
 add_action('wp_enqueue_scripts', 'custom_registration_enqueue_scripts');
 
 function update_user_client_id_registration_id() {
-    $user_id = sanitize_text_field($_POST['user_id']);
-    $client_id = sanitize_text_field($_POST['client_id']);
-    $active_registration_id = sanitize_text_field($_POST['active_registration_id']);
-    $client_login_id = sanitize_text_field($_POST['client_login_id']);
-    $updated = update_user_meta( $user_id, 'client_id', $client_id );
-    $updated = update_user_meta( $user_id, 'client_login_id', $client_login_id );
-    $updated = $updated && update_user_meta( $user_id, 'active_registration_id', $active_registration_id );
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Unauthorized', 403);
+    }
 
-    if ( $updated ) {
-        wp_send_json_success( 'User meta updated successfully.' );
+    $posted_user_id = isset($_POST['user_id']) ? intval($_POST['user_id']) : 0;
+
+    // Optional nonce validation if provided by caller
+    if (isset($_POST['security']) && !wp_verify_nonce($_POST['security'], 'ample_nonce_data')) {
+        wp_send_json_error('Invalid nonce', 400);
+    }
+
+    // Ensure the current user owns this account or has privilege to edit
+    if ($posted_user_id !== get_current_user_id() && !current_user_can('edit_user', $posted_user_id)) {
+        wp_send_json_error('Unauthorized', 403);
+    }
+
+    $client_id = sanitize_text_field($_POST['client_id'] ?? '');
+    $active_registration_id = sanitize_text_field($_POST['active_registration_id'] ?? '');
+    $client_login_id = sanitize_text_field($_POST['client_login_id'] ?? '');
+
+    $updated  = update_user_meta($posted_user_id, 'client_id', $client_id);
+    $updated &= update_user_meta($posted_user_id, 'client_login_id', $client_login_id);
+    $updated &= update_user_meta($posted_user_id, 'active_registration_id', $active_registration_id);
+
+    if ($updated) {
+        wp_send_json_success('User meta updated successfully.');
     } else {
-        wp_send_json_error( 'Failed to update user meta.' );
+        wp_send_json_error('Failed to update user meta.');
     }
 }
 add_action('wp_ajax_update_user_client_id_registration_id', 'update_user_client_id_registration_id');
-add_action('wp_ajax_nopriv_update_user_client_id_registration_id', 'update_user_client_id_registration_id');
 
 // Handle form submission
 function custom_registration_action()
@@ -157,20 +172,12 @@ add_action('wp_ajax_nopriv_custom_registration_action', 'custom_registration_act
 
 
 // Register AJAX endpoint for retrieving token
-add_action('wp_ajax_nopriv_get_admin_token', 'get_admin_token_callback'); // For logged-out users
-add_action('wp_ajax_get_admin_token', 'get_admin_token_callback'); // For logged-in users
-
-function get_admin_token_callback() {
-
-    $token = get_ample_api_token();
-    echo json_encode(array('token' => $token)); 
-    wp_die();
-}
+// Removed insecure public token endpoint
 
 
 // Register a customer/patient on the websitehw
 function patient_registration_action($record, $handler) {
-    ample_connect_log("patient form submitted");
+    // ample_connect_log("patient form submitted");
     $form_name = $record->get_form_settings('form_name');
     if ($form_name !== 'Registration Form') return;
 
@@ -181,12 +188,12 @@ function patient_registration_action($record, $handler) {
     }
 
     // $form_fields = $record->get('fields');
-    ample_connect_log($form_fields);
+    // ample_connect_log($form_fields);
     // Retrieve form data
     $first_name = sanitize_text_field($form_fields['firstname']);
     $middle_name = sanitize_text_field($form_fields['email']);
     $last_name = sanitize_text_field($form_fields['message']);
-    ample_connect_log("name = $first_name $middle_name $last_name");
+    // ample_connect_log("name = $first_name $middle_name $last_name");
     $dob_year = intval($form_fields['field_871115a']);
     $dob_month = intval($form_fields['field_434268a']);
     $dob_day = intval($form_fields['field_701927b']);

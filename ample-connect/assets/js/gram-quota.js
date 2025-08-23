@@ -1,32 +1,15 @@
 (function () {
-    const rxDed = document.getElementById('rx-dedu-info');
-    
-
-    // function updateBar(usedGrams, totalGrams) {
-    //     const remainingGrams = Math.max(0, totalGrams - usedGrams);
-        
-    //     // rxDed.innerText = `${remainingGrams} gr remaining`;
-    //     rxDed.innerText = `${totalGrams} gr remaining`;
-    //     const pathSegments = window.location.pathname.split('/').filter(Boolean);
-    //     const lastSegment = pathSegments[pathSegments.length - 1];
-
-    //     if (lastSegment === 'cart' || lastSegment === 'checkout') {
-    //         var percentage = (usedGrams / totalGrams) * 100;
-    //         // Update the skill bar
-    //         var skillPerElement = document.querySelector('.skill-per');
-    //         skillPerElement.style.width = percentage + '%';
-    //         skillPerElement.setAttribute('data-per', remainingGrams);
-    //         skillPerElement.setAttribute('data-max', totalGrams);
-    //         document.querySelector(".gr.max").innerText = totalGrams + " gr";
-    //     }
-        
-    // }
 
     function updateBar(policyGrams, presGrams) {
+
         console.log("I am called");
+        const rxDed = document.getElementById('rx-dedu-info');
         // rxDed.innerText = `${remainingGrams} gr remaining`;
         // console.log("totalGrams: ", totalGrams);
-        rxDed.innerText = `${presGrams} gr remaining`;
+        if (rxDed) {
+            rxDed.innerText = `${presGrams} gr remaining`;
+        }
+        
         
         
         const pathSegments = window.location.pathname.split('/').filter(Boolean);
@@ -49,8 +32,8 @@
 
     function fetchQuota() {
         fetch(GramQuotaAjax.ajax_url + '?action=get_gram_quota_data', {
-        method: 'GET',
-        credentials: 'same-origin'
+            method: 'GET',
+            credentials: 'same-origin'
         })
         .then(res => res.json())
         .then(data => {
@@ -60,7 +43,7 @@
             }
         })
         .catch(err => {
-            console.error('Error fetching quota:', err);
+            console.error('Error fetching quota.');
         });
     }
 
@@ -70,27 +53,31 @@
 
     fetchQuota();
 
-    
-    setTimeout(function () {
-        const checkbox = document.querySelector('input.apply-policy-discount[value="134"]');
-        if (checkbox) {
-            checkbox.checked = true;
-            checkbox.dispatchEvent(new Event('change', { bubbles: true })); // Trigger change event
-        }
-    }, 500);
+    // Run again whenever WooCommerce updates the cart DOM
+    jQuery(document.body).on('updated_wc_div', function () {
+        fetchQuota();
+    });
+
+    // setTimeout(function () {
+    //     const checkbox = document.querySelector('input.apply-policy-discount[value="134"]');
+    //     if (checkbox) {
+    //         checkbox.checked = true;
+    //         checkbox.dispatchEvent(new Event('change', { bubbles: true })); // Trigger change event
+    //     }
+    // }, 500);
 
 })();
 
-document.querySelectorAll('.product-remove').forEach(function(quantityWrapper) {
-    const removeButton = quantityWrapper.querySelector('.remove1');
+// document.querySelectorAll('.product-remove').forEach(function(quantityWrapper) {
+//     const removeButton = quantityWrapper.querySelector('.remove1');
 
-    removeButton.addEventListener('click', function() {
+//     removeButton.addEventListener('click', function() {
         
-        setTimeout(() => {
-            location.reload();
-        }, 7500);
-    });
-});
+//         setTimeout(() => {
+//             location.reload();
+//         }, 7500);
+//     });
+// });
 
 
 // Run only if the URL path includes "/product-filter/"
@@ -169,3 +156,6 @@ if (window.location.pathname.includes('/featured-filter/')) {
 
 
 
+jQuery(document.body).on('update_checkout', function(e){
+    console.log('update_checkout triggered', e);
+});

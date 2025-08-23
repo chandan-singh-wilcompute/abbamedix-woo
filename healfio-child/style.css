@@ -975,3 +975,16 @@ a.page-numbers {
   font-size: 1.2em;
   font-weight: bold;
 }
+
+button.notify-me-button {
+	margin-left: 15px;
+	width: 137px;
+	height: 38px;
+	font-size: 16px;
+	border: 0;
+	text-transform: uppercase;
+	font-weight: bold;
+    background-color: #929E31;
+}
+
+
