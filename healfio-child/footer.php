@@ -90,10 +90,10 @@
 <div id="notifyMeModal" class="notify-me-modal" style="display:none;">
     <div class="notify-me-content">
         <span class="close">&times;</span>
-        <h5>Get Notified When Available</h3>
-        <input type="email" id="notifyEmail" placeholder="Enter your email">
-        <button id="notifySubmit">Submit</button>
-        <p id="notifyMessage"></p>
+        <!-- <h5>Product Notification</h5> -->
+        <!-- <input type="email" id="notifyEmail" placeholder="Enter your email">
+        <button id="notifySubmit">Submit</button> -->
+        <h6 id="notifyMessage"></h6>
     </div>
 </div>
 <?php wp_footer(); ?>
@@ -300,39 +300,61 @@
         // Open popup on Notify Me click
         $(document).on('click', '.notify-me-button', function () {
             selectedProductId = $(this).data('product-id');
-            console.log("I got licked", selectedProductId);
-            $('#notifyMeModal').fadeIn();
+            // console.log("I got licked", selectedProductId);
+
+            $.post(wc_add_to_cart_params.ajax_url, {
+                action: 'add_to_notify_list',
+                product_id: selectedProductId,
+                // email: email
+            }, function (response) {
+                console.log(response);
+                if (response.success) {
+                    $('#notifyMeModal').fadeIn();
+                    $('#notifyMessage').text(response.data).css('color', 'green');
+                    setTimeout(() => { $('#notifyMeModal').fadeOut(); }, 4000);
+                } else {
+                    if (response.data.redirect) {
+                        window.location.href = response.data.redirect;
+                    }
+                    // $('#notifyMeModal').fadeIn();
+                    // $('#notifyMessage').text(response.data).css('color', 'red');
+                }
+            });
+
+            // $('#notifyMeModal').fadeIn();
+            // $('#notifySubmit').trigger('click');
         });
 
         // Close popup
         $(document).on('click', '.close', function () {
             $('#notifyMeModal').fadeOut();
             $('#notifyMessage').text('');
-            $('#notifyEmail').val('');
+            // $('#notifyEmail').val('');
         });
 
         // Submit email
-        $('#notifySubmit').on('click', function () {
-            let email = $('#notifyEmail').val().trim();
+        // $('#notifySubmit').on('click', function () {
+        //     // let email = $('#notifyEmail').val().trim();
 
-            if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-                $('#notifyMessage').text('Please enter a valid email.').css('color', 'red');
-                return;
-            }
+        //     // if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+        //     //     $('#notifyMessage').text('Please enter a valid email.').css('color', 'red');
+        //     //     return;
+        //     // }
 
-            $.post(wc_add_to_cart_params.ajax_url, {
-                action: 'add_to_notify_list',
-                product_id: selectedProductId,
-                email: email
-            }, function (response) {
-                if (response.success) {
-                    $('#notifyMessage').text('You will be notified!').css('color', 'green');
-                    setTimeout(() => { $('#notifyMeModal').fadeOut(); }, 1500);
-                } else {
-                    $('#notifyMessage').text(response.data).css('color', 'red');
-                }
-            });
-        });
+        //     $.post(wc_add_to_cart_params.ajax_url, {
+        //         action: 'add_to_notify_list',
+        //         product_id: selectedProductId,
+        //         // email: email
+        //     }, function (response) {
+        //         if (response.success) {
+        //             console.log(response);
+        //             $('#notifyMessage').text('You will be notified!').css('color', 'green');
+        //             setTimeout(() => { $('#notifyMeModal').fadeOut(); }, 1500);
+        //         } else {
+        //             $('#notifyMessage').text(response.data).css('color', 'red');
+        //         }
+        //     });
+        // });
     });
 
 
@@ -491,7 +513,6 @@
                 });
             });
         }
-
 
     });
 
@@ -687,6 +708,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const unitPrice = parseFloat(variation.display_price || 0);
         const totalPrice = (unitPrice * quantity).toFixed(2);
+        
+        const rxDed = parseFloat(document.getElementById('rxDeductionActual').value);
+        const updRx = rxDed * quantity;
+        document.getElementById('rxDeductionAmnt').textContent = `${updRx}g`;
 
         const currencySymbol = priceBdi.querySelector('.woocommerce-Price-currencySymbol')?.textContent || '$';
 
@@ -757,34 +782,41 @@ document.addEventListener('DOMContentLoaded', function () {
 jQuery(function($){
 
   // Enable/disable controls inside a given form (.variations_form or .cart)
-  function setQuantityButtonsState($form, isInStock) {
-    // find the add-to-cart wrapper for this form (fallback to first matching)
-    var $wrap = $form.find('.woocommerce-variation-add-to-cart').first();
-    if (!$wrap.length) {
-      $wrap = $('.woocommerce-variation-add-to-cart').first();
+    function setQuantityButtonsState($form, isInStock) {
+        // find the add-to-cart wrapper for this form (fallback to first matching)
+        var $wrap = $form.find('.woocommerce-variation-add-to-cart').first();
+        if (!$wrap.length) {
+        $wrap = $('.woocommerce-variation-add-to-cart').first();
+        }
+
+        // toggle wrapper class (WooCommerce uses this class when showing unavailable UI)
+        // $wrap.toggleClass('woocommerce-variation-add-to-cart-disabled', !isInStock);
+
+        // quantity input and +/- buttons
+        $wrap.find('input[name="quantity"]').prop('disabled', !isInStock);
+        $wrap.find('.increase, .decrease').prop('disabled', !isInStock).toggleClass('disabled', !isInStock);
+
+        // also disable the Add to cart button
+        // var $addBtn = $wrap.find('.single_add_to_cart_button');
+        // $addBtn.prop('disabled', !isInStock);
+        // $addBtn.toggleClass('disabled', !isInStock);
+
+        if (!isInStock) {
+        // optional: show unavailable text if you want
+        // $addBtn.text('Out of stock');
+            $('.single_add_to_cart_button').hide();
+            if ($('.notify-me-button').length === 0) {
+                $('.addToCartGroup').append('<button type="button" class="notify-me-button">Notify Me</button>');
+            }
+            $('.singleProductContainer').addClass('outofstock');
+        } else {
+            // restore original text if needed (depends on your theme)
+            // $addBtn.text($addBtn.data('original-text') || 'Add to cart');
+            $('.single_add_to_cart_button').show();
+            $('.notify-me-button').remove();
+            $('.singleProductContainer').removeClass('outofstock');
+        }
     }
-
-    // toggle wrapper class (WooCommerce uses this class when showing unavailable UI)
-    $wrap.toggleClass('woocommerce-variation-add-to-cart-disabled', !isInStock);
-
-    // quantity input and +/- buttons
-    $wrap.find('input[name="quantity"]').prop('disabled', !isInStock);
-    $wrap.find('.increase, .decrease').prop('disabled', !isInStock).toggleClass('disabled', !isInStock);
-
-    // also disable the Add to cart button
-    var $addBtn = $wrap.find('.single_add_to_cart_button');
-    $addBtn.prop('disabled', !isInStock);
-    $addBtn.toggleClass('disabled', !isInStock);
-    if (!isInStock) {
-      // optional: show unavailable text if you want
-      // $addBtn.text('Out of stock');
-      $('.singleProductContainer').addClass('outofstock');
-    } else {
-      // restore original text if needed (depends on your theme)
-      // $addBtn.text($addBtn.data('original-text') || 'Add to cart');
-      $('.singleProductContainer').removeClass('outofstock');
-    }
-  }
 
   // ===========================
   // 1) Variable products
@@ -804,15 +836,16 @@ jQuery(function($){
       // update rx reduction UI (your existing logic)
       if (variation.rx_reduction) {
         $('#rxDeductionAmnt').text(variation.rx_reduction + 'g');
+        $('#rxDeductionActual').val(variation.rx_reduction);
       } else {
-        $('#rxDeductionAmnt').text('—');
+        // $('#rxDeductionAmnt').text('—');
       }
     });
 
     // When variations are reset
     $variationsForm.on('reset_data', function() {
       setQuantityButtonsState($(this), false);
-      $('#rxDeductionAmnt').text('—');
+      // $('#rxDeductionAmnt').text('—');
     });
 
     // If the page already displays an availability element (some themes do),
@@ -857,11 +890,61 @@ jQuery(function($){
 //     if (val > min) $input.val(val - 1).trigger('change');
 //   });
 
+    // jQuery(function($) {
+    //     $('form.variations_form').on('found_variation', function(e, variation) {
+    //         if (!variation.is_in_stock) {
+    //             $('.single_add_to_cart_button').hide();
+    //             if ($('.notify-me-button').length === 0) {
+    //                 $('.addToCartGroup').append('<button type="button" class="notify-me-button">Notify Me</button>');
+    //             }
+    //         } else {
+    //             $('.single_add_to_cart_button').show();
+    //             $('.notify-me-button').remove();
+    //         }
+    //     });
+    // });
+
+
+
 });
 
-</script>
 
 
 <?php endif; ?>
+</script>
+<!-- Talkdesk Webchat -->
+<script>
+  var webchat;
+  (function(window, document, node, props, configs) {
+    if (window.TalkdeskChatSDK) {
+      console.error("TalkdeskChatSDK already included");
+      return;
+    }
+    var divContainer = document.createElement("div");
+    divContainer.id = node;
+    document.body.appendChild(divContainer);
+    var src = "https://talkdeskchatsdk.talkdeskapp.com/v2/talkdeskchatsdk.js";
+    var script = document.createElement("script");
+    var firstScriptTag = document.getElementsByTagName("script")[0];
+    script.type = "text/javascript";
+    script.charset = "UTF-8";
+    script.id = "tdwebchatscript";
+    script.src = src;
+    script.async = true;
+    firstScriptTag.parentNode.insertBefore(script, firstScriptTag);
+    script.onload = function() {
+      webchat = TalkdeskChatSDK(node, props);
+      webchat.init(configs);
+    };
+  })(
+    window,
+    document,
+    "tdWebchat",
+    { touchpointId: "6f4f4755162c438199a48936ea0bceff", accountId: "", region: "td-ca-1" },
+    { enableValidation: false, enableEmoji: true, enableUserInput: true, enableAttachments: true }
+  );
+</script>
+
+
 </body>
 </html>

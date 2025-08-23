@@ -51,7 +51,14 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 						<td><?php echo esc_html( wc_get_order_status_name( $order->get_status() ) ); ?></td>
 						<td><?php echo  $order->get_formatted_order_total(); ?></td>			
 					</tr>
-					<tr class="tbfoot"><td colspan="2"><button type="button" id="order-confirmation" data-order-id="<?php echo esc_html( $order->get_id() ); ?>">Order Confirmation</button></td><td colspan="4"><button type="button" id="shipped-receipt" data-order-id="<?php echo esc_html( $order->get_id() ); ?>">Shipped Receipt</button></td></tr>
+					<tr class="tbfoot"><td colspan="2"><button type="button" id="order-confirmation" data-order-id="<?php echo esc_html( $order->get_id() ); ?>">Order Confirmation</button></td>
+					<?php 
+						if ( $order->get_status() === 'completed' ) : ?>
+							<td colspan="4"><button type="button" id="shipped-receipt" data-order-id="<?php echo esc_html( $order->get_id() ); ?>">Shipped Receipt</button></td>
+					<?php else: ?>
+							<td colspan="4"><button type="button" id="shipped-receipt" data-order-id="<?php echo esc_html( $order->get_id() ); ?>" disabled>Shipped Receipt</button></td>
+					<?php endif; ?>
+					</tr>
 				</table>
 				<?php endforeach; ?>
 			</div>

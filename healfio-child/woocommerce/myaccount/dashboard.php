@@ -62,6 +62,7 @@ $credit_cards = Ample_Session_Cache::get('credit_cards');
 				<h5 class="mt-0">PERSONAL INFORMATION</h5>
 				<p><span class="badgeApproved">Approved</span></p>
 				<p><strong>Registration Date</strong> <?php echo esc_html($current_user->user_registered); ?></p>
+				<button id="registrationDcoument" class="registrationDcoument"><i class="bi bi-cloud-arrow-down-fill"></i> &nbsp; Registration Dcoument</button>
 			</div>
 			
 			<div class="group3">

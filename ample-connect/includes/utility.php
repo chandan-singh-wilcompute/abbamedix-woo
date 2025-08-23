@@ -86,8 +86,19 @@ function api_call($endpoint, $method, $data, $headers, $log, $expired = false) {
         'body'      => (!empty($body)) ? $body : null,
     ];
 
-    $response = wp_remote_request($endpoint, $args);
+     // ⏱ Start timer
+    $start_time = microtime(true);
 
+    $response = wp_remote_request($endpoint, $args);
+    
+    // ⏱ End timer
+    $end_time = microtime(true);
+    $duration = round(($end_time - $start_time), 3); // seconds, 3 decimals
+
+    if ($log) {
+        ample_connect_log("API call took {$duration} seconds.", true);
+    }
+    
     return $response;
 }
 
@@ -125,7 +136,7 @@ function handle_response($response, $log = false) {
         WC()->session->__unset('cached_order_data');
         $user_id = get_current_user_id();
         clear_customer_cart($user_id);
-    } else if (isset($body['error_code'])) {
+    } else if (isset($body['error_code']) && $body['error_code'] != "policies.apply_failed" && $body['error_code'] != "orders.cannot_modify_after_purchase") {
         wp_send_json_error([
             'message' => 'Document not found.',
             'error_code' => $body['error_code']

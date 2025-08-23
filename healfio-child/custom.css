@@ -938,7 +938,7 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
   width: 100%;
   position: absolute;
 }
-.woocommerce ul.products li.product.outofstock::before {
+.woocommerce ul.products li.product.outofstock a.woocommerce-LoopProduct-link::before {
   position: absolute;
   top: 0;
   left: 0;
@@ -3911,4 +3911,16 @@ li.category-concentrates .swatch-item.selected {
   height: 100%;
   max-width: 1170px;
   margin: 100px auto 0;
+}
+.registrationDcoument {
+  padding: 8px 15px;
+  border: 0;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease-in-out;
+}
+.registrationDcoument i {
+  font-size: 20px;
+  line-height: 20px;
 }

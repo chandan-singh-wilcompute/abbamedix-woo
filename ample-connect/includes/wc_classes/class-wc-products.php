@@ -159,13 +159,37 @@ class WC_Products {
         }
         
         // Add product image if available
-        $image_url = $productData['product_image'];
-        // ample_connect_log($image_url);
-        if (!empty($image_url)) {
-            $attachment_id = $this->download_image_to_media_library($image_url);
-            if ($attachment_id) {
-                $this->attach_image_to_product($attachment_id, $product_id, true);
-                // ample_connect_log("Product attached to the product");
+        // $image_url = $productData['product_image'];
+        // // ample_connect_log($image_url);
+        // if (!empty($image_url)) {
+        //     $attachment_id = $this->download_image_to_media_library($image_url);
+        //     if ($attachment_id) {
+        //         $this->attach_image_to_product($attachment_id, $product_id, true);
+        //         // ample_connect_log("Product attached to the product");
+        //     }
+        // } else {
+        //     ample_connect_log("product image url not found : " . $productData['id'] . "\n");
+        // }
+
+        $image_ids = [];
+        $prod_images = $productData['product_images'];
+        foreach ($prod_images as $prod_image) {
+            // Download image and add to Media Library
+            $image_id = $this->download_image_to_media_library($prod_image['display_url']);
+            if (!is_wp_error($image_id)) {
+                if ($prod_image['order_index'] == 1)
+                    array_unshift($image_ids, $image_id);
+                else
+                    $image_ids[] = $image_id;
+            }
+        }
+
+        if (!empty($image_ids)) {
+            // First image → Featured image
+            $this->attach_image_to_product($image_ids[0], $product_id, true);
+            // Remaining images → Product gallery
+            if (count($image_ids) > 1) {
+                $this->attach_image_to_product($image_ids[0], $product_id, false);
             }
         } else {
             ample_connect_log("product image url not found : " . $productData['id'] . "\n");

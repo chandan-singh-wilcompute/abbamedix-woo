@@ -9,9 +9,9 @@ class Ample_Session_Cache {
      */
     public static function is_session_available() {
         return function_exists('WC') && 
-               WC() && 
-               WC()->session && 
-               WC()->session->has_session();
+            WC() && 
+            WC()->session && 
+            WC()->session->has_session();
     }
 
     /**
@@ -29,9 +29,9 @@ class Ample_Session_Cache {
     /**
      * Get session data.
      */
-    public static function get($key) {
+    public static function get($key, $default=null) {
         if (self::is_session_available()) {
-            return WC()->session->get($key);
+            return WC()->session->get($key, $default);
         }
         return null;
     }
@@ -82,7 +82,15 @@ class Ample_Session_Cache {
                 'available_to_order',
                 'credit_cards',
                 'status',
-                'session_initialized'
+                'session_initialized',
+                'prescriptions',
+                'current_prescription',
+                'applicable_discount_codes',
+                'applied_policies',
+                'applicable_policies',
+                'order_note',
+                'external_order_number',
+                'last_completed_order_id'
             ];
             
             foreach ($session_keys as $key) {
