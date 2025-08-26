@@ -48,8 +48,9 @@ class  Client_Information {
         // Fetching registration
         $registration = $client['registration'];
         $status = $registration['status'];
+        $needs_renewal = $client['needs_renewal'];
         Ample_Session_Cache::set('status', $status);
-
+        Ample_Session_Cache::set('needs_renewal', $needs_renewal);
         return true;
     }
 

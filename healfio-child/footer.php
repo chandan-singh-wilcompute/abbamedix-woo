@@ -648,6 +648,13 @@ jQuery(document).ready(function($) {
         downloadDocument(orderId, 'shipped-receipt', button);
     });
 
+    // Handle Registration Document button
+    $(document).on('click', '#registrationDcoument', function() {
+        let button = $(this);
+        button.data('original-text', button.text());
+        downloadDocument(0, 'registration_document', button);
+    });
+
 });
 
 

@@ -156,6 +156,6 @@ if (window.location.pathname.includes('/featured-filter/')) {
 
 
 
-jQuery(document.body).on('update_checkout', function(e){
-    console.log('update_checkout triggered', e);
-});
+// jQuery(document.body).on('update_checkout', function(e){
+//     console.log('update_checkout triggered', e);
+// });

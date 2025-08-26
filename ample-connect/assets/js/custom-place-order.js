@@ -33,26 +33,26 @@ jQuery(document).ready(function($) {
     controlPlaceOrderButton();
 
 
-    // $(document).on('change', 'input[name="shipping_method[0]"]', function () {
-    //     let shipping_method = $(this).val();
-    //     console.log("Shipping Method: ", shipping_method);
+    $(document).on('change', 'input[name="shipping_method[0]"]', function () {
+        let shipping_method = $(this).val();
+        console.log("Shipping Method: ", shipping_method);
 
-    //     $.ajax({
-    //         type: "POST",
-    //         url: custom_order.ajax_url,
-    //         data: {
-    //             action: "shipping_method_selected",
-    //             shipping_method: shipping_method
-    //         },
-    //         success: function (response) {
-    //             console.log("API Response:", response);
-    //             $('body').trigger('update_checkout');
-    //         },
-    //         error: function (error) {
-    //             console.log("Error:", error);
-    //         }
-    //     });
-    // });
+        $.ajax({
+            type: "POST",
+            url: custom_order.ajax_url,
+            data: {
+                action: "shipping_method_selected",
+                shipping_method: shipping_method
+            },
+            success: function (response) {
+                console.log("API Response:", response);
+                $('body').trigger('update_checkout');
+            },
+            error: function (error) {
+                console.log("Error:", error);
+            }
+        });
+    });
 
     $(document).ready(function($) {
         $('form.variations_form').on('found_variation', function(event, variation) {
