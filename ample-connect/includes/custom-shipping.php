@@ -13,7 +13,9 @@ function custom_shipping_api_init() {
                 $this->id                 = 'custom_shipping_api';
                 $this->method_title       = __('Custom Shipping API', 'woocommerce');
                 $this->method_description = __('Retrieve shipping rates from an external API', 'woocommerce');
-
+                $this->supports = array(
+                    'no-shipping-cache' // 🚀 disables caching
+                );
                 $this->init();
             }
 
@@ -110,11 +112,12 @@ function custom_shipping_api_init() {
             // }
 
             public function calculate_shipping($package = array()) {
-                // get_shipping_rates_and_store_in_session();
-                
-                if (!Ample_Session_Cache::has('custom_shipping_rates')) {
-                    get_shipping_rates_and_store_in_session();
-                }
+                get_shipping_rates_and_store_in_session();
+                $shipping_options = [];
+
+                // if (!Ample_Session_Cache::has('custom_shipping_rates')) {
+                //     get_shipping_rates_and_store_in_session();
+                // }
 
                 $shipping_options = Ample_Session_Cache::get('custom_shipping_rates');
                 // $shipping_options = get_shipping_rates_and_store_in_session();

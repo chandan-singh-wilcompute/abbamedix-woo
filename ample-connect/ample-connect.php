@@ -54,8 +54,11 @@ add_filter( 'woocommerce_payment_gateways', function ( $gateways ) {
     return $gateways;
 });
 
-// Define global configuration settings
-define('AMPLE_CONNECT_API_BASE_URL', 'https://abbatestbox.sandbox.onample.com/api');
+require_once plugin_dir_path(__FILE__) . 'includes/class-ample-connect-admin.php';
+$ample_connect_settings = Ample_Connect_Admin::get_settings();
+
+// define('AMPLE_CONNECT_API_BASE_URL', 'https://abbatestbox.sandbox.onample.com/api');
+define('AMPLE_CONNECT_API_BASE_URL', $ample_connect_settings['ample_base_url']);
 define('AMPLE_CONNECT_LOGIN_URL', AMPLE_CONNECT_API_BASE_URL . '/v1/users/login');
 define('AMPLE_CONNECT_PORTAL_URL', AMPLE_CONNECT_API_BASE_URL . '/v1/portal');
 define('AMPLE_CONNECT_CLIENTS_URL', AMPLE_CONNECT_API_BASE_URL . '/v2/clients');

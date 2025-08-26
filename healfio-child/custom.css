@@ -3912,7 +3912,8 @@ li.category-concentrates .swatch-item.selected {
   max-width: 1170px;
   margin: 100px auto 0;
 }
-.registrationDcoument {
+.registrationDcoument,
+.renewalFormBtn {
   padding: 8px 15px;
   border: 0;
   box-shadow: none;
@@ -3920,7 +3921,199 @@ li.category-concentrates .swatch-item.selected {
   align-items: center;
   transition: all 0.3s ease-in-out;
 }
-.registrationDcoument i {
+.registrationDcoument i,
+.renewalFormBtn i {
   font-size: 20px;
   line-height: 20px;
+}
+.renewalFormBtn {
+  margin-left: 20px;
+  text-decoration: none;
+  background: #E9E9ED;
+  color: #000000;
+}
+.renewalFormBtn:hover {
+  background: #D0D0D7;
+}
+#renewalForm input::placeholder {
+  color: #ffffff;
+  opacity: 1;
+  font-weight: bold;
+}
+#renewalForm input:-webkit-autofill,
+#renewalForm input:-webkit-autofill:hover,
+#renewalForm input:-webkit-autofill:focus,
+#renewalForm input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #6EB0BE inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+#renewalForm .elementor-field-group {
+  align-items: flex-end;
+}
+#renewalForm .elementor-field-group input[type="text"],
+#renewalForm .elementor-field-group input[type="number"],
+#renewalForm .elementor-field-group input[type="email"],
+#renewalForm .elementor-field-group input[type="password"],
+#renewalForm .elementor-field-group select {
+  border: 0;
+  border-radius: 0;
+  -webkit-box-shadow: 0 0 0 30px #6EB0BE inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+#renewalForm .elementor-field-label {
+  font-family: "Comfortaa", sans-serif !important;
+  font-size: 20px !important;
+  font-weight: normal !important;
+  margin-bottom: 20px;
+  display: inline-block;
+}
+#renewalForm .elementor-field-label:after {
+  display: none;
+}
+#renewalForm .elementor-field-option {
+  display: inline-flex;
+  align-items: center;
+}
+#renewalForm .elementor-field-option label {
+  font-size: 16px !important;
+  margin-bottom: 0 !important;
+  line-height: 24px;
+}
+#renewalForm .elementor-col-100 {
+  line-height: 24px;
+}
+#renewalForm .elementor-col-100 span {
+  display: block;
+  font-size: 14px;
+  font-weight: normal;
+}
+#renewalForm .elementor-col-100 span.elementor-field-option {
+  display: inline-flex;
+}
+#renewalForm .elementor-col-20 {
+  white-space: nowrap;
+}
+#renewalForm .elementor-button {
+  box-shadow: none !important;
+}
+#renewalForm .elementor-upload-field {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background-color: transparent !important;
+}
+#renewalForm input[type="checkbox"],
+#renewalForm input[type="radio"] {
+  min-width: 30px;
+  width: 30px;
+  height: 30px;
+  border-radius: 0;
+  position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+  background: #6EB0BE;
+  margin-right: 10px;
+  border: 0;
+}
+#renewalForm input[type="checkbox"]:hover,
+#renewalForm input[type="radio"]:hover {
+  border-color: #000000;
+}
+#renewalForm input[type="checkbox"]:before,
+#renewalForm input[type="radio"]:before {
+  content: '\2713';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  font-size: 22px;
+  transform: rotate(17deg);
+  z-index: 2;
+  color: #6EB0BE;
+}
+#renewalForm input[type="checkbox"]:checked:before,
+#renewalForm input[type="radio"]:checked:before {
+  color: #ffffff;
+}
+#renewalForm input#form-field-field_1975c55-0[type="checkbox"] {
+  background: #6EB0BE;
+  border: 0;
+}
+#renewalForm input#form-field-field_1975c55-0[type="checkbox"]:before {
+  color: #6EB0BE;
+}
+#renewalForm input#form-field-field_1975c55-0[type="checkbox"]:checked:before {
+  color: #000000;
+}
+#renewalForm input#form-field-field_41a57c5 {
+  min-height: 0px;
+  visibility: hidden;
+  padding: 0;
+}
+#renewalForm input[type="radio"] {
+  border-radius: 100%;
+}
+#renewalForm input[type="radio"]:before {
+  content: '';
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  font-size: 20px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  border-radius: 100%;
+}
+#renewalForm input[type="radio"]:checked:before {
+  background-color: #ffffff;
+}
+#renewalForm input::file-selector-button {
+  color: #ffffff;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 3px;
+  background-color: #A7AF39;
+  font-size: 24px;
+}
+#renewalForm .elementor_signature_clear {
+  width: 85px !important;
+  height: 30px !important;
+  top: -40px;
+}
+#renewalForm .elementor_signature_clear img {
+  opacity: 0;
+  height: 30px;
+  margin-top: 0px;
+}
+#renewalForm .elementor_signature_clear:before {
+  font-size: 20px;
+  line-height: 28px;
+  width: 100%;
+  height: 100%;
+  content: 'Clear';
+  text-transform: uppercase;
+  color: #ffffff;
+  padding: 2px 10px;
+  background-color: #A7AF39;
+  position: absolute;
+}
+#renewalForm .width-100 {
+  margin-top: 0;
+}
+#renewalForm .elementor-field-group-field_35bc086 p {
+  padding: 20px 20px 20px 45px;
+  background: #f5f5f5 url(img/info-circle.svg) 15px 17px no-repeat;
+  margin: 10px 0;
+  border-radius: 10px;
+}
+#renewalForm .elementor-field-group-field_1975c55 {
+  margin-top: 20px;
+}
+#renewalForm hr {
+  margin-top: 20px;
+}
+#renewalForm .elementor-field-type-signature {
+  padding-top: 0 !important;
+}
+#renewalForm .elementor-field-type-checkbox .elementor-field-option {
+  align-items: flex-start;
 }

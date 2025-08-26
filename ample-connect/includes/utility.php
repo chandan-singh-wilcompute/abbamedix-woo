@@ -164,26 +164,32 @@ function custom_registration_generate_unique_username ($username)
 
 // Function to clear cart to the particular customer
 function clear_customer_cart( $customer_id ) {
+    ample_connect_log("clear cart got called! customer id is: " . $customer_id);
+
     if ( ! $customer_id ) {
-
-
-        return 0;
+        return false;
     }
 
-    // Delete persistent cart stored in user meta
-    delete_user_meta( $customer_id, '_woocommerce_persistent_cart_1' );
+    // 1. Delete persistent cart (saved carts)
+    $blog_id = get_current_blog_id();
+    delete_user_meta( $customer_id, '_woocommerce_persistent_cart_' . $blog_id );
 
-    // Delete session from WooCommerce session table
+    // 2. Delete active session
     global $wpdb;
-
     $table = $wpdb->prefix . 'woocommerce_sessions';
-
-    // Delete session based on user ID (stored as session_key)
     $wpdb->delete(
         $table,
-        array( 'session_key' => $customer_id ),
+        array( 'session_key' => (string) $customer_id ),
         array( '%s' )
     );
-    return 1;
+
+    // 3. Clear cart immediately if this is the current logged-in user
+    if ( is_user_logged_in() && get_current_user_id() == $customer_id && function_exists('WC') && WC()->cart ) {
+        WC()->cart->empty_cart();
+        WC()->session->set('cart', []); // make sure it's flushed
+    }
+
+    return true;
 }
+
 

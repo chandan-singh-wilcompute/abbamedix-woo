@@ -55,12 +55,22 @@ function is_login_page() {
 }
 
 
-add_action('template_redirect', 'set_user_session_data_if_logged_in');
-function set_user_session_data_if_logged_in() {
+function setup_session_for_user_once() {
     // Avoid admin, login pages, or AJAX calls
     if (is_admin() || is_login_page() || wp_doing_ajax()) {
         return;
     }
+
+    static $already_run = false;
+    if ($already_run) return;
+    $already_run = true;
+
+    setup_session_for_user();
+}
+add_action('template_redirect', 'setup_session_for_user_once');
+add_action('wp', 'setup_session_for_user_once');
+
+function setup_session_for_user() {
 
     // User must be logged in
     if (!is_user_logged_in()) {
@@ -77,19 +87,15 @@ function set_user_session_data_if_logged_in() {
     if (!$session_initialized || !$purchasable_products) {
         ample_connect_log("Re-initializing session data for user: " . $user->ID);
         
-        get_purchasable_products_and_store_in_session($user->ID);
         Client_Information::fetch_information();
+        get_purchasable_products_and_store_in_session($user->ID);
         // get_order_from_api_and_update_session($user->ID);
         // get_shipping_rates_and_store_in_session($user->ID);
         Ample_Session_Cache::set('session_initialized', true);
     }
 
-    if (!Ample_Session_Cache::has('order_id')) {
-        ample_connect_log("Getting current order.");
-        get_order_from_api_and_update_session($user->ID);
-    }
+    get_order_from_api_and_update_session($user->ID);
 }
-
 
 // Custom Fields add to User Profile Page
 function wk_custom_user_profile_fields($user)
@@ -224,7 +230,8 @@ add_action('woocommerce_customer_save_address', 'custom_update_user_shipping_add
 
 function custom_update_external_system($client_id, $active_registration_id, $data)
 {
-    $update_url = "https://medbox.sandbox.onample.com/api/v2/clients/$client_id/registrations/$active_registration_id";
+    $update_url = AMPLE_CONNECT_CLIENTS_URL . "/{$client_id}/registrations/{$active_registration_id}";
+    //$update_url = "https://medbox.sandbox.onample.com/api/v2/clients/$client_id/registrations/$active_registration_id";
     $update_data = ample_request($update_url, 'PUT', $data);
 
     if ($update_data['status'] != 'success') {
@@ -734,6 +741,7 @@ function handle_shipping_method_selected() {
         wp_send_json_success($body_data);
         
     } else {
+        get_order_from_api_and_update_session();
         wp_send_json_error("API request failed: " . $response->get_error_message());
     }
 }
@@ -1457,14 +1465,18 @@ function validate_selected_shipping_method() {
     }
 }
 
-
-add_action('woocommerce_before_checkout_form', 'force_shipping_reset', 5);
-function force_shipping_reset() {
-    if (function_exists('wc') && wc()->shipping()) {
-        wc()->shipping()->reset_shipping();
+add_action('woocommerce_before_checkout_form', function() {
+    if (WC()->session) {
+        WC()->session->set('shipping_for_package_0', null);
     }
-}
-
+    if (wc()->shipping) {
+        wc()->shipping->reset_shipping();
+    }
+    if (is_checkout() && WC()->cart) {
+        ample_connect_log("shipping being recalculated"); 
+        WC()->cart->calculate_shipping(); // forces recalc
+    }
+});
 
 
 // Customer discount and policies
@@ -1485,7 +1497,7 @@ function show_selectable_discounts_on_checkout() {
         $code   = esc_attr($discount['code']);
         $id     = $discount['id'];
         $amount = number_format($discount['amount'] / 100, 2);
-        echo "<li><label><input type='checkbox' class='apply-discount' value='{$id}' data-amount='{$discount['amount']}' data-desc='{$desc} (-\${$amount})'> {$desc} (-\${$amount})</label></li>";
+        echo "<li><label><input type='checkbox' class='apply-discount discount_checkbox' value='{$id}' data-amount='{$discount['amount']}' data-desc='{$desc} (-\${$amount})'> {$desc} (-\${$amount})</label></li>";
     }
 
     // Policy discount checkbox
@@ -1494,7 +1506,7 @@ function show_selectable_discounts_on_checkout() {
         $covers_shipping   = esc_attr($policy['covers_shipping']);
         $id     = $policy['id'];
         $percent = esc_html($policy['percent']);
-        echo "<li><label><input type='checkbox' class='apply-policy-discount' data-shipping='{$covers_shipping}' value='{$id}' data-percentage='{$percent}' data-desc='{$label} ({$percent}% off)'> {$label} ({$percent}% off)</label></li>";
+        echo "<li><label><input type='checkbox' class='apply-policy-discount discount_checkbox' data-shipping='{$covers_shipping}' value='{$id}' data-percentage='{$percent}' data-desc='{$label} ({$percent}% off)'> {$label} ({$percent}% off)</label></li>";
     }
 
     echo '</ul>';
@@ -1537,6 +1549,8 @@ function custom_discount_ajax_script() {
                     discounts: discounts
                 },
                 success: function(response) {
+                    console.log("policy apply response:");
+                    console.log(response);
                     if(response.success){
                         $(document.body).trigger('update_checkout'); // refresh totals
                     } else {
@@ -1566,7 +1580,11 @@ function custom_discount_ajax_script() {
                 data: { action: 'get_applied_discounts' },
                 success: function(response){
                     if(response.success){
+                        console.log("Applied discounts = ");
+                        console.log(response.data);
                         const applied = response.data.applied || [];
+                        // Reset all discount checkboxes
+                        $('.discount_checkbox').prop('checked', false);
                         applied.forEach(d => {
                             $('input[value="'+d.id+'"]').prop('checked', true);
                         });
@@ -1628,17 +1646,19 @@ function handle_update_discounts() {
 
     $to_apply_policies = array_diff_key($new_policies, $prev_policies);
     $to_remove_policies = array_diff_key($prev_policies, $new_policies);
+    
+    $return_data = [];
 
     // 🔹 API calls for discounts
     if (!empty($to_apply_discounts)) {
         foreach ($to_apply_discounts as $discount_id => $discount) {
-            add_discount_to_order($discount_id);
+            $return_data[] = add_discount_to_order($discount_id);
         }
     }
     if (!empty($to_remove_discounts)) {
         $app_dis_codes = Ample_Session_Cache::get('applied_discount_codes');
         foreach ($to_remove_discounts as $discount_id => $discount) {
-            remove_discount_from_order($app_dis_codes[$discount_id]);
+            $return_data[] = remove_discount_from_order($app_dis_codes[$discount_id]);
         }
     }
 
@@ -1660,11 +1680,14 @@ function handle_update_discounts() {
         //         $policy_data = add_policy_to_order($policy_id);
         //     }
         // }
-        $policy_data = add_policy_to_order($policy_id);
+        foreach ($to_apply_policies as $policy_id => $policy) {
+            $return_data[] = add_policy_to_order($policy_id);
+        }
+        
     }
     if (!empty($to_remove_policies)) {
         foreach ($to_remove_policies as $policy_id => $policy) {
-            remove_policy_from_order($policy_id);
+            $return_data[] = remove_policy_from_order($policy_id);
         }
     }
 
@@ -1672,7 +1695,7 @@ function handle_update_discounts() {
     Ample_Session_Cache::set('applied_discounts', $new_discounts);
     Ample_Session_Cache::set('applied_policies', $new_policies);
 
-    wp_send_json_success();
+    wp_send_json_success($return_data);
 }
 
 // Return applied discounts for UI restore
@@ -2109,49 +2132,55 @@ function ample_connect_debug_session_data() {
 
 // Confirmation Receipt 
 add_action('wp_ajax_view_order_document', 'view_order_document');
+add_action('wp_ajax_nopriv_view_order_document', 'view_order_document');
 function view_order_document() {
     if (!is_user_logged_in()) {
         wp_die('Not allowed', 'Error', ['response' => 403]);
     }
 
     // Require nonce from client side for CSRF protection
-    check_ajax_referer('view_order_doc_nonce', 'nonce');
+    // check_ajax_referer('view_order_doc_nonce', 'nonce');
 
     $woo_order_id = intval($_POST['order_id']);
     $doc_type = sanitize_text_field($_POST['doc_type']); 
 
-    // Verify the logged-in user owns the WooCommerce order (or has capability)
-    $order = wc_get_order($woo_order_id);
-    if (!$order || ($order->get_user_id() !== get_current_user_id() && !current_user_can('manage_woocommerce'))) {
-        wp_die('Not allowed', 'Error', ['response' => 403]);
-    }
-
-    // Map to external Ample order ID stored on the Woo order
-    $external_order_number = get_post_meta($woo_order_id, '_external_order_number', true);
-    if (empty($external_order_number)) {
-        wp_die('External order not found', 'Error', ['response' => 400]);
-    }
-
     $user_id = get_current_user_id();
     $client_id = get_user_meta($user_id, 'client_id', true);
 
-    // Decide API URL based on document type
-    if ($doc_type === 'order-confirmation') {
-        $url = AMPLE_CONNECT_PORTAL_URL . '/orders/' . $external_order_number . '/confirmation_receipt';
-    } elseif ($doc_type === 'shipped-receipt') {
-        $url = AMPLE_CONNECT_PORTAL_URL . '/orders/' . $external_order_number . '/shipping_receipt';
+    if ($doc_type === 'registration_document') {
+        $url = AMPLE_CONNECT_PORTAL_URL . '/clients/' . $client_id . '/registration_document';
     } else {
-        wp_die('Invalid document type', 'Error', ['response' => 400]);
+        // Verify the logged-in user owns the WooCommerce order (or has capability)
+        $order = wc_get_order($woo_order_id);
+        if (!$order || ($order->get_user_id() !== get_current_user_id() && !current_user_can('manage_woocommerce'))) {
+            wp_die('Not allowed', 'Error', ['response' => 403]);
+        }
+
+        // Map to external Ample order ID stored on the Woo order
+        $external_order_number = get_post_meta($woo_order_id, '_external_order_number', true);
+        if (empty($external_order_number)) {
+            wp_die('External order not found', 'Error', ['response' => 400]);
+        }
+
+        // Decide API URL based on document type
+        if ($doc_type === 'order-confirmation') {
+            $url = AMPLE_CONNECT_PORTAL_URL . '/orders/' . $external_order_number . '/confirmation_receipt';
+        } elseif ($doc_type === 'shipped-receipt') {
+            $url = AMPLE_CONNECT_PORTAL_URL . '/orders/' . $external_order_number . '/shipping_receipt';
+        } else {
+            wp_die('Invalid document type', 'Error', ['response' => 400]);
+        }
     }
 
     $api_url = add_query_arg(array('client_id' => $client_id), $url);
 
     $body = ample_request($api_url);
-
+    // ample_connect_log("document response - ");
+    // ample_connect_log($body);
     if (is_array($body)) {
         wp_send_json_error($body);
     }
-
+    
     header('Content-Type: application/pdf');
     echo $body;
     wp_die();

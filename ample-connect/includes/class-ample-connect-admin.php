@@ -7,6 +7,25 @@ require_once plugin_dir_path(__FILE__) . 'class-wc-product-sync.php';
 // require_once plugin_dir_path(__FILE__) . 'class-ample-connect-api.php';
 class Ample_Connect_Admin {
 
+    private static $settings_cache = null;
+
+    public static function get_settings() {
+        if (self::$settings_cache === null) {
+            self::$settings_cache = array(
+                'product_sync_enabled'       => get_option('ample_connect_product_sync_enabled', true),
+                'client_profile_update_enabled' => get_option('ample_connect_client_profile_update_enabled', true),
+                'consumer_key'               => get_option('ample_connect_consumer_key', ''),
+                'consumer_secret'            => get_option('ample_connect_consumer_secret', ''),
+                'account_not_approved_message' => get_option('account_not_approved_message', ''),
+                'product_sync_time'          => get_option('product_sync_time', ''),
+                'ample_base_url'             => get_option('ample_base_url', ''),
+                'ample_admin_username'       => get_option('ample_admin_username', ''),
+                'ample_admin_password'       => get_option('ample_admin_password', ''),
+                'webhook_secret'             => get_option('ample_connect_webhook_secret', ''),
+            );
+        }
+        return self::$settings_cache;
+    }
 
     public function __construct() {
         // Hook into the admin_init action to register settings
@@ -59,6 +78,7 @@ class Ample_Connect_Admin {
 
 
     public function register_settings() {
+
         register_setting('ample_connect_settings', 'ample_connect_product_sync_enabled');
         register_setting('ample_connect_settings', 'ample_connect_client_profile_update_enabled');
         register_setting('ample_connect_settings', 'ample_connect_consumer_key');
@@ -66,7 +86,7 @@ class Ample_Connect_Admin {
 
         register_setting('ample_connect_settings', 'account_not_approved_message');
         register_setting('ample_connect_settings', 'product_sync_time');
-
+        register_setting('ample_connect_settings', 'ample_base_url');
         register_setting('ample_connect_settings', 'ample_admin_username');
         register_setting('ample_connect_settings', 'ample_admin_password');
 
@@ -117,6 +137,14 @@ class Ample_Connect_Admin {
             'account_not_approved_message',
             'Account not approved message',
             [$this, 'account_not_approved_message_field_callback'],
+            'ample-connect-settings',
+            'ample_connect_main_section'
+        );
+
+        add_settings_field(
+            'ample_base_url',
+            'Ample Base URL',
+            [$this, 'ample_base_url_field_callback'],
             'ample-connect-settings',
             'ample_connect_main_section'
         );
@@ -182,6 +210,12 @@ class Ample_Connect_Admin {
         global $ample_connect_settings;
         $option = $ample_connect_settings['account_not_approved_message'];
         echo '<input type="text" name="account_not_approved_message" value="' . esc_attr($option) . '" class="regular-text">';
+    }
+
+    public function ample_base_url_field_callback() {
+        global $ample_connect_settings;
+        $option = $ample_connect_settings['ample_base_url'];
+        echo '<input type="text" name="ample_base_url" value="' . esc_attr($option) . '" class="regular-text">';
     }
 
     public function ample_admin_username_field_callback() {
@@ -380,7 +414,7 @@ class Ample_Connect_Admin {
             'consumer_secret' => get_option('ample_connect_consumer_secret', ''),
             'account_not_approved_message' => get_option('account_not_approved_message', ''),
             'product_sync_time' => get_option('product_sync_time', ''),
-
+            'ample_base_url' => get_option('ample_base_url', ''),
             'ample_admin_username' => get_option('ample_admin_username', ''),
             'ample_admin_password' => get_option('ample_admin_password', ''),
             'webhook_secret' => get_option('ample_connect_webhook_secret', ''),

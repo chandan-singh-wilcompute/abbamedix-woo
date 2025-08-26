@@ -4435,7 +4435,8 @@ li {
   margin: 100px auto 0;
 }
 
-.registrationDcoument {
+.registrationDcoument,
+.renewalFormBtn {
   padding: 8px 15px;
   border: 0;
   box-shadow: none;
@@ -4448,4 +4449,242 @@ li {
     font-size: 20px;
     line-height: 20px;
   }
+}
+
+.renewalFormBtn {
+  margin-left: 20px;
+  text-decoration: none;
+  background: #E9E9ED;
+  color: #000000;
+
+  &:hover {
+    background: #D0D0D7;
+  }
+}
+
+#renewalForm {
+
+  
+
+  input::placeholder {
+    color: #ffffff;
+    opacity: 1;
+    font-weight: bold;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus, 
+  input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px #6EB0BE inset !important;
+    -webkit-text-fill-color: @white !important;
+  }
+
+  .elementor-field-group {
+
+    align-items: flex-end;
+
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"],
+    select {
+      border: 0;
+      border-radius: 0;
+      -webkit-box-shadow: 0 0 0 30px #6EB0BE inset !important;
+      -webkit-text-fill-color: @white !important;
+    }
+    
+  }
+
+  .elementor-field-label {
+    font-family: @Comfortaa !important;
+    font-size: 20px !important;
+    font-weight: normal !important;
+    margin-bottom: 20px;
+    display: inline-block;
+
+    &:after {
+      display: none;
+    }
+  }
+
+  .elementor-field-option {
+    display: inline-flex;
+    align-items: center;
+
+    label {
+      font-size: 16px !important;
+      margin-bottom: 0 !important;
+      line-height: 24px;
+    }
+  }
+
+  .elementor-col-100 {
+    line-height: 24px;
+
+    span {
+      display: block;
+      font-size: 14px;
+      font-weight: normal;
+    }
+
+    span.elementor-field-option {
+      display: inline-flex;
+    }
+  }
+
+  .elementor-col-20 {
+    white-space: nowrap;
+  }
+
+  .elementor-button {
+    box-shadow: none !important;
+  }
+
+  .elementor-upload-field {
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    background-color: transparent !important;
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-width: 30px;
+    width: 30px;
+    height: 30px;
+    border-radius: 0;
+
+    position: relative;
+    appearance: none;
+    -webkit-appearance: none;
+    background: #6EB0BE;
+    margin-right: 10px;
+    border: 0;
+
+    &:hover {
+      border-color: #000000;
+    }
+
+    &:before {
+      content: '\2713';
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      font-size: 22px;
+      transform: rotate(17deg);
+      z-index: 2;
+      color: #6EB0BE;
+    }
+
+    &:checked:before {
+      color: @white; 
+    }
+  }
+
+  input#form-field-field_1975c55-0[type="checkbox"] {
+    background: #6EB0BE;
+    border: 0;
+    &:before {
+      color: #6EB0BE;
+    }
+    &:checked:before {
+      color: @black; 
+    }
+  }
+
+  input#form-field-field_41a57c5 {
+    min-height: 0px;
+    visibility: hidden;
+    padding: 0;    
+  }
+
+  input[type="radio"] {
+    border-radius: 100%;
+    &:before {
+      content: '';
+      position: absolute;
+      
+      right: 4px;
+      top: 4px;
+      font-size: 20px;
+      z-index: 2;
+
+      width: 22px;
+      height: 22px;
+      border-radius: 100%;
+    }
+
+    &:checked:before {
+      background-color: @white; 
+    }
+  } 
+
+
+  input::file-selector-button {
+    color: #ffffff;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 3px;
+    background-color: #A7AF39;
+    font-size: 24px;
+  }
+
+  .elementor_signature_clear {
+    width: 85px !important;
+    height: 30px !important;
+    top: -40px;
+
+    img {
+      opacity: 0;
+      height: 30px;
+      margin-top: 0px;
+    }
+
+    &:before {
+      font-size: 20px;
+      line-height: 28px;
+      width: 100%;
+      height: 100%;
+      content: 'Clear';
+      text-transform: uppercase;
+      color: #ffffff;
+      padding: 2px 10px;
+      background-color: #A7AF39;
+      position: absolute;
+    }
+  }
+
+  .width-100 {
+    margin-top: 0;
+  }
+
+  .elementor-field-group-field_35bc086 {
+    p {
+      padding: 20px 20px 20px 45px;
+      background: #f5f5f5 url(img/info-circle.svg) 15px 17px no-repeat;
+      margin: 10px 0;
+      border-radius: 10px;
+    }
+  }
+
+  .elementor-field-group-field_1975c55 {
+    margin-top: 20px;
+  }
+
+  hr {
+    margin-top: 20px;
+  }
+
+  .elementor-field-type-signature {
+    padding-top: 0 !important;
+  }
+
+  .elementor-field-type-checkbox {
+    .elementor-field-option {
+      align-items: flex-start;
+    }
+  }
+
 }

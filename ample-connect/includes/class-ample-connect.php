@@ -3,8 +3,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-require_once plugin_dir_path(__FILE__) . 'class-ample-connect-admin.php';
-
 class Ample_Connect {
 
     protected $admin;
