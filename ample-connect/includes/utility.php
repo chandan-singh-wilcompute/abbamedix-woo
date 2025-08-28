@@ -14,6 +14,7 @@ function get_ample_api_token($expired = false) {
 
 // Handle API requests
 function ample_request($endpoint, $method = 'GET', $data = [], $headers = [], $log = true) {
+    ample_connect_log("ample request called");
     // echo '<pre>';
     // echo print_r($endpoint);
     // echo '</pre>';

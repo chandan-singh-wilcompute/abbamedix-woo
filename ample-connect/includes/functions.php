@@ -71,7 +71,7 @@ add_action('template_redirect', 'setup_session_for_user_once');
 add_action('wp', 'setup_session_for_user_once');
 
 function setup_session_for_user() {
-
+    ample_connect_log("Setup session for user called");
     // User must be logged in
     if (!is_user_logged_in()) {
         return;
@@ -94,7 +94,11 @@ function setup_session_for_user() {
         Ample_Session_Cache::set('session_initialized', true);
     }
 
-    get_order_from_api_and_update_session($user->ID);
+    $order_id = Ample_Session_Cache::get('order_id', false);
+    if (!$order_id) {
+        get_order_from_api_and_update_session($user->ID);
+    }
+    
 }
 
 // Custom Fields add to User Profile Page
@@ -732,16 +736,17 @@ function handle_shipping_method_selected() {
         'shipping_rate_id' => $shipping_method,
         'client_id' => $client_id
     );
+
     $body_data = ample_request($api_url, 'PUT', $body);
+
     if ($body_data) {
-        if (array_key_exists('id', $body_data)) {
-            store_current_order_to_session($body_data);
+        if (is_array($body_data) && array_key_exists('id', $body_data)) {
+            store_current_order_to_session($body_data, $user_id);
             WC()->cart->calculate_totals();
         }
         wp_send_json_success($body_data);
-        
     } else {
-        get_order_from_api_and_update_session();
+        // get_order_from_api_and_update_session();
         wp_send_json_error("API request failed: " . $response->get_error_message());
     }
 }
@@ -1552,6 +1557,7 @@ function custom_discount_ajax_script() {
                     console.log("policy apply response:");
                     console.log(response);
                     if(response.success){
+                        // location.reload();
                         $(document.body).trigger('update_checkout'); // refresh totals
                     } else {
                         console.log('Failed to update discounts:', response);
@@ -1770,11 +1776,14 @@ function apply_selected_custom_discount($cart) {
 
     $discounts = Ample_Session_Cache::get('applied_discounts', []);
     $policies  = Ample_Session_Cache::get('applied_policies', []);
-
+    // ample_connect_log("Discounts ");
+    // ample_connect_log($discounts);
+    // ample_connect_log("Policies ");
+    // ample_connect_log($policies);
     // Apply fixed amount discounts
     if ($discounts) {
         foreach($discounts as $d) {
-            $cart->add_fee($d['desc'], -floatval($d['amount']), false);
+            $cart->add_fee($d['desc'], -(floatval($d['amount'])/100), false);
         }
     }
     
@@ -1931,6 +1940,7 @@ add_action('wp_ajax_nopriv_get_gram_quota_data', 'get_gram_quota_data');
 
 function get_gram_quota_data() {
     $details = Ample_Session_Cache::get('policy_details');
+    $availble_to_order = Ample_Session_Cache::get('available_to_order', 0);
     
     $current_prescription = Ample_Session_Cache::get('current_prescription');
 
@@ -1940,8 +1950,22 @@ function get_gram_quota_data() {
         $policy_available_grams = 0;
     }
 
-    if ($current_prescription) {
-        $prescription_available_grams = $current_prescription['available_to_order'];
+    if ($availble_to_order > 0) {
+        $total = 0;
+        if ( WC()->cart ) {
+            foreach ( WC()->cart->get_cart() as $cart_item ) {
+                $product = $cart_item['data']; // WC_Product object
+                $quantity = $cart_item['quantity'];
+
+                // Make sure 'rx_reduction' meta exists
+                $rx_reduction = floatval( $product->get_meta('RX Reduction') );
+
+                $total += $rx_reduction * $quantity;
+            }
+        }
+
+        $prescription_available_grams = $availble_to_order - $total;
+
     } else {
         $prescription_available_grams = 0;
     }
@@ -2175,15 +2199,28 @@ function view_order_document() {
     $api_url = add_query_arg(array('client_id' => $client_id), $url);
 
     $body = ample_request($api_url);
-    // ample_connect_log("document response - ");
-    // ample_connect_log($body);
+
     if (is_array($body)) {
-        wp_send_json_error($body);
+        // API returned an error or no document
+        wp_send_json_success([
+            'message' => 'No document available',
+            'has_pdf' => false,
+        ]);
     }
-    
+
+    // Clean output buffer
+    if (ob_get_length()) {
+        ob_end_clean();
+    }
+
+    nocache_headers();
     header('Content-Type: application/pdf');
+    header('Content-Disposition: attachment; filename="order-' . intval($_POST['order_id']) . '.pdf"');
+    header('Content-Length: ' . strlen($body));
     echo $body;
-    wp_die();
+
+    // ✅ Use exit, not wp_die
+    exit;
 }
 
 

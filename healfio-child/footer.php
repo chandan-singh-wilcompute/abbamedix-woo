@@ -99,826 +99,526 @@
 <?php wp_footer(); ?>
 
 <script>
-    // GO Back
-    document.getElementById("goback").addEventListener("click", () => {
-      history.back();
-    });
-    
-    // Quantity
-    // const qtyInput = document.querySelector('.productQuantity .quantity .qty');
-    // const increaseBtn = document.querySelector('.productQuantity .increase');
-    // const decreaseBtn = document.querySelector('.productQuantity .decrease');
+    /**
+     * Unified, non-redundant variant + qty + price script
+     * Keeps your classes/markup exactly as-is, fixes glitches.
+     */
+    jQuery(function($){
 
-    // increaseBtn.addEventListener('click', () => {
-    //   const currentValue = parseInt(qtyInput.value) || 0;
-    //   qtyInput.value = currentValue + 1;
-    // });
-
-    // decreaseBtn.addEventListener('click', () => {
-    //   const currentValue = parseInt(qtyInput.value) || 0;
-    //   const min = parseInt(qtyInput.min) || 0;
-    //   if (currentValue > min) {
-    //     qtyInput.value = currentValue - 1;
-    //   }
-    // }); 
-
-
-    // Product card quantity
-    function increaseQty(button) {
-        const input = button.previousElementSibling;
-        input.value = parseInt(input.value) + 1;
-        updateTotal(input);
-    }
-
-    function decreaseQty(button) {
-        const input = button.nextElementSibling;
-        if (parseInt(input.value) > 1) {
-        input.value = parseInt(input.value) - 1;
-        updateTotal(input);
+        // -------------------------
+        // Helpers
+        // -------------------------
+        function parsePriceString(str){
+            if(!str) return 0;
+            const num = String(str).replace(/[^0-9.\-]+/g,'');
+            return parseFloat(num) || 0;
         }
-    }
 
-    function updateTotal(input) {
-        // const card = input.closest('.product');
-        // const price = parseFloat(card.querySelector('#prod-price').value);
-        // const cur = card.querySelector('#prod-cur').value;
-        // // const priceText = card.querySelector('.prodcard-price span').innerText;
-        // // const price = parseFloat(priceText.replace('$', ''));
-        // const qty = parseInt(input.value);
-        // const totalPrice = card.querySelector('.prodcard-price span');
-        // totalPrice.innerText = `${cur}${(price * qty).toFixed(2)}`;
+        // store base price for each product card so resets restore it
+        $('li.product').each(function(){
+            const $card = $(this);
+            const $priceHtml = $card.find('.prodcard-price .price-html').first();
+            const base = $priceHtml.length ? $priceHtml.text().trim() : '';
+            $card.find('.prodcard-price').data('base-price', base);
+        });
 
-        const card = input.closest('.product');
-        const price = parseFloat(card.querySelector('#prod-price').value);
-        const cur = card.querySelector('#prod-cur').value;
-        const qty = parseInt(input.value);
+        // -------------------------
+        // Expose global functions used by inline onclick in markup
+        // -------------------------
+        window.increaseQty = function(button){
+            try {
+            const input = button.previousElementSibling;
+            if (!input) return;
+            input.value = parseInt(input.value || 0) + 1;
+            window.updateTotal(input);
+            } catch(e){ console.error(e); }
+        };
+        window.decreaseQty = function(button){
+            try {
+            const input = button.nextElementSibling;
+            if (!input) return;
+            if (parseInt(input.value || 0) > 1) {
+                input.value = parseInt(input.value || 0) - 1;
+                window.updateTotal(input);
+            }
+            } catch(e){ console.error(e); }
+        };
 
-        // Update total price display
-        const totalPrice = card.querySelector('.prodcard-price .price-html');
-        totalPrice.innerText = `${cur}${(price * qty).toFixed(2)}`;
+        window.updateTotal = function(input){
+            try {
+            const card = input.closest('.product');
+            if (!card) return;
+            const $card = $(card);
 
-        // ✅ Update WooCommerce form's quantity field
-        const hiddenQtyInput = card.querySelector('form.cart input[name="quantity"]');
-        if (hiddenQtyInput) {
-            hiddenQtyInput.value = qty;
-        }
-    }
-    
+            // prefer hidden numeric prod-price if present (set on swatch selection)
+            let unit = parseFloat($card.find('#prod-price').val());
+            if (!unit || isNaN(unit)) {
+                // fallback to base-price (strip currency)
+                const baseTxt = $card.find('.prodcard-price').data('base-price') || $card.find('.prodcard-price .price-html').first().text().trim();
+                unit = parsePriceString(baseTxt);
+            }
+            const cur = $card.find('#prod-cur').val() || '$';
+            const qty = parseInt(input.value) || 1;
 
-   
-    jQuery(document).ready(function($) {
-        // Increase quantity
-        $('.qty-plus').on('click', function(e) {
+            const totalPriceEl = $card.find('.prodcard-price .price-html').first();
+            if (totalPriceEl.length) {
+                totalPriceEl.text(cur + ( (unit * qty).toFixed(2) ) );
+            }
+
+            // Update WooCommerce form's quantity field for this card (if it exists)
+            const $hiddenQty = $card.find('form.cart input[name="quantity"]').first();
+            if ($hiddenQty.length) $hiddenQty.val(qty);
+
+            } catch(e){ console.error(e); }
+        };
+
+        // Delegated handlers for plus/minus (covers .qty-plus/.qty-minus, .increase/.decrease, .addQuntity/.minusQuntity)
+        $(document).on('click', '.increase, .addQuntity', function(e){
             e.preventDefault();
-            var input = $('input[name="quantity"]'); // global selector
-            var currentVal = parseInt(input.val());
-            if (!isNaN(currentVal)) {
-            input.val(currentVal + 1).change();
-            }
+            const $btn = $(this);
+            // find closest product card then the qty input inside it
+            const $card = $btn.closest('li.product, .product, .product-card, .singleProductContainer');
+            let $qty = $card.find('input[name="quantity"], input.quantity, input.qty').first();
+            if (!$qty.length) $qty = $btn.siblings('input.qty').first();
+            if (!$qty.length) return;
+            const curVal = parseInt($qty.val()) || 0;
+            const max = parseInt($qty.attr('max')) || null;
+            const newVal = (max && curVal >= max) ? max : curVal + 1;
+            $qty.val(newVal).trigger('change');
+            // call update for product card totals
+            const nativeInput = $qty.get(0);
+            if (nativeInput) window.updateTotal(nativeInput);
+            // call single product total update as well
+            updateDisplayedPriceIfSingle();
         });
 
-        // Decrease quantity
-        $('.qty-minus').on('click', function(e) {
+        $(document).on('click', '.decrease, .minusQuntity', function(e){
             e.preventDefault();
-            var input = $('input[name="quantity"]'); // global selector
-            var currentVal = parseInt(input.val());
-            var min = parseInt(input.attr('min')) || 1;
-            if (!isNaN(currentVal) && currentVal > min) {
-            input.val(currentVal - 1).change();
-            }
+            const $btn = $(this);
+            const $card = $btn.closest('li.product, .product, .product-card, .singleProductContainer');
+            let $qty = $card.find('input[name="quantity"], input.quantity, input.qty').first();
+            if (!$qty.length) $qty = $btn.siblings('input.qty').first();
+            if (!$qty.length) return;
+            const curVal = parseInt($qty.val()) || 0;
+            const min = parseInt($qty.attr('min')) || 1;
+            const newVal = curVal > min ? curVal - 1 : min;
+            $qty.val(newVal).trigger('change');
+            const nativeInput = $qty.get(0);
+            if (nativeInput) window.updateTotal(nativeInput);
+            updateDisplayedPriceIfSingle();
         });
-    });
 
-  </script>
-
-  <script>
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const swatchItems = document.querySelectorAll('.swatch-item');
-
-        swatchItems.forEach(function (swatch) {
-            swatch.addEventListener('click', function () {
-            const productCard = swatch.closest('.product-card');
-
-            if (productCard) {
-                const addToCartButton = productCard.querySelector('.single_add_to_cart_button');
-                const productQuantity = productCard.querySelector('.productQuantity');
-
-                // Toggle 'active' on swatch item itself
-                swatch.classList.toggle('active');
-
-                if (addToCartButton) {
-                addToCartButton.classList.toggle('active');
-
-                // Change button text
-                if (addToCartButton.classList.contains('active')) {
-                    addToCartButton.textContent = 'Add to Cart';
-                } else {
-                    addToCartButton.textContent = 'Select Size';
-                }
+        // -----------------
+            // AUTO SELECT FIRST VARIATION ON SINGLE PRODUCT PAGE
+            // -----------------
+            if ($('body').hasClass('single-product')) {
+                var $firstOption = $('.variations_form select').first().find('option:not(:disabled):not([value=""])').first();
+                if ($firstOption.length) {
+                    $('.variations_form select').first().val($firstOption.val()).trigger('change');
                 }
 
-                if (productQuantity) {
-                productQuantity.classList.toggle('active');
+                // if using swatches instead of select dropdowns
+                var $firstSwatch = $('.variations_form .swatch').first();
+                if ($firstSwatch.length) {
+                    $firstSwatch.trigger('click');
                 }
             }
-            });
+
+        // Also ensure change/input on quantity input triggers updateTotal
+        $(document).on('input change', 'li.product input[name="quantity"], li.product input.quantity', function() {
+            // update only this card
+            const nativeInput = this;
+            window.updateTotal(nativeInput);
         });
-    });
 
+        // -------------------------
+        // Notify Me (keep your ajax)
+        // -------------------------
+        $(document).on('click', '.notify-me-button', function() {
+            const $btn = $(this);
+            const selectedProductId = $btn.data('product-id');
+            if (!selectedProductId) return;
 
-    // jQuery(document).ready(function ($) {
-    //     $('.swatch-item').on('click', function () {
-    //         // Reset ALL other swatches
-    //         $('.swatch-item').removeClass('active');
+            // Save original button content
+            const originalText = $btn.html();
 
-    //         // 🔁 Reset all product cards' quantity and price to default
-    //         $('li.product').each(function () {
-    //             const priceWrapper = $(this).find('.price.prodcard-price');
-    //             const basePrice = priceWrapper.data('base-price');
-    //             priceWrapper.find('.price-html').text(basePrice);
-    //             $(this).find('.quantity').val(1); // Reset quantity
-    //             $(this).find('.productQuantity').removeClass('active');
-    //             $(this).find('.single_add_to_cart_button').removeClass('active').text('SELECT SIZE');
-    //         });
+            // Disable button & show loading animation
+            $btn.prop('disabled', true).html('<span class="spinner"></span> Please wait...');
 
-    //         // ✅ Now apply "active" state only to this card
-    //         $(this).addClass('active');
-    //         const productCard = $(this).closest('li.product');
-    //         productCard.find('.productQuantity').addClass('active');
-    //         productCard.find('.single_add_to_cart_button').addClass('active').text('Add to cart');
-    //     });
-    // });
-    
-    jQuery(document).ready(function ($) {
-        $('.swatch-item').on('click', function () {
-
-            // If swatch is disabled, stop here
-            if ($(this).hasClass('disabled')) {
-                return;
-            }
-
-            const productCard = $(this).closest('li.product');
-
-            // Skip if this product card has only "Notify Me"
-            if (productCard.find('.notify-me-button').length) {
-                return;
-            }
-
-            // Reset swatches only for in-stock products
-            $('li.product').each(function () {
-                if (!$(this).find('.notify-me-button').length) {
-                    $(this).find('.swatch-item').removeClass('active');
-
-                    const priceWrapper = $(this).find('.price.prodcard-price');
-                    const basePrice = priceWrapper.data('base-price');
-                    priceWrapper.find('.price-html').text(basePrice);
-
-                    $(this).find('.quantity').val(1);
-                    $(this).find('.productQuantity').removeClass('active');
-                    $(this).find('.single_add_to_cart_button')
-                        .removeClass('active')
-                        .text('SELECT SIZE');
-                }
-            });
-
-            // Activate current swatch
-            $(this).addClass('active');
-            productCard.find('.productQuantity').addClass('active');
-            productCard.find('.single_add_to_cart_button')
-                    .addClass('active')
-                    .text('Add to cart');
-        });
-    });
-
-
-    // Notify user about the product.
-    jQuery(document).ready(function ($) {
-
-        let selectedProductId = null;
-
-        // Open popup on Notify Me click
-        $(document).on('click', '.notify-me-button', function () {
-            selectedProductId = $(this).data('product-id');
-            // console.log("I got licked", selectedProductId);
-
-            $.post(wc_add_to_cart_params.ajax_url, {
-                action: 'add_to_notify_list',
-                product_id: selectedProductId,
-                // email: email
-            }, function (response) {
-                console.log(response);
-                if (response.success) {
-                    $('#notifyMeModal').fadeIn();
-                    $('#notifyMessage').text(response.data).css('color', 'green');
-                    setTimeout(() => { $('#notifyMeModal').fadeOut(); }, 4000);
-                } else {
-                    if (response.data.redirect) {
-                        window.location.href = response.data.redirect;
+            $.post(
+                wc_add_to_cart_params.ajax_url,
+                {
+                    action: 'add_to_notify_list',
+                    product_id: selectedProductId
+                },
+                function(response) {
+                    if (response && response.success) {
+                        $('#notifyMeModal').fadeIn();
+                        $('#notifyMessage')
+                            .text(response.data)
+                            .css('color', 'green');
+                        setTimeout(() => $('#notifyMeModal').fadeOut(), 4000);
+                    } else if (response && response.data && response.data.redirect) {
+                        window.location = response.data.redirect;
                     }
-                    // $('#notifyMeModal').fadeIn();
-                    // $('#notifyMessage').text(response.data).css('color', 'red');
                 }
+            ).always(function() {
+                // Restore button state
+                $btn.prop('disabled', false).html(originalText);
             });
-
-            // $('#notifyMeModal').fadeIn();
-            // $('#notifySubmit').trigger('click');
         });
 
-        // Close popup
-        $(document).on('click', '.close', function () {
+
+        $(document).on('click', '.close', function(){
             $('#notifyMeModal').fadeOut();
             $('#notifyMessage').text('');
-            // $('#notifyEmail').val('');
         });
 
-        // Submit email
-        // $('#notifySubmit').on('click', function () {
-        //     // let email = $('#notifyEmail').val().trim();
-
-        //     // if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-        //     //     $('#notifyMessage').text('Please enter a valid email.').css('color', 'red');
-        //     //     return;
-        //     // }
-
-        //     $.post(wc_add_to_cart_params.ajax_url, {
-        //         action: 'add_to_notify_list',
-        //         product_id: selectedProductId,
-        //         // email: email
-        //     }, function (response) {
-        //         if (response.success) {
-        //             console.log(response);
-        //             $('#notifyMessage').text('You will be notified!').css('color', 'green');
-        //             setTimeout(() => { $('#notifyMeModal').fadeOut(); }, 1500);
-        //         } else {
-        //             $('#notifyMessage').text(response.data).css('color', 'red');
-        //         }
-        //     });
-        // });
-    });
-
-
-    jQuery(function($) {
-        $('.shop-variation-swatches').each(function () {
+        // -------------------------
+        // Variation swatches IN LOOP (per-container ajax + queued clicks)
+        // -------------------------
+        $('.shop-variation-swatches').each(function(){
             const container = $(this);
             const productId = container.data('product-id');
             let variations = [];
+            let loaded = false;
+            let queued = [];
 
+            // store base-price if not already set
+            const $card = container.closest('li.product');
+            if ($card.length) {
+            const base = $card.find('.prodcard-price .price-html').first().text().trim();
+            container.data('base-price', base);
+            }
+
+            // fetch variations via AJAX (server side endpoint you already have)
             $.ajax({
-                url: wc_add_to_cart_params.ajax_url,
-                method: 'POST',
-                data: {
-                    action: 'get_variations_for_product',
-                    product_id: productId
-                },
-                success: function(response) {
-                    variations = response.data;
-                }
+            url: wc_add_to_cart_params.ajax_url,
+            method: 'POST',
+            data: { action: 'get_variations_for_product', product_id: productId }
+            }).done(function(res){
+            variations = (res && res.success && res.data) ? res.data : [];
+            loaded = true;
+            container.data('variations', variations);
+            // process queued clicks
+            while (queued.length) {
+                const sw = queued.shift();
+                processSwatchClick(sw);
+            }
+            container.trigger('variations_loaded');
+            }).fail(function(){
+            variations = [];
+            loaded = true;
+            container.data('variations', variations);
+            container.trigger('variations_loaded');
             });
-            container.on('click', '.swatch-item', function () {
+
+            // delegated click handler attached to container
+            container.on('click', '.swatch-item', function(e){
                 const swatch = $(this);
-                const swatchWrapper = swatch.closest('.shop-variation-swatches');
-                const productCard = swatch.closest('li.product');
-                const selectedAttrs = getSelectedAttributes(swatchWrapper);
-                const match = findMatchingVariation(productId, selectedAttrs, variations);
-
-                const button = swatchWrapper.find('.single_add_to_cart_button');
-                const qtyInput = productCard.find('.productQuantity input.quantity');
-                const qty = parseInt(qtyInput.val()) || 1;
-                const currency = productCard.find('#prod-cur').val() || '$';
-
-                if (match) {
-                    // ✅ Update hidden fields
-                    swatchWrapper.find('.variation_id').val(match.variation_id);
-                    swatchWrapper.find('form.cart input[name="quantity"]').val(qty);
-                    swatchWrapper.find('#prod-price').val(match.display_price);
-
-                    // ✅ Update price box
-                    const total = (match.display_price * qty).toFixed(2);
-                    productCard.find('.prodcard-price .price-html').html(`${currency}${total}`);
-
-                    // ✅ Show Add to Cart button
-                    swatchWrapper.find('.variation-add-to-cart').show();
-                    button.addClass('active').text('Add to Cart');
-
-                } else {
-                    swatchWrapper.find('.variation_id').val('');
-                    productCard.find('.prodcard-price .price-html').html('');
-                    swatchWrapper.find('.variation-add-to-cart').hide();
-                    button.removeClass('active').text('Select Size');
+                if (!loaded) {
+                    queued.push(swatch);
+                    swatch.addClass('queued');
+                    return;
                 }
-
-                // ✅ Toggle classes
-                $('.swatch-item').removeClass('active');
-                swatch.addClass('active');
-                $('li.product .productQuantity').removeClass('active');
-                productCard.find('.productQuantity').addClass('active');
+                processSwatchClick(swatch);
             });
 
-            // container.on('click', '.swatch-item', function () {
-            //     const swatchWrapper = $(this).closest('.shop-variation-swatches');
-            //     const selectedAttrs = getSelectedAttributes(swatchWrapper);
+            function processSwatchClick(swatch) {
+            swatch.removeClass('queued');
+            const swatchWrapper = swatch.closest('.shop-variation-swatches');
+            const productCard = swatch.closest('li.product');
+            // Reset all other product cards to base state (keep base price)
+            $('li.product').each(function(){
+                const $p = $(this);
+                if ($p.find('.notify-me-button').length) return; // keep notify for true OOS items
+                $p.find('.swatch-item').removeClass('active');
+                $p.find('.variation_id').val('');
+                $p.find('.variation-add-to-cart').show();
+                $p.find('.single_add_to_cart_button').removeClass('active').text('SELECT SIZE').prop('disabled', false).removeClass('disabled');
+                $p.find('.productQuantity').removeClass('active');
+                const base = $p.find('.prodcard-price').data('base-price') || $p.find('.prodcard-price .price-html').first().text().trim() || '';
+                $p.find('.prodcard-price .price-html').html(base);
+            });
 
-            //     const match = findMatchingVariation(productId, selectedAttrs, variations);
+            // Activate clicked swatch only
+            swatchWrapper.find('.swatch-item').removeClass('active');
+            swatch.addClass('active');
 
-            //     const button = swatchWrapper.find('.single_add_to_cart_button');
+            const selectedAttrs = getSelectedAttributes(swatchWrapper);
+            const match = findMatchingVariation(productId, selectedAttrs, variations);
 
-            //     if (match) {
-            //         container.find('.variation_id').val(match.variation_id);
+            const button = swatchWrapper.find('.single_add_to_cart_button');
+            const qtyInput = productCard.find('.productQuantity input.quantity');
+            const qty = parseInt(qtyInput.val()) || 1;
+            const currency = productCard.find('#prod-cur').val() || '$';
 
-            //         // ✅ Update price HTML dynamically
-            //         // container.find('.prodcard-price span').html(match.price_html);
-            //         // container.find('.prodcard-price .price-html').html(match.price_html);
-            //         // console.log(container.closest('li.product').find('.prodcard-price .price-html'));
-                    
-            //         const qtyInput = container.closest('li.product').find('.productQuantity input.quantity');
-            //         const quantity = parseInt(qtyInput.val()) || 1;
-            //         const unitPrice = parseFloat(match.display_price || 0);
-            //         const totalPrice = (unitPrice * quantity).toFixed(2);
-            //         const currency = container.closest('li.product').find('#prod-cur').val() || '$';
+            if (match) {
+                swatchWrapper.find('.variation_id').val(match.variation_id);
+                swatchWrapper.find('form.cart input[name="quantity"]').val(qty);
+                const unitPrice = parseFloat(match.display_price || match.price || match.regular_price || 0) || 0;
+                swatchWrapper.find('#prod-price').val(unitPrice);
+                const total = (unitPrice * qty).toFixed(2);
+                productCard.find('.prodcard-price .price-html').html(`${currency}${total}`);
+                swatchWrapper.find('.variation-add-to-cart').show();
+                button.addClass('active').text('Add to Cart');
+            } else {
+                swatchWrapper.find('.variation_id').val('');
+                productCard.find('.prodcard-price .price-html').html(container.data('base-price') || '');
+                swatchWrapper.find('.variation-add-to-cart').hide();
+                button.removeClass('active').text('Select Size');
+            }
 
-            //         // Update price
-            //         container.closest('li.product').find('.prodcard-price .price-html').html(`${currency}${totalPrice}`);
+            // Toggle quantity UI only for active card
+            $('li.product .productQuantity').removeClass('active');
+            productCard.find('.productQuantity').addClass('active');
+            }
 
-            //         // Update hidden price field
-            //         container.find('#prod-price').val(unitPrice);
-
-
-            //         // Optional: update hidden field if used elsewhere
-            //         container.find('#prod-price').val(match.display_price);
-            //         container.find('.variation-add-to-cart').show();
-
-            //     } else {
-            //         container.find('.variation_id').val('');
-            //         container.find('.prodcard-price span').html('');
-            //         container.find('.variation-add-to-cart').hide();
-            //     }
-
-
-            //     // if (match) {
-            //     //     swatchWrapper.find('.variation_id').val(match.variation_id);
-            //     //     // swatchWrapper.find('.variation-price').html(match.display_price_html || '');
-            //     //     // swatchWrapper.find('.variation-stock').html(match.is_in_stock ? 'In Stock' : 'Out of Stock');
-            //     //     swatchWrapper.find('.variation-add-to-cart').show();
-            //     //     // button.prop('disabled', false);
-            //     // } else {
-            //     //     swatchWrapper.find('.variation_id').val('');
-            //     //     // swatchWrapper.find('.variation-price').html('');
-            //     //     // swatchWrapper.find('.variation-stock').html();
-            //     //     swatchWrapper.find('.variation-add-to-cart').show();
-            //     //     // button.prop('disabled', true);
-            //     // }
-            // });
-        });
-
-        function wc_price_format(price) {
-            // Customize to your locale/needs
-            return parseFloat(price).toFixed(2);
-        }
-
-        function getSelectedAttributes(container) {
+            // helper functions for this container
+            function getSelectedAttributes(container) {
             const attributes = {};
-            container.find('.swatch-item.active').each(function () {
-                const attr = $(this).data('attribute'); // already like pa_package-size
-                const val = $(this).data('value');
-                attributes[attr] = val;
+            container.find('.swatch-item.active').each(function(){
+                const a = $(this).data('attribute');
+                const v = $(this).data('value');
+                if (typeof a !== 'undefined') attributes[a] = v;
             });
             return attributes;
-        }
+            }
 
-
-        // function getSelectedAttributes(container) {
-        //     const attributes = {};
-        //     container.find('.swatch-item.active').each(function () {
-        //         const attr = $(this).data('attribute');
-        //         const val = $(this).data('value');
-        //         attributes[attr] = val;
-        //     });
-        //     return attributes;
-        // }
-
-        // function findMatchingVariation(productId, selectedAttrs, variations) {
-        //     return variations.find(function (variation) {
-        //         return Object.entries(selectedAttrs).every(function ([key, value]) {
-        //             return variation.attributes[key] === value;
-        //         });
-        //     });
-        // }
-
-        function findMatchingVariation(productId, selectedAttrs, variations) {
-            return variations.find(function (variation) {
-                return Object.entries(selectedAttrs).every(function ([key, value]) {
-                    const attrKey = 'attribute_' + key;
-                    return variation.attributes[attrKey] === value;
+            function findMatchingVariation(productId, selectedAttrs, variationsList) {
+            if (!selectedAttrs || Object.keys(selectedAttrs).length === 0) return null;
+            if (!variationsList || !variationsList.length) return null;
+            function normalize(v){ return String(v||'').toLowerCase().trim().replace(/\s+/g,' '); }
+            return variationsList.find(function(variation){
+                if (!variation || !variation.attributes) return false;
+                return Object.entries(selectedAttrs).every(function([key,value]){
+                const want = normalize(value);
+                const candidates = ['attribute_' + key];
+                if (key.indexOf('pa_') !== 0) candidates.push('attribute_pa_' + key);
+                candidates.push('attribute_' + key.replace(/-/g,'_'));
+                candidates.push('attribute_' + key.replace(/_/g,'-'));
+                return candidates.some(function(k){
+                    if (typeof variation.attributes[k] === 'undefined' || variation.attributes[k] === null) return false;
+                    return normalize(variation.attributes[k]) === want;
                 });
-            });
+                });
+            }) || null;
+            }
+
+        }); 
+
+        // -------------------------
+        // Single product page: variation found + qty => update price & RX
+        // -------------------------
+        const $variationForm = $('form.variations_form');
+        function updateDisplayedPriceIfSingle() {
+            // find single product qty input
+            const $cartForm = $('form.cart').first();
+            const $qty = $cartForm.find('input[name="quantity"], input.qty').first();
+            const qty = parseInt($qty.val()) || 1;
+
+            let unit = parseFloat($('#productUnitPrice').val());
+            let inStock = true; // assume in stock unless we detect otherwise
+
+            if (!unit || isNaN(unit)) {
+                // try to read variation id dump
+                const $vf = $('form.variations_form').first();
+                if ($vf.length) {
+                    let variations = $vf.data('product_variations');
+                    if (!variations) {
+                        const raw = $vf.attr('data-product_variations') || $vf.attr('data-product-variations') || '';
+                        try { variations = JSON.parse($('<textarea/>').html(raw).text() || '[]'); } catch(e) { variations = []; }
+                    }
+                    const vid = parseInt($vf.find('input.variation_id').val()) || 0;
+                    if (vid && variations && variations.length) {
+                        const v = variations.find(x => parseInt(x.variation_id) === vid);
+                        if (v) {
+                            unit = parseFloat(v.display_price || v.price || 0);
+                            inStock = !!v.is_in_stock; // check stock
+                        }
+                    }
+                }
+            }
+
+            const $priceBdi = $('.woocommerce-variation.single_variation .price bdi').first();
+
+            if (!unit || isNaN(unit) || !inStock) {
+                // variation not in stock → clear everything
+                if ($priceBdi.length) {
+                    $priceBdi.text('');
+                }
+                $('#rxDeductionAmnt').text('-');
+                $('.quantity input, .quantity button').prop('disabled', true); // disable qty buttons & input
+                return; // stop here
+            }
+
+            // if in stock → update normally
+            if ($priceBdi.length) {
+                const currency = $priceBdi.find('.woocommerce-Price-currencySymbol').text() || '$';
+                $priceBdi.html(`${currency}${(unit * qty).toFixed(2)}`);
+            }
+
+            const rxBase = parseFloat($('#rxDeductionActual').val()) || 0;
+            if (rxBase) {
+                const rxTotal = (rxBase * qty).toFixed(2).replace(/\.00$/,'');
+                $('#rxDeductionAmnt').text(rxTotal + 'g');
+            }
+
+            // re-enable qty controls when in stock
+            $('.quantity input, .quantity button').prop('disabled', false);
         }
 
-    });
+        // when native WooCommerce finds a variation
+        // $variationForm.on('found_variation', function(event, variation) {
+        //     try {
+        //         const $qty = $variationForm.find('input[name="quantity"], input.qty').first();
+        //         const $plus = $('.increase, .addQuntity');
+        //         const $minus = $('.decrease, .minusQuntity');
+        //         const $priceBdi = $('.woocommerce-variation.single_variation .price bdi').first();
 
-function fadeWooNotices() {
-    const notices = document.querySelectorAll('.woocommerce-message, .woocommerce-error, .woocommerce-info');
-    if (notices.length > 0) {
-        setTimeout(() => {
-            notices.forEach(el => {
+        //         if (!variation.is_in_stock) {
+        //             // Out of stock → disable controls + reset displays
+        //             $qty.prop('disabled', true);
+        //             $plus.prop('disabled', true).addClass('disabled');
+        //             $minus.prop('disabled', true).addClass('disabled');
+
+        //             $('#rxDeductionAmnt').text('—');
+        //             $('#rxDeductionActual').val('');
+        //             $('#productUnitPrice').val('');
+
+        //             if ($priceBdi.length) {
+        //                 $priceBdi.html('');
+        //             }
+        //             return; // bail out
+        //         }
+
+        //         // Otherwise: In stock → enable controls
+        //         $qty.prop('disabled', false);
+        //         $plus.prop('disabled', false).removeClass('disabled');
+        //         $minus.prop('disabled', false).removeClass('disabled');
+
+        //         // Store unit price
+        //         const unit = parseFloat(variation.display_price || variation.price || 0) || 0;
+        //         if ($('#productUnitPrice').length) {
+        //             $('#productUnitPrice').val(unit);
+        //         } else {
+        //             $('<input>').attr({type:'hidden', id:'productUnitPrice', value: unit}).appendTo('form.variations_form');
+        //         }
+
+        //         // Set RX base
+        //         if (variation.rx_reduction) {
+        //             $('#rxDeductionActual').val(variation.rx_reduction);
+        //         } else {
+        //             $('#rxDeductionAmnt').text('—');
+        //             $('#rxDeductionActual').val('');
+        //         }
+
+        //     } catch(e){ console.error(e); }
+        // });
+        $variationForm.on('found_variation', function(event, variation) {
+            try {
+                const $qty = $variationForm.find('input[name="quantity"], input.qty').first();
+                const $plus = $('.increase, .addQuntity');
+                const $minus = $('.decrease, .minusQuntity');
+                const $priceBdi = $('.woocommerce-variation.single_variation .price bdi').first();
+                const $cartBtn = $variationForm.find('.single_add_to_cart_button');
+
+                // Hide button immediately to prevent flicker
+                if ($cartBtn.length) $cartBtn.hide();
+
+                if (!variation.is_in_stock) {
+                    // Out of stock → disable controls + reset displays
+                    $qty.prop('disabled', true);
+                    $plus.prop('disabled', true).addClass('disabled');
+                    $minus.prop('disabled', true).addClass('disabled');
+
+                    $('#rxDeductionAmnt').text('-');
+                    $('#rxDeductionActual').val('');
+                    $('#productUnitPrice').val('');
+
+                    if ($priceBdi.length) $priceBdi.html('');
+
+                    // Change Add to Cart → Notify Me
+                    if ($cartBtn.length) {
+                        $cartBtn
+                            .prop('disabled', false) // keep clickable
+                            .removeClass('disabled')
+                            .addClass('notify-me-button')
+                            .attr('data-product-id', variation.variation_id)
+                            .text('Notify Me')
+                            .show(); // show after update
+                    }
+
+                    return;
+                }
+
+                // In stock → enable controls
+                $qty.prop('disabled', false);
+                $plus.prop('disabled', false).removeClass('disabled');
+                $minus.prop('disabled', false).removeClass('disabled');
+
+                // Restore Add to Cart button
+                if ($cartBtn.length) {
+                    $cartBtn
+                        .removeClass('notify-me-button')
+                        .text(wc_add_to_cart_params.i18n_add_to_cart || 'Add to cart')
+                        .show(); // show after update
+                }
+
+                // Store unit price
+                const unit = parseFloat(variation.display_price || variation.price || 0) || 0;
+                if ($('#productUnitPrice').length) {
+                    $('#productUnitPrice').val(unit);
+                } else {
+                    $('<input>').attr({type:'hidden', id:'productUnitPrice', value: unit}).appendTo('form.variations_form');
+                }
+
+                // Set RX base
+                if (variation.rx_reduction) {
+                    $('#rxDeductionActual').val(variation.rx_reduction);
+                } else {
+                    $('#rxDeductionAmnt').text('-');
+                    $('#rxDeductionActual').val('');
+                }
+
+            } catch(e){ console.error(e); }
+        });
+
+        // when native WooCommerce shows a variation
+        $variationForm.on('show_variation', function(event, variation){
+            setTimeout(updateDisplayedPriceIfSingle, 20); // slight delay to let Woo overwrite
+        });
+
+        // when variation resets
+        $variationForm.on('reset_data', function(){
+            $('#rxDeductionAmnt').text('—');
+            $('#rxDeductionActual').val('');
+            $('#productUnitPrice').val('');
+            // restore price area to default - let WooCommerce handle server-rendered price
+        });
+
+        // -------------------------
+        // Fade Woo notices (keeps your behavior)
+        // -------------------------
+        function fadeWooNotices() {
+            const notices = document.querySelectorAll('.woocommerce-message, .woocommerce-error, .woocommerce-info');
+            if (notices.length > 0) {
+            setTimeout(() => {
+                notices.forEach(el => {
                 el.style.transition = 'opacity 1s ease-out';
                 el.style.opacity = '0';
                 setTimeout(() => el.style.display = 'none', 800);
-            });
-        }, 4000);
-    }
-}
-
-document.addEventListener('DOMContentLoaded', fadeWooNotices);
-
-// WooCommerce AJAX triggers
-jQuery(document.body).on('updated_wc_div wc_fragments_refreshed', function () {
-    fadeWooNotices();
-});
-
-
-// // confirmation receipt and shipped receipt
-// jQuery(document).ready(function($) {
-
-//     function downloadDocument(orderId, docType) {
-//         $.ajax({
-//             url: wc_add_to_cart_params.ajax_url,
-//             method: 'POST',
-//             data: {
-//                 action: 'view_order_document',
-//                 order_id: orderId,
-//                 doc_type: docType
-//             },
-//             xhrFields: {
-//                 responseType: 'blob' 
-//             },
-//             success: function(blob) {
-//                 let fileURL = URL.createObjectURL(blob);
-//                 let a = document.createElement('a');
-//                 a.href = fileURL;
-//                 a.download = `${docType}-${orderId}.pdf`; 
-//                 document.body.appendChild(a);
-//                 a.click();
-//                 document.body.removeChild(a);
-//                 URL.revokeObjectURL(fileURL); // clean up
-//             },
-//             error: function(err) {
-//                 console.error('Error fetching document', err);
-//             }
-//         });
-//     }
-
-//     // Handle Order Confirmation button
-//     $(document).on('click', '#order-confirmation', function() {
-//         let orderId = $(this).data('order-id');
-//         console.log("order id: ", orderId);
-//         downloadDocument(orderId, 'order-confirmation');
-//     });
-
-//     // Handle Shipped Receipt button
-//     $(document).on('click', '#shipped-receipt', function() {
-//         let orderId = $(this).data('order-id');
-//         downloadDocument(orderId, 'shipped-receipt');
-//     });
-// });
-
-jQuery(document).ready(function($) {
-
-    function downloadDocument(orderId, docType, button) {
-        // Disable button and show loading state
-        button.prop('disabled', true).text('Loading...');
-
-        $.ajax({
-            url: wc_add_to_cart_params.ajax_url,
-            method: 'POST',
-            data: {
-                action: 'view_order_document',
-                order_id: orderId,
-                doc_type: docType
-            },
-            xhrFields: {
-                responseType: 'blob'
-            },
-            success: function (data, status, xhr) {
-                const contentType = xhr.getResponseHeader('Content-Type');
-                
-                if (contentType && contentType.indexOf('application/json') !== -1) {
-                    // JSON error
-                    const reader = new FileReader();
-                    reader.onload = function () {
-                        const json = JSON.parse(reader.result);
-                        alert(json.confirmation_receipt?.[0] || 'No PDF available.');
-                    };
-                    reader.readAsText(data);
-                } else {
-                    // PDF download
-                    const blob = new Blob([data], { type: 'application/pdf' });
-                    const link = document.createElement('a');
-                    link.href = URL.createObjectURL(blob);
-                    link.download = 'order-' + orderId + '.pdf';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-            },
-            error: function(err) {
-                console.error('Error fetching document', err);
-                alert('Unable to fetch the document.');
-            },
-            complete: function() {
-                // Re-enable button and reset text
-                button.prop('disabled', false).text(button.data('original-text'));
+                });
+            }, 4000);
             }
-        });
-    }
+        }
+        $(document).ready(fadeWooNotices);
+        $(document.body).on('updated_wc_div wc_fragments_refreshed', fadeWooNotices);
 
-    // Handle Order Confirmation button
-    $(document).on('click', '#order-confirmation', function() {
-        let button = $(this);
-        button.data('original-text', button.text());
-        let orderId = button.data('order-id');
-        downloadDocument(orderId, 'order-confirmation', button);
-    });
-
-    // Handle Shipped Receipt button
-    $(document).on('click', '#shipped-receipt', function() {
-        let button = $(this);
-        button.data('original-text', button.text());
-        let orderId = button.data('order-id');
-        downloadDocument(orderId, 'shipped-receipt', button);
-    });
-
-    // Handle Registration Document button
-    $(document).on('click', '#registrationDcoument', function() {
-        let button = $(this);
-        button.data('original-text', button.text());
-        downloadDocument(0, 'registration_document', button);
-    });
-
-});
-
-
-
+    }); // end jQuery wrapper
 </script>
 
-<?php if (is_product()) : ?>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    
 
-
-    function updateQuantity(button, change) {
-        const group = button.closest('.group');
-        if (!group) return;
-
-        const qtyInput = group.querySelector('input.qty');
-        if (!qtyInput) return;
-
-        let currentVal = parseInt(qtyInput.value) || 1;
-        const min = parseInt(qtyInput.getAttribute('min')) || 1;
-        const max = parseInt(qtyInput.getAttribute('max')) || 9999;
-
-        let newVal = currentVal + change;
-        newVal = Math.max(min, Math.min(newVal, max));
-
-        qtyInput.value = newVal;
-        qtyInput.dispatchEvent(new Event('change'));
-
-        updateDisplayedPrice(newVal);
-    }
-
-    function updateDisplayedPrice(quantity) {
-        const priceBdi = document.querySelector('.woocommerce-variation.single_variation .price bdi');
-        const variationForm = document.querySelector('.variations_form.cart');
-        const variationIdInput = variationForm?.querySelector('.variation_id');
-
-        if (!priceBdi || !variationForm || !variationIdInput) return;
-
-        const variationId = parseInt(variationIdInput.value);
-        if (!variationId || variationId === 0) return; // Variation not selected
-
-        // Get data-product_variations (as JSON string)
-        const variationDataJson = variationForm.getAttribute('data-product_variations');
-        if (!variationDataJson) return;
-
-        let variations;
-        try {
-            variations = JSON.parse(variationDataJson);
-        } catch (e) {
-            console.error('Failed to parse variation data:', e);
-            return;
-        }
-
-        // Find current selected variation
-        const variation = variations.find(v => parseInt(v.variation_id) === variationId);
-        if (!variation) return;
-
-        const unitPrice = parseFloat(variation.display_price || 0);
-        const totalPrice = (unitPrice * quantity).toFixed(2);
-        
-        const rxDed = parseFloat(document.getElementById('rxDeductionActual').value);
-        const updRx = rxDed * quantity;
-        document.getElementById('rxDeductionAmnt').textContent = `${updRx}g`;
-
-        const currencySymbol = priceBdi.querySelector('.woocommerce-Price-currencySymbol')?.textContent || '$';
-
-        // Set new price inside <bdi>
-        priceBdi.innerHTML = `${currencySymbol}${totalPrice}`;
-    }
-
-    // Attach event listeners to + and - buttons
-    document.querySelectorAll('.addQuntity').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            updateQuantity(this, 1);
-        });
-    });
-
-    document.querySelectorAll('.minusQuntity').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            updateQuantity(this, -1);
-        });
-    });
-
-    // Also watch manual input in quantity field
-    document.querySelectorAll('input.qty').forEach(function (input) {
-        input.addEventListener('change', function () {
-            const qty = parseInt(this.value) || 1;
-            updateDisplayedPrice(qty);
-        });
-    });
-
-    // Ensure price updates when variation is selected
-    const variationForm = document.querySelector('.variations_form.cart');
-    if (variationForm) {
-        variationForm.addEventListener('woocommerce_variation_has_changed', function () {
-            const qty = parseInt(document.querySelector('input.qty')?.value || 1);
-            updateDisplayedPrice(qty);
-        });
-        if (variationForm) {
-            variationForm.addEventListener('show_variation', function () {
-                const qty = parseInt(document.querySelector('input.qty')?.value || 1);
-                updateDisplayedPrice(qty);
-            });
-        }
-
-    }
-
-    const priceContainer = document.querySelector('.woocommerce-variation.single_variation');
-
-    if (priceContainer) {
-        const observer = new MutationObserver(function (mutationsList, observerInstance) {
-            // Disconnect temporarily to avoid infinite loop
-            observerInstance.disconnect();
-
-            // Wait for WooCommerce to fully inject price HTML
-            setTimeout(() => {
-                const qty = parseInt(document.querySelector('input.qty')?.value || 1);
-                updateDisplayedPrice(qty);
-
-                // Reconnect observer
-                observerInstance.observe(priceContainer, { childList: true, subtree: true });
-            }, 50); // short delay ensures DOM update is complete
-        });
-
-        observer.observe(priceContainer, { childList: true, subtree: true });
-    }
-
-});
-
-
-jQuery(function($){
-
-  // Enable/disable controls inside a given form (.variations_form or .cart)
-    function setQuantityButtonsState($form, isInStock) {
-        // find the add-to-cart wrapper for this form (fallback to first matching)
-        var $wrap = $form.find('.woocommerce-variation-add-to-cart').first();
-        if (!$wrap.length) {
-        $wrap = $('.woocommerce-variation-add-to-cart').first();
-        }
-
-        // toggle wrapper class (WooCommerce uses this class when showing unavailable UI)
-        // $wrap.toggleClass('woocommerce-variation-add-to-cart-disabled', !isInStock);
-
-        // quantity input and +/- buttons
-        $wrap.find('input[name="quantity"]').prop('disabled', !isInStock);
-        $wrap.find('.increase, .decrease').prop('disabled', !isInStock).toggleClass('disabled', !isInStock);
-
-        // also disable the Add to cart button
-        // var $addBtn = $wrap.find('.single_add_to_cart_button');
-        // $addBtn.prop('disabled', !isInStock);
-        // $addBtn.toggleClass('disabled', !isInStock);
-
-        if (!isInStock) {
-        // optional: show unavailable text if you want
-        // $addBtn.text('Out of stock');
-            $('.single_add_to_cart_button').hide();
-            if ($('.notify-me-button').length === 0) {
-                $('.addToCartGroup').append('<button type="button" class="notify-me-button">Notify Me</button>');
-            }
-            $('.singleProductContainer').addClass('outofstock');
-        } else {
-            // restore original text if needed (depends on your theme)
-            // $addBtn.text($addBtn.data('original-text') || 'Add to cart');
-            $('.single_add_to_cart_button').show();
-            $('.notify-me-button').remove();
-            $('.singleProductContainer').removeClass('outofstock');
-        }
-    }
-
-  // ===========================
-  // 1) Variable products
-  // ===========================
-  var $variationsForm = $('form.variations_form');
-
-  if ($variationsForm.length) {
-
-    // Disable until a variation is selected (safe default)
-    setQuantityButtonsState($variationsForm, false);
-
-    // When a variation is found by WooCommerce
-    $variationsForm.on('found_variation', function(event, variation) {
-      // variation.is_in_stock is a boolean
-      setQuantityButtonsState($(this), !!variation.is_in_stock);
-
-      // update rx reduction UI (your existing logic)
-      if (variation.rx_reduction) {
-        $('#rxDeductionAmnt').text(variation.rx_reduction + 'g');
-        $('#rxDeductionActual').val(variation.rx_reduction);
-      } else {
-        // $('#rxDeductionAmnt').text('—');
-      }
-    });
-
-    // When variations are reset
-    $variationsForm.on('reset_data', function() {
-      setQuantityButtonsState($(this), false);
-      // $('#rxDeductionAmnt').text('—');
-    });
-
-    // If the page already displays an availability element (some themes do),
-    // set initial state accordingly (handles server-rendered selected variation)
-    var $avail = $variationsForm.find('.woocommerce-variation-availability .stock');
-    if ($avail.length) {
-      var inStock = !$avail.hasClass('out-of-stock');
-      setQuantityButtonsState($variationsForm, inStock);
-    }
-  }
-
-  // ===========================
-  // 2) Simple products (single)
-  // ===========================
-  var $simpleForm = $('form.cart').not('.variations_form');
-  if ($simpleForm.length) {
-    var isInStock = $('p.stock').hasClass('in-stock'); // adjust selector if theme differs
-    setQuantityButtonsState($simpleForm, isInStock);
-  }
-
-  // ===========================
-  // 3) Safeguard +/- handlers (delegated)
-  //    they won't do anything when disabled
-  // ===========================
-//   $(document).on('click', '.increase', function(e) {
-//     var $btn = $(this);
-//     if ($btn.prop('disabled')) return;
-//     var $wrap = $btn.closest('.woocommerce-variation-add-to-cart');
-//     var $input = $wrap.find('input[name="quantity"]');
-//     var val = parseInt($input.val()) || 1;
-//     var max = parseInt($input.attr('max')) || 999;
-//     if (val < max) $input.val(val + 1).trigger('change');
-//   });
-
-//   $(document).on('click', '.decrease', function(e) {
-//     var $btn = $(this);
-//     if ($btn.prop('disabled')) return;
-//     var $wrap = $btn.closest('.woocommerce-variation-add-to-cart');
-//     var $input = $wrap.find('input[name="quantity"]');
-//     var val = parseInt($input.val()) || 1;
-//     var min = parseInt($input.attr('min')) || 1;
-//     if (val > min) $input.val(val - 1).trigger('change');
-//   });
-
-    // jQuery(function($) {
-    //     $('form.variations_form').on('found_variation', function(e, variation) {
-    //         if (!variation.is_in_stock) {
-    //             $('.single_add_to_cart_button').hide();
-    //             if ($('.notify-me-button').length === 0) {
-    //                 $('.addToCartGroup').append('<button type="button" class="notify-me-button">Notify Me</button>');
-    //             }
-    //         } else {
-    //             $('.single_add_to_cart_button').show();
-    //             $('.notify-me-button').remove();
-    //         }
-    //     });
-    // });
-
-
-
-});
-
-
-
-<?php endif; ?>
-</script>
 <!-- Talkdesk Webchat -->
 <script>
   var webchat;

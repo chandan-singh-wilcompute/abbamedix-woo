@@ -26,93 +26,11 @@ function custom_shipping_api_init() {
                 add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
             }
 
-            // public function calculate_shipping($package = array()) {
-
-            //     $cache_key = 'custom_shipping_rates_user_' . $user_id;
-            //     $shipping_options = get_transient($cache_key);
-
-            //     if (!$shipping_options) {
-            //         $user_id = get_current_user_id();
-            //         // Get the client id of the customer
-            //         $client_id = get_user_meta($user_id, 'client_id', true);
-
-            //         $order = get_order_id_from_api();
-            //         $order_id = $order['id'];
-
-            //         $url = AMPLE_CONNECT_PORTAL_URL . "/orders/{$order_id}/shipping_rates"; 
-            //         ample_connect_log("shipping url");
-            //         ample_connect_log($url);
-            //         $api_url = add_query_arg (
-            //             array( 'client_id' => $client_id ),
-            //             $url
-            //         );
-
-            //         $data = ample_request($api_url);
-            //         $shipping_options = array_merge(...array_values($data));
-
-            //         ample_connect_log("shipping options");
-            //         ample_connect_log($shipping_options);
-                    
-            //         // Cache for 2 minutes
-            //         set_transient($cache_key, $shipping_options, 120);
-            //     }
-                
-            //     $this->add_rate(array(
-            //         'id'    => 'select_shipping_placeholder',
-            //         'label' => __('-- Select Shipping Method --', 'woocommerce'),
-            //         'cost'  => 0,
-            //     ));
-                
-            //     if (!empty($shipping_options)) {
-                    
-            //         foreach ($shipping_options as $option) {
-            //             $rate = array(
-            //                 'id'    => $option['id'],
-            //                 'label' => preg_replace('/(?<!^)([A-Z])/', ' $1', $option['service']),
-            //                 'cost'  => (float)$option['rate'],
-            //             );
-            //             $this->add_rate($rate);
-            //         }
-            //     }
-            // }
-
-            // public function calculate_shipping($package = array()) {
-            //     $user_id = get_current_user_id();
-            //     $client_id = get_user_meta($user_id, 'client_id', true);
-
-            //     $order = get_order_id_from_api();
-            //     $order_id = $order['id'];
-
-            //     $url = AMPLE_CONNECT_PORTAL_URL . "/orders/{$order_id}/shipping_rates"; 
-            //     $api_url = add_query_arg(array('client_id' => $client_id), $url);
-
-            //     $data = ample_request($api_url);
-            //     $shipping_options = array_merge(...array_values($data));
-
-            //     ample_connect_log("Fetched shipping options from API:");
-            //     ample_connect_log($shipping_options);
-
-            //     // Add placeholder first
-            //     $this->add_rate(array(
-            //         'id'    => 'select_shipping_placeholder',
-            //         'label' => __('-- Select Shipping Method --', 'woocommerce'),
-            //         'cost'  => 0,
-            //     ));
-
-            //     if (!empty($shipping_options)) {
-            //         foreach ($shipping_options as $option) {
-            //             $rate = array(
-            //                 'id'    => $option['id'],
-            //                 'label' => preg_replace('/(?<!^)([A-Z])/', ' $1', $option['service']),
-            //                 'cost'  => (float)$option['rate'],
-            //             );
-            //             $this->add_rate($rate);
-            //         }
-            //     }
-            // }
-
             public function calculate_shipping($package = array()) {
-                get_shipping_rates_and_store_in_session();
+                if (is_checkout()) {
+                    get_shipping_rates_and_store_in_session();
+                }
+                
                 $shipping_options = [];
 
                 // if (!Ample_Session_Cache::has('custom_shipping_rates')) {

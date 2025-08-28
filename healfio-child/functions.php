@@ -1382,90 +1382,6 @@ function add_main_category_to_product_class($classes, $product) {
 
 // Display variation swatches on shop page
 add_action('woocommerce_after_shop_loop_item', 'display_variation_swatches', 15);
-// function display_variation_swatches() {
-//     global $product;
-    
-//     if (!$product->is_type('variable')) {
-//         return;
-//     }
-    
-//     $attributes = $product->get_variation_attributes();
-//     $available_variations = $product->get_available_variations();
-    
-//     if (empty($attributes)) {
-//         return;
-//     }
-    
-//     echo '<div class="shop-variation-swatches" data-product-id="' . $product->get_id() . '">';
-//     $currency_symbol = get_woocommerce_currency_symbol();
-//     $price_html = $product->get_price_html();
-//     $price = '';
-
-//     if ($price_html) {
-//         libxml_use_internal_errors(true);
-//         $dom = new DOMDocument();
-//         $dom->loadHTML($price_html);
-//         libxml_clear_errors();
-
-//         $price_elements = $dom->getElementsByTagName('span');
-//         foreach ($price_elements as $element) {
-//             if ($element->getAttribute('class') === 'woocommerce-Price-currencySymbol') {
-//                 $price_node = $element->nextSibling;
-//                 $price = $price_node->nodeValue;
-//                 break;
-//             }
-//         }
-//     }
-
-//     foreach ($attributes as $attribute_name => $options) {
-//         $attribute_label = wc_attribute_label($attribute_name);
-        
-//         echo '<div class="swatch-group">';
-//         // echo '<span class="swatch-label">Select' . $attribute_label . ':</span>';
-//         echo '<div class="swatches">';
-        
-//         foreach ($options as $option) {
-//             $class = 'swatch-item';
-//             $attribute_slug = str_replace('pa_', '', $attribute_name);
-            
-//             // Check if this is a color attribute
-//             if (strpos($attribute_name, 'color') !== false || strpos($attribute_name, 'colour') !== false) {
-//                 $class .= ' color-swatch';
-//                 $color_value = get_color_value($option);
-//                 $style = 'background-color: ' . $color_value . ';';
-//                 echo '<span class="' . $class . '" data-attribute="' . esc_attr($attribute_name) . '" data-value="' . esc_attr($option) . '" style="' . $style . '" title="' . esc_attr($option) . '"></span>';
-//             } else {
-//                 $class .= ' text-swatch';
-//                 echo '<span class="' . $class . '" data-attribute="' . esc_attr($attribute_name) . '" data-value="' . esc_attr($option) . '">' . esc_html($option) . '</span>';
-//             }
-//         }
-        
-//         echo '</div>';
-//         echo '</div>';
-//     }
-
-//     echo '<input type="hidden" id="prod-cur" value="' . esc_attr($currency_symbol) . '">';
-//     echo '<input type="hidden" id="prod-price" value="' . esc_attr($price) . '">';
-
-
-//     echo '<div class="variation-info">';
-//     echo '<span class="variation-price"></span>';
-//     echo '<span class="variation-stock"></span>';
-//     echo '</div>';
-    
-//     echo '<div class="variation-add-to-cart">';
-//     echo '<form class="cart" method="post" enctype="multipart/form-data">';
-//     echo '<input type="hidden" name="add-to-cart" value="' . $product->get_id() . '">';
-//     echo '<input type="hidden" name="product_id" value="' . $product->get_id() . '">';
-//     echo '<input type="hidden" name="variation_id" class="variation_id" value="">';    
-//     echo '<input type="hidden" name="quantity" value="1">';
-//     echo '<button type="submit" class="single_add_to_cart_button button alt">SELECT SIZE</button>';
-//     echo '</form>';
-//     echo '</div>';
-    
-//     echo '</div>';
-// }
-// Display variation swatches on shop page
 function display_variation_swatches() {
     global $product;
     
@@ -1657,7 +1573,6 @@ function strain_brand_thc_cbd_shortcode() {
     return $output;
 }
 add_shortcode('show_product_attributes', 'strain_brand_thc_cbd_shortcode');
-
 
 // Related Product Count
 function woocommerce_product_count_shortcode() {
@@ -1911,4 +1826,88 @@ add_shortcode('reg_form_message', function () {
 
 
 
+// Used on Home page popular categories
+// Universal shortcode for showing only subcategories of a parent category
+// Usage: [show_subcats parent="dried-flower"]
+add_shortcode('show_subcats', function ($atts) {
+    $a = shortcode_atts([
+        'taxonomy'     => 'product_cat', // WooCommerce categories
+        'parent'       => '',            // parent slug, name, or ID
+        'parent_by'    => 'slug',        // slug|id|name
+        'hide_empty'   => 'true',
+        'orderby'      => 'name',
+        'order'        => 'ASC',
+        'columns'      => '4',
+        'show_image'   => 'true',
+        'image_size'   => 'woocommerce_thumbnail',
+        'show_count'   => 'false',
+        'class'        => '',
+    ], $atts, 'show_subcats');
 
+    // Resolve parent term
+    $taxonomy = sanitize_key($a['taxonomy']);
+    $parent_term = null;
+
+    if ($a['parent_by'] === 'id' && is_numeric($a['parent'])) {
+        $parent_term = get_term((int)$a['parent'], $taxonomy);
+    } elseif ($a['parent_by'] === 'name') {
+        $parent_term = get_term_by('name', $a['parent'], $taxonomy);
+    } else { // default slug
+        $parent_term = get_term_by('slug', $a['parent'], $taxonomy);
+    }
+
+    if (!$parent_term || is_wp_error($parent_term)) {
+        return '<div class="subcats error">Parent category not found.</div>';
+    }
+
+    // Query subcategories
+    $args = [
+        'taxonomy'   => $taxonomy,
+        'hide_empty' => filter_var($a['hide_empty'], FILTER_VALIDATE_BOOLEAN),
+        'parent'     => (int)$parent_term->term_id,
+        'orderby'    => sanitize_text_field($a['orderby']),
+        'order'      => sanitize_text_field($a['order']),
+    ];
+    $terms = get_terms($args);
+    if (is_wp_error($terms) || empty($terms)) {
+        return '<div class="subcats empty">No subcategories found.</div>';
+    }
+
+    $columns = max(1, (int)$a['columns']);
+    $show_image = filter_var($a['show_image'], FILTER_VALIDATE_BOOLEAN);
+    $show_count = filter_var($a['show_count'], FILTER_VALIDATE_BOOLEAN);
+    $image_size = sanitize_key($a['image_size']);
+    $extra_class = sanitize_html_class($a['class']);
+
+    ob_start(); ?>
+    <ul class="subcats grid cols-<?php echo esc_attr($columns); ?> <?php echo esc_attr($extra_class); ?>">
+        <?php
+        $all_slugs = "";
+        foreach ($terms as $term): 
+            if ($all_slugs == "") {
+                $all_slugs .= $term->slug;
+            } else {
+                $all_slugs .= "+" . $term->slug;
+            }
+            
+            $url = trailingslashit( site_url( '/product-filter/' . $term->slug ) );
+            ?>
+            <li class="subcat item">
+                <a href="<?php echo esc_url( $url ); ?>" class="subcat-link">
+                    <?php echo esc_html($term->name); ?>
+                </a>
+            </li>
+        <?php endforeach; 
+        $url = trailingslashit( site_url( '/product-filter/' . $all_slugs ) );
+        
+        ?>
+        <li class="subcat item">
+            <a href="<?php echo esc_url( $url ); ?>" class="subcat-link">
+                SHOP ALL <?php echo $parent_term->name; ?>
+            </a>
+        </li>
+    </ul>
+    
+    <?php
+    return ob_get_clean();
+});

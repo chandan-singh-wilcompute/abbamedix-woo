@@ -1,8 +1,6 @@
 (function () {
 
     function updateBar(policyGrams, presGrams) {
-
-        console.log("I am called");
         const rxDed = document.getElementById('rx-dedu-info');
         // rxDed.innerText = `${remainingGrams} gr remaining`;
         // console.log("totalGrams: ", totalGrams);
@@ -47,10 +45,6 @@
         });
     }
 
-    // window.addEventListener('resize', () => {
-    //     fetchQuota(); // Optional: re-fetch on resize
-    // });
-
     fetchQuota();
 
     // Run again whenever WooCommerce updates the cart DOM
@@ -67,18 +61,6 @@
     // }, 500);
 
 })();
-
-// document.querySelectorAll('.product-remove').forEach(function(quantityWrapper) {
-//     const removeButton = quantityWrapper.querySelector('.remove1');
-
-//     removeButton.addEventListener('click', function() {
-        
-//         setTimeout(() => {
-//             location.reload();
-//         }, 7500);
-//     });
-// });
-
 
 // Run only if the URL path includes "/product-filter/"
 if (window.location.pathname.includes('/product-filter/')) {
@@ -122,40 +104,76 @@ if (window.location.pathname.includes('/featured-filter/')) {
     });
 }
 
+// Document downloading
+jQuery(document).ready(function($) {
 
-// jQuery(document).ready(function($) {
-//     $('.shop-variation-swatches').each(function() {
-//         var container = $(this);
-//         var variationsData = container.data('variations');
+    function downloadDocument(orderId, docType, button) {
+        // Save original text
+        if (!button.data('original-text')) {
+            button.data('original-text', button.text());
+        }
 
-//         container.on('click', '.swatch-item', function() {
-//             var attribute = $(this).data('attribute');
-//             var value = $(this).data('value');
+        // Disable button and show loading state
+        button.prop('disabled', true).text('Loading...');
 
-//             // Mark selected swatch
-//             $(this).siblings().removeClass('selected');
-//             $(this).addClass('selected');
+        $.ajax({
+            url: wc_add_to_cart_params.ajax_url,
+            method: 'POST',
+            data: {
+                action: 'view_order_document',
+                order_id: orderId,
+                doc_type: docType,
+                ajax_check: true // marker to force JSON response if error
+            },
+            xhrFields: {
+                responseType: 'blob'
+            },
+            success: function (data, status, xhr) {
+                const contentType = xhr.getResponseHeader('Content-Type');
 
-//             // Find matching variation
-//             var matched = variationsData.find(function(v) {
-//                 return v.attributes[attribute] === value;
-//             });
+                if (contentType && contentType.indexOf('application/json') !== -1) {
+                    // JSON error
+                    alert(data.message);
+                } else if (contentType && contentType.indexOf('application/pdf') !== -1) {
+                    const blob = new Blob([data], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'order-' + orderId + '.pdf';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    alert('Unexpected response type.');
+                }
+            },
+            complete: function() {
+                // Re-enable button and reset text
+                button.prop('disabled', false).text(button.data('original-text'));
+            }
+        });
+    }
 
-//             if (matched) {
-//                 if (!matched.is_in_stock) {
-//                     container.find('.single_add_to_cart_button')
-//                         .replaceWith('<button type="button" class="button notify-me-button">NOTIFY ME</button>');
-//                 } else {
-//                     container.find('.notify-me-button')
-//                         .replaceWith('<button type="submit" class="single_add_to_cart_button button alt">ADD TO CART</button>');
-//                 }
-//             }
-//         });
-//     });
-// });
+    // Handle Order Confirmation button
+    $(document).on('click', '#order-confirmation', function() {
+        let button = $(this);
+        button.data('original-text', button.text());
+        let orderId = button.data('order-id');
+        downloadDocument(orderId, 'order-confirmation', button);
+    });
 
+    // Handle Shipped Receipt button
+    $(document).on('click', '#shipped-receipt', function() {
+        let button = $(this);
+        button.data('original-text', button.text());
+        let orderId = button.data('order-id');
+        downloadDocument(orderId, 'shipped-receipt', button);
+    });
 
+    // Handle Registration Document button
+    $(document).on('click', '#registrationDcoument', function() {
+        let button = $(this);
+        button.data('original-text', button.text());
+        downloadDocument(0, 'registration_document', button);
+    });
 
-// jQuery(document.body).on('update_checkout', function(e){
-//     console.log('update_checkout triggered', e);
-// });
+});

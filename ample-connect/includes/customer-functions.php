@@ -329,10 +329,15 @@ function store_current_order_to_session($data, $user_id) {
     // Ample_Session_Cache::set('applied_discounts', $new_discounts);
     
 
+    if (isset($data['shipping_rate'])) {
+        Ample_Session_Cache::set('applied_shipping_rate', $data['shipping_rate']['id']);
+    } else {
+        Ample_Session_Cache::set('applied_shipping_rate', '');
+    }
 
     // Retrieve policy breakdown
-    $policy_data = [];
     if (isset($data['policy_breakdown']) && is_array($data['policy_breakdown'])) {
+        $policy_data = [];
         $breakdown = $data['policy_breakdown'];
 
         $fields_to_extract = [
@@ -351,10 +356,10 @@ function store_current_order_to_session($data, $user_id) {
                 $policy_data[$field] = $breakdown[$field];
             }
         }
-    }
-    // Store policy details in wc session
-    Ample_Session_Cache::set('policy_details', $policy_data);
 
+        // Store policy details in wc session
+        Ample_Session_Cache::set('policy_details', $policy_data);
+    }
 
     // Retrieve order-items in wc session
     $order_items = $data['order_items'];
@@ -383,7 +388,9 @@ function store_current_order_to_session($data, $user_id) {
                 // Apply discount or whatever you need
                 if(!empty($order_item['discounts'])) {
                     WC()->cart->cart_contents[$cart_item_key]['api_discounts'] = $order_item['discounts'];
-                } else {
+                    WC()->cart->set_session();
+                } 
+                else {
                     if ( isset( WC()->cart->cart_contents[$cart_item_key]['api_discounts'] ) ) {
                         unset( WC()->cart->cart_contents[$cart_item_key]['api_discounts'] );
                     }
@@ -393,15 +400,16 @@ function store_current_order_to_session($data, $user_id) {
 
         
     }
-    foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
-        // ample_connect_log("API Discount -- ");
-        // ample_connect_log($cart_item_key);
-        // if ( isset( WC()->cart->cart_contents[$cart_item_key]['api_discounts'] ) ) {
-        //     ample_connect_log(WC()->cart->cart_contents[$cart_item_key]['api_discounts']);
-        // }
-    }
+    // foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+    //     ample_connect_log("API Discount -- ");
+    //     ample_connect_log($cart_item_key);
+    //     if ( isset( WC()->cart->cart_contents[$cart_item_key]['api_discounts'] ) ) {
+    //         ample_connect_log(WC()->cart->cart_contents[$cart_item_key]['api_discounts']);
+    //     }
+    // }
     // // ✅ Save order in session
     // Ample_Session_Cache::set('current_order_data', $data);
+
     return true;
 }
 
@@ -428,17 +436,18 @@ function add_to_order($order_id, $sku_id, $quantity) {
         'client_id' => $client_id
     );
     $data = ample_request($url, 'PUT', $body);
-    if (array_key_exists('id', $data)) {
-        Client_Information::fetch_information();
-        store_current_order_to_session($data, $user_id);
-        get_shipping_rates_and_store_in_session();
-    }
+    
+    // if (is_array($data) && array_key_exists('id', $data)) {
+    //     Client_Information::fetch_information();
+    //     store_current_order_to_session($data, $user_id);
+    //     // get_shipping_rates_and_store_in_session();
+    // }
     
     return $data;
 }
 
 function change_item_quantity($order_id, $order_item_id, $updated_quantity) {
-    
+
     // Who called me?
     $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2); 
     // [0] = this function, [1] = caller
@@ -471,11 +480,11 @@ function change_item_quantity($order_id, $order_item_id, $updated_quantity) {
 
     $data = ample_request($url, 'PUT', $body);
 
-    if (array_key_exists('id', $data)) {
-        Client_Information::fetch_information();
-        store_current_order_to_session($data, $user_id);
-        get_shipping_rates_and_store_in_session();
-    }
+    // if (is_array($data) && array_key_exists('id', $data)) {
+    //     Client_Information::fetch_information();
+    //     store_current_order_to_session($data, $user_id);
+    //     // get_shipping_rates_and_store_in_session();
+    // }
     
     return $data;
 }
@@ -502,11 +511,11 @@ function remove_from_order($order_id, $order_item_id) {
         return $data;
     }
     
-    if (array_key_exists('id', $data)) {
-        Client_Information::fetch_information();
-        store_current_order_to_session($data, $user_id);
-        get_shipping_rates_and_store_in_session();
-    }
+    // if (is_array($data) && array_key_exists('id', $data)) {
+    //     Client_Information::fetch_information();
+    //     store_current_order_to_session($data, $user_id);
+    //     // get_shipping_rates_and_store_in_session();
+    // }
     return $data;
 }
 
@@ -523,9 +532,9 @@ function add_discount_to_order($discount_id) {
         'client_id' => $client_id
     );
     $data = ample_request($url, 'PUT', $body);
-    if (array_key_exists('id', $data)) {
+    if (is_array($data) && array_key_exists('id', $data)) {
         store_current_order_to_session($data, $user_id);
-        get_shipping_rates_and_store_in_session();
+        // get_shipping_rates_and_store_in_session();
     }
     
     return $data;
@@ -544,9 +553,9 @@ function remove_discount_from_order($discount_id) {
         'client_id' => $client_id
     );
     $data = ample_request($url, 'PUT', $body);
-    if (array_key_exists('id', $data)) {
+    if (is_array($data) && array_key_exists('id', $data)) {
         store_current_order_to_session($data, $user_id);
-        get_shipping_rates_and_store_in_session();
+        // get_shipping_rates_and_store_in_session();
     }
     
     return $data;
@@ -565,9 +574,10 @@ function add_policy_to_order($policy_id) {
         'client_id' => $client_id
     );
     $data = ample_request($url, 'PUT', $body);
-    if (array_key_exists('id', $data)) {
+    if (is_array($data) && array_key_exists('id', $data)) {
+        ample_connect_log("After policy apply, storig current order");
         store_current_order_to_session($data, $user_id);
-        get_shipping_rates_and_store_in_session();
+        // get_shipping_rates_and_store_in_session();
     }
     // ample_connect_log("add policy url = " . $url . " policy id: " . $policy_id);
     // ample_connect_log($data);
@@ -587,9 +597,9 @@ function remove_policy_from_order($policy_id) {
         'client_id' => $client_id
     );
     $data = ample_request($url, 'PUT', $body);
-    if (array_key_exists('id', $data)) {
+    if (is_array($data) && array_key_exists('id', $data)) {
         store_current_order_to_session($data, $user_id);
-        get_shipping_rates_and_store_in_session();
+        // get_shipping_rates_and_store_in_session();
     }
     
     return $data;
