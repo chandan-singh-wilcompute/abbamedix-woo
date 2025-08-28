@@ -102,6 +102,71 @@ class WC_Products {
 
         $parent_category = isset($category_dictionary[$parent_category]) ? $category_dictionary[$parent_category] : $parent_category;
 
+        // Add attributes
+        // Product-level attributes
+        $package_sizes = [];
+        $cannabinoid_values = [];
+
+        // Cannabinoid keys to track
+        $cannabinoids = ['thc', 'cbd', 'cbg', 'cbn', 'cbc'];
+
+        foreach ($productData['skus'] as $sku_data) {
+
+            // Start of Attributes and package sizes
+            if (in_array($parent_category, ["Extracts", "Beverages", "Topicals"])) {
+                if (is_null($sku_data['net_volume'])) {
+                    $package_size = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
+                    if ($package_size != 0) {
+                        $package_sizes[] = "{$package_size} g";
+                    }
+                } else {
+                    $package_size = floatval($sku_data['net_volume']);
+                    if ($package_size != 0) {
+                        $package_sizes[] = "{$package_size} ml";
+                    }
+                }
+                
+            } else {
+                $package_size = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
+                if ($package_size != 0) {
+                    $package_sizes[] = "{$package_size} g";
+                }
+            }
+            
+            $cannabinoid_profile = $sku_data['cannabinoid_profile'] ?? [];
+            foreach ($cannabinoid_profile as $key => $value_data) {
+                if (!isset($value_data['high'])) {
+                    continue;
+                }
+                $lower_key = strtolower($key);
+                foreach ($cannabinoids as $cannabinoid) {
+                    if (strpos($lower_key, $cannabinoid) !== false) {
+                        // Extract unit
+                        if (strpos($lower_key, 'mg_g_') !== false) {
+                            $unit = 'mg/g';
+                        } elseif (strpos($lower_key, 'mg_ml_') !== false) {
+                            $unit = 'mg/ml';
+                        } elseif (strpos($lower_key, 'mg_') !== false) {
+                            $unit = 'mg';
+                        } else {
+                            $unit = '%';
+                        }
+
+                        $value = floatval($value_data['high']);
+                        $cannabinoid_values[$cannabinoid][$unit][] = $value;
+                    }
+                }
+            }
+            // End of attributes and package sizes
+        }
+
+        // Build PACKAGE SIZE attribute
+        $package_sizes = array_unique($package_sizes);
+
+        if ( empty( $package_sizes ) ) {
+            return false;
+        }
+
         // // Create or get parent category
         // $parent_term = term_exists($parent_category, 'product_cat');
         // if (!$parent_term) {
@@ -195,60 +260,6 @@ class WC_Products {
             ample_connect_log("product image url not found : " . $productData['id'] . "\n");
         }
 
-        // Add attributes
-        // Product-level attributes
-        $package_sizes = [];
-        $cannabinoid_values = [];
-
-        // Cannabinoid keys to track
-        $cannabinoids = ['thc', 'cbd', 'cbg', 'cbn', 'cbc'];
-
-        foreach ($productData['skus'] as $sku_data) {
-
-            // Start of Attributes and package sizes
-            if (in_array($parent_category, ["Extracts", "Beverages", "Topicals"])) {
-                if (is_null($sku_data['net_volume'])) {
-                    $package_size = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
-                    $package_sizes[] = "{$package_size} g";
-                } else {
-                    $package_size = floatval($sku_data['net_volume']);
-                    $package_sizes[] = "{$package_size} ml";
-                }
-                
-            } else {
-                $package_size = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
-                $package_sizes[] = "{$package_size} g";
-            }
-            
-            $cannabinoid_profile = $sku_data['cannabinoid_profile'] ?? [];
-            foreach ($cannabinoid_profile as $key => $value_data) {
-                if (!isset($value_data['high'])) {
-                    continue;
-                }
-                $lower_key = strtolower($key);
-                foreach ($cannabinoids as $cannabinoid) {
-                    if (strpos($lower_key, $cannabinoid) !== false) {
-                        // Extract unit
-                        if (strpos($lower_key, 'mg_g_') !== false) {
-                            $unit = 'mg/g';
-                        } elseif (strpos($lower_key, 'mg_ml_') !== false) {
-                            $unit = 'mg/ml';
-                        } elseif (strpos($lower_key, 'mg_') !== false) {
-                            $unit = 'mg';
-                        } else {
-                            $unit = '%';
-                        }
-
-                        $value = floatval($value_data['high']);
-                        $cannabinoid_values[$cannabinoid][$unit][] = $value;
-                    }
-                }
-            }
-            // End of attributes and package sizes
-        }
-
-        // Build PACKAGE SIZE attribute
-        $package_sizes = array_unique($package_sizes);
         $attributes = [];
 
         $package_attr = new WC_Product_Attribute();

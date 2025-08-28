@@ -2232,7 +2232,7 @@ input[type=number] {
 .slick-list {
   border: solid 2px #ffffff;
   border-radius: 16px;
-  box-shadow: 0 5px 5px 2px #9da632 !important;
+  box-shadow: 0 5px 5px 0px rgba(157, 166, 50, 0.8) !important;
 }
 .slick-list.draggable {
   display: none;
@@ -2469,7 +2469,7 @@ input[type=number] {
   background-color: #1b5d72;
   margin-left: auto;
   margin-right: auto;
-  padding: 10px 0;
+  padding: 12px 0 10px;
   max-width: 1458px;
   margin: 15px 0 10px;
 }
@@ -2482,7 +2482,7 @@ input[type=number] {
   font-size: 24px;
   font-weight: bold;
   color: #000000;
-  line-height: 24px;
+  line-height: 23px;
 }
 .featuredFilterResultWrapper .titleWrapper.category-dried,
 .productFilterResultWrapper .titleWrapper.category-dried,
@@ -4116,4 +4116,18 @@ li.category-concentrates .swatch-item.selected {
 }
 #renewalForm .elementor-field-type-checkbox .elementor-field-option {
   align-items: flex-start;
+}
+.subcats {
+  list-style: none;
+}
+.subcats li {
+  list-style: none;
+  background-color: white;
+}
+.subcats li a {
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #000000;
+  line-height: 24px;
+  padding-left: 10px;
 }

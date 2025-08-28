@@ -80,20 +80,15 @@ function custom_add_to_order($cart_item_key, $product_id, $quantity, $variation_
     
     if ($order_id) {
         try {
-
+            
             $found_in_cart = false;
-            foreach (WC()->cart->get_cart() as $key => $item) {
-                $item_product = $item['data'];
-                if ($item_product->get_sku() === $sku) {
-                    foreach ($order_items as $a_item) {
-                        if (isset($a_item['sku_id']) && $a_item['sku_id'] == $sku_id) {
-                            $found_in_cart = true;
-                            break;
-                        }
-                    }
+            foreach ($order_items as $a_item) {
+                if (isset($a_item['sku_id']) && $a_item['sku_id'] == $sku_id) {
+                    $found_in_cart = true;
                     break;
                 }
             }
+
             if (!$found_in_cart) {
                 $response = add_to_order($order_id, $sku_id, $quantity);
                 if (is_wp_error($response)) {
@@ -109,6 +104,7 @@ function custom_add_to_order($cart_item_key, $product_id, $quantity, $variation_
         ample_connect_log('No order_id available during add to cart');
     }
 }
+
 
 // add_action('woocommerce_remove_cart_item', 'ample_cart_updated', 10, 2);
 // function ample_cart_updated($cart_item_key, $cart) {
@@ -348,7 +344,7 @@ function cart_item_quantity_update_ample_after($cart_item_key, $quantity, $old_q
         error_log('Ample Connect: Alternative hook - Quantity updated successfully for SKU ' . $sku_id . ' to ' . $quantity);
         error_log('Ample Connect: Alternative hook - API Response: ' . print_r($response, true));
         // Refresh session data to get updated order information
-        Client_Information::fetch_information();
+        // Client_Information::fetch_information();
     }
 }
 
@@ -368,6 +364,15 @@ function calculate_total_package_size_in_checkout_page() {
         $package_size = $product->get_attribute('package-size');
         $quantity = $cart_item['quantity'];
         $total_package_size += floatval($package_size) * $quantity;
+    }
+
+    $chosen_shipping_method = Ample_Session_Cache::get('applied_shipping_rate'); 
+
+    if (empty($chosen_shipping_method) != "") {
+        // Example: "custom_shipping_api:rate_9636d7efcd10478d99698cf085b5b678"
+
+        // Store for later (your own key)
+        WC()->session->set('chosen_shipping_methods', ["custom_shipping_api" => $chosen_shipping_method]);
     }
 
     // Output the total package size
@@ -433,23 +438,23 @@ function apply_api_discounts_to_cart_items($cart) {
     if (!is_checkout()) return;
 
     // 3. Prevent multiple executions in same request
-    static $ran = false;
-    if ($ran) return;
-    $ran = true;
+    // static $ran = false;
+    // if ($ran) return;
+    // $ran = true;
 
-    // 4. Prevent re-running unless page reload happens
-    $session = WC()->session;
-    $reload_flag = $session->get('my_calc_flag');
+    // // 4. Prevent re-running unless page reload happens
+    // $session = WC()->session;
+    // $reload_flag = $session->get('my_calc_flag');
 
-    if ($reload_flag === WC()->cart->get_cart_hash()) {
-        return; // already handled this exact cart state in this reload
-    }
+    // if ($reload_flag === WC()->cart->get_cart_hash()) {
+    //     return; // already handled this exact cart state in this reload
+    // }
 
-    // Save current hash so it won’t run again until reload
-    $session->set('my_calc_flag', WC()->cart->get_cart_hash());
+    // // Save current hash so it won’t run again until reload
+    // $session->set('my_calc_flag', WC()->cart->get_cart_hash());
     
     ample_connect_log("before calculate total hook called");
-    foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
+    foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
         if (!empty($cart_item['api_discounts'])) {
 
             // Ensure we always have the original price saved
@@ -573,7 +578,7 @@ function ample_update_quantity_ajax() {
         wp_send_json_error($response->get_error_message());
     } else {
         // Refresh session data
-        Client_Information::fetch_information();
+        // Client_Information::fetch_information();
         wp_send_json_success('Quantity updated successfully');
     }
 }

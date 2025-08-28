@@ -64,8 +64,12 @@ $status = Ample_Session_Cache::get('status', false);
 				<h5 class="mt-0">PERSONAL INFORMATION</h5>
 				<p><span class="badgeApproved"><?php echo $status; ?></span></p>
 				<p><strong>Registration Date</strong> <?php echo esc_html($current_user->user_registered); ?></p>
-				<button id="registrationDcoument" class="registrationDcoument"><i class="bi bi-cloud-arrow-down-fill"></i> &nbsp; Registration Dcoument</button>
-				<a id="renewalFormBtn" class="renewalFormBtn" href="<?php bloginfo('url'); ?>/my-account/renewal"><i class="bi bi-repeat"></i> &nbsp; Renewal Form</a>
+				<button id="registrationDcoument" class="registrationDcoument"><i class="bi bi-cloud-arrow-down-fill"></i> &nbsp; Registration Document</button>
+				<?php if($needs_renewal) : ?>
+					<a id="renewalFormBtn" class="renewalFormBtn" href="<?php bloginfo('url'); ?>/my-account/renewal"><i class="bi bi-repeat"></i> &nbsp; Renewal Form</a>
+				<?php else : ?>
+					<a id="renewalFormBtn" class="renewalFormBtn" href="<?php bloginfo('url'); ?>/my-account/renewal"><i class="bi bi-repeat"></i> &nbsp; Renewal Form</a>
+				<?php endif; ?>
 			</div>
 			
 			<div class="group3">
