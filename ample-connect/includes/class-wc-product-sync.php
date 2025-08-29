@@ -57,42 +57,41 @@ class WC_Product_Sync {
         ?>
         <div class="wrap">
             <h1>Ample Product Sync</h1>
-            
-            <!-- <?php if (isset($_GET['sync_success']) && $_GET['sync_success'] === 'true') : ?>
-                <div class="notice notice-success is-dismissible">
-                    <p>Products successfully synced!</p>
-                </div>
-            <?php endif; ?>
+            <button id="product_fetch_and_sync" class="button-primary">Sync Products</button>
 
-            <form action="<?php echo admin_url('admin-post.php'); ?>" method="post">
-                <input type="hidden" name="action" value="sync_products">
-                <?php submit_button('Sync Products'); ?>
-            </form> -->
-            <button id="product_fetch_and_sync" class="button-
-            
-            
-            primary">Sync Products</button>
+            <br/> <br/>
+
+            <button id="delete-all-products" class="button button-danger">Delete All Products & Categories</button>
+            <div id="delete-result" style="margin-top:10px;"></div>
         </div>
         <?php
     }
 
 
     public function sync_products() {
-        // Ensure the WooCommerce client is initialized
-        // $api_url = AMPLE_CONNECT_API_BASE_URL . '/v3/products/public_listing';
-        $api_url = 'https://abbamedix.onample.com/api/v3/products/public_listing';
-        // $this->save_api_products_to_temp_file($api_url);
+        // Step 1: Fetch products and save to file
+        $this->fetch_and_store_products_for_cron();
 
-
-        $woo_client = new WC_Products();
-        $woo_client->clean_product_categories();
-        foreach ($products as $product) {   
-            $result = $woo_client->add_custom_variable_product($product); 
+        // Step 2: Process in batches until done
+        $batch_size = 50;
+        while (true) {
+            $result = process_product_batch_from_file($batch_size);
+            if (strpos($result, 'remaining!') === false) {
+                break; // no more products
+            }
         }
-
-        wp_redirect(add_query_arg('sync_success', 'true', admin_url('admin.php?page=ample-product-sync')));
-        exit;
     }
+
+    private function fetch_and_store_products_for_cron() {
+        $api_url = AMPLE_CONNECT_API_BASE_URL . '/v3/products/public_listing';
+        $products = ample_request($api_url);
+
+        $upload_dir = wp_upload_dir();
+        $file_path  = trailingslashit($upload_dir['basedir']) . 'temp_products.json';
+
+        file_put_contents($file_path, json_encode($products));
+    }
+
 }
 
 // WC_Product_Sync::init();

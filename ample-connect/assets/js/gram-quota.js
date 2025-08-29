@@ -138,7 +138,16 @@ jQuery(document).ready(function($) {
                     const blob = new Blob([data], { type: 'application/pdf' });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
-                    link.download = 'order-' + orderId + '.pdf';
+                    if (docType == 'order-confirmation') {
+                        link.download = 'order-confirm-' + orderId + '.pdf';
+                    } else if (docType == 'shipped-receipt') {
+                        link.download = 'order-shipping-' + orderId + '.pdf';
+                    } else if (docType == 'registration_document') {
+                        link.download = 'registration-document.pdf';
+                    } else {
+                        link.download = 'document.pdf';
+                    }
+                    
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
@@ -154,7 +163,7 @@ jQuery(document).ready(function($) {
     }
 
     // Handle Order Confirmation button
-    $(document).on('click', '#order-confirmation', function() {
+    $(document).off('click', '#order-confirmation').on('click', '#order-confirmation', function() {
         let button = $(this);
         button.data('original-text', button.text());
         let orderId = button.data('order-id');
@@ -162,7 +171,7 @@ jQuery(document).ready(function($) {
     });
 
     // Handle Shipped Receipt button
-    $(document).on('click', '#shipped-receipt', function() {
+    $(document).off('click', '#shipped-receipt').on('click', '#shipped-receipt', function() {
         let button = $(this);
         button.data('original-text', button.text());
         let orderId = button.data('order-id');
@@ -170,7 +179,7 @@ jQuery(document).ready(function($) {
     });
 
     // Handle Registration Document button
-    $(document).on('click', '#registrationDcoument', function() {
+    $(document).off('click', '#registrationDcoument').on('click', '#registrationDcoument', function() {
         let button = $(this);
         button.data('original-text', button.text());
         downloadDocument(0, 'registration_document', button);

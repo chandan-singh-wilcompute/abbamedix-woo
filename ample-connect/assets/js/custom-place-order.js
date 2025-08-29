@@ -54,18 +54,19 @@ jQuery(document).ready(function($) {
         });
     });
 
-    $(document).ready(function($) {
-        $('form.variations_form').on('found_variation', function(event, variation) {
-            let $container = $('#cannabinoid-info');
-            $container.empty(); // Clear previous
+    // $(document).ready(function($) {
+    //     $('form.variations_form').on('found_variation', function(event, variation) {
+    //         console.log("I got called from custom place order");
+    //         let $container = $('#cannabinoid-info');
+    //         $container.empty(); // Clear previous
     
-            if (variation.cannabinoids) {
-                $.each(variation.cannabinoids, function(key, value) {
-                    $container.append('<p><strong>' + key + ':</strong> ' + value + '</p>');
-                });
-            }
-        });
-    });
+    //         if (variation.cannabinoids) {
+    //             $.each(variation.cannabinoids, function(key, value) {
+    //                 $container.append('<p><strong>' + key + ':</strong> ' + value + '</p>');
+    //             });
+    //         }
+    //     });
+    // });
     
 });
 

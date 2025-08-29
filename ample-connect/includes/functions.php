@@ -19,36 +19,6 @@ add_action('wp_enqueue_scripts', function() {
     ]);
 });
 
-// // Set user's session at login
-// add_action('wp_login', 'set_user_session_on_login', 10, 2);
-// function set_user_session_on_login($user_login, $user) {
-//     // Set session data using your custom class
-//     $purchasable_products = get_purchasable_products($user->ID);
-//     Client_Information::fetch_information();
-//     $order_id = get_order_from_api_and_update_session($user->ID);
-//     ample_connect_log("order id from login is : ", $order_id);
-//     Ample_Session_Cache::set('purchasable_products', $purchasable_products);
-//     $order_id_2 = Ample_Session_Cache::get('order_id');
-//     ample_connect_log("order id from login 2 is : ", $order_id_2);
-// }
-
-// add_action('woocommerce_init', 'set_user_session_data_if_logged_in');
-// function set_user_session_data_if_logged_in() {
-//     // Skip if in admin dashboard (wp-admin or AJAX in admin context)
-//     if (is_admin() || (defined('DOING_AJAX') && DOING_AJAX && is_admin())) {
-//         return;
-//     }
-
-//     if (is_user_logged_in()) {
-//         $user = wp_get_current_user();
-//         // Prevent re-setting if already set
-//         if (!Ample_Session_Cache::get('order_id')) {
-//             get_purchasable_products_and_store_in_session($user->ID);
-//             Client_Information::fetch_information();
-//             get_order_from_api_and_update_session($user->ID);
-//         }
-//     }
-// }
 
 function is_login_page() {
     return in_array($GLOBALS['pagenow'], ['wp-login.php', 'wp-register.php']);
@@ -98,7 +68,6 @@ function setup_session_for_user() {
     if (!$order_id) {
         get_order_from_api_and_update_session($user->ID);
     }
-    
 }
 
 // Custom Fields add to User Profile Page
@@ -158,7 +127,6 @@ function custom_update_user_profile($user_id)
 
     // Call the function to update the external system
     custom_update_external_system($client_id, $active_registration_id, $data);
-
 }
 
 // Hook into WooCommerce billing address update
@@ -243,14 +211,65 @@ function custom_update_external_system($client_id, $active_registration_id, $dat
     }
 
 }
-add_action('admin_post_sync_products', 'handle_manual_product_sync');
 
-function handle_manual_product_sync()
-{
-    // Ensure the WooCommerce client is initialized
-    WC_Product_Sync::init();
-    $instance = WC_Product_Sync::get_instance();
-    $instance->sync_products();
+add_action( 'wp_ajax_fetch_and_store_product_data', 'save_api_products_to_temp_file' );
+function save_api_products_to_temp_file() {
+    // ✅ Check if user has admin rights
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_send_json_error( 'You are not allowed to perform this action.' );
+    }
+
+    $api_url = AMPLE_CONNECT_API_BASE_URL . '/v3/products/public_listing';
+    $products = ample_request($api_url);
+
+    $upload_dir = wp_upload_dir();
+    $file_path  = trailingslashit( $upload_dir['basedir'] ) . 'temp_products.json';
+
+    if ( file_put_contents( $file_path, json_encode( $products ) ) === false ) {
+        wp_send_json_error( 'Failed to write file' );
+    }
+
+    wp_send_json_success( 'Product data saved to file' );
+
+}
+
+function process_product_batch_from_file( $batch_size = 50 ) {
+    $upload_dir = wp_upload_dir();
+    $file_path  = trailingslashit( $upload_dir['basedir'] ) . 'temp_products.json';
+
+    if ( ! file_exists( $file_path ) ) {
+        return 'No file to process';
+    }
+
+    $all_products = json_decode( file_get_contents( $file_path ), true );
+
+    if ( empty( $all_products ) ) {
+        unlink( $file_path );
+        return 'Done. File deleted.';
+    }
+
+    // Get the first N products
+    $batch = array_splice( $all_products, 0, $batch_size );
+
+    $woo_client = new WC_Products();
+    foreach ( $batch as $product_data ) {
+        // Your existing function to add/update product
+        $result = $woo_client->add_custom_variable_product($product_data);
+    }
+
+    // Save the remaining data back to file
+    file_put_contents( $file_path, json_encode( $all_products ) );
+
+    return 'Processed batch of ' . count( $batch ) . ' and ' .
+    
+    
+    count($all_products) . ' products remaining!';
+}
+
+add_action( 'wp_ajax_run_product_batch_processing', 'handle_ajax_product_batch' );
+function handle_ajax_product_batch() {
+    $result = process_product_batch_from_file( 50 ); // or whatever batch size
+    wp_send_json_success( $result );
 }
 
 function load_ample_connect_settings()
@@ -260,6 +279,22 @@ function load_ample_connect_settings()
 }
 add_action('plugins_loaded', 'load_ample_connect_settings');
 
+
+add_action('wp_ajax_delete_all_products', function() {
+    // check_ajax_referer('delete_products_nonce', 'nonce');
+
+    if (!current_user_can('manage_woocommerce')) {
+        wp_send_json_error('You do not have permission to do this.');
+    }
+
+    // ✅ Delete products
+    $woo_client = new WC_Products();
+    $woo_client->hard_reset_catalog();
+    // $woo_client->clean_product_categories();
+    // $woo_client->hard_reset_catalog();
+
+    wp_send_json_success('✅ All products and categories have been deleted.');
+});
 
 
 // Add to My Account menu
@@ -1400,67 +1435,6 @@ function extractValueCategory($input) {
 }
 
 
-add_action( 'wp_ajax_fetch_and_store_product_data', 'save_api_products_to_temp_file' );
-    function save_api_products_to_temp_file() {
-        // $api_url = 'https://abbamedix.onample.com/api/v3/products/public_listing';
-        $api_url = AMPLE_CONNECT_API_BASE_URL . '/v3/products/public_listing';
-        $products = ample_request($api_url);
-
-        $upload_dir = wp_upload_dir();
-        $file_path  = trailingslashit( $upload_dir['basedir'] ) . 'temp_products.json';
-
-        if ( file_put_contents( $file_path, json_encode( $products ) ) === false ) {
-            wp_send_json_error( 'Failed to write file' );
-        }
-
-        wp_send_json_success( 'Product data saved to file' );
-
-        // $woo_client = new WC_Products();
-        // $woo_client->clean_product_categories();
-        // wp_send_json_success( 'Products and categories cleared!' );
-    }
-
-
-    function process_product_batch_from_file( $batch_size = 50 ) {
-        $upload_dir = wp_upload_dir();
-        $file_path  = trailingslashit( $upload_dir['basedir'] ) . 'temp_products.json';
-
-        if ( ! file_exists( $file_path ) ) {
-            return 'No file to process';
-        }
-
-        $all_products = json_decode( file_get_contents( $file_path ), true );
-
-        if ( empty( $all_products ) ) {
-            unlink( $file_path );
-            return 'Done. File deleted.';
-        }
-
-        // Get the first N products
-        $batch = array_splice( $all_products, 0, $batch_size );
-
-        $woo_client = new WC_Products();
-        foreach ( $batch as $product_data ) {
-            // Your existing function to add/update product
-            $result = $woo_client->add_custom_variable_product($product_data);
-        }
-
-        // Save the remaining data back to file
-        file_put_contents( $file_path, json_encode( $all_products ) );
-
-        return 'Processed batch of ' . count( $batch ) . ' and ' .
-        
-        
-        count($all_products) . ' products remaining!';
-    }
-
-    add_action( 'wp_ajax_run_product_batch_processing', 'handle_ajax_product_batch' );
-    function handle_ajax_product_batch() {
-        $result = process_product_batch_from_file( 50 ); // or whatever batch size
-        wp_send_json_success( $result );
-    }
-
-
 add_action('woocommerce_checkout_process', 'validate_selected_shipping_method');
 function validate_selected_shipping_method() {
     $chosen_methods = WC()->session->get('chosen_shipping_methods');
@@ -2172,7 +2146,7 @@ function view_order_document() {
     $client_id = get_user_meta($user_id, 'client_id', true);
 
     if ($doc_type === 'registration_document') {
-        $url = AMPLE_CONNECT_PORTAL_URL . '/clients/' . $client_id . '/registration_document';
+        $url = AMPLE_CONNECT_WOO_CLIENT_URL . $client_id . '/registration_document';
     } else {
         // Verify the logged-in user owns the WooCommerce order (or has capability)
         $order = wc_get_order($woo_order_id);
