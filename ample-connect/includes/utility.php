@@ -48,6 +48,7 @@ function ample_request($endpoint, $method = 'GET', $data = [], $headers = [], $l
     // echo '</pre>';
 
     if ($api_data == "Token_Expired") {
+        ample_connect_log("Token Expired");
         $response = api_call($endpoint, $method, $data, $headers, $log, true);
 
         if ($log)
@@ -193,4 +194,10 @@ function clear_customer_cart( $customer_id ) {
     return true;
 }
 
+function get_product_id_by_sku( $sku ) {
+    global $wpdb;
 
+    $product_id = wc_get_product_id_by_sku( $sku );
+
+    return $product_id ? intval( $product_id ) : false;
+}

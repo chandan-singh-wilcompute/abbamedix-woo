@@ -30,7 +30,6 @@ class WC_Products {
         ];
 
         $product_ids = get_posts($product_args);
-
         foreach ($product_ids as $product_id) {
             wp_delete_post($product_id, true); // true = force delete
         }
@@ -46,7 +45,7 @@ class WC_Products {
         }
 
         $category_dictionary = [
-            'Dried'                 => 'Dried Flower',
+            'Dried'                 => 'Flower',
             'Edibles - Solids'      => 'Edibles',
             'Extracts - Ingested'   => 'Extracts',
             'Edibles - Non-solids'  => 'Beverages',
@@ -73,7 +72,7 @@ class WC_Products {
         $is_descrete = false;
 
         $category_dictionary = [
-            'Dried'                 => 'Dried Flower',
+            'Dried'                 => 'Flower',
             'Edibles - Solids'      => 'Edibles',
             'Extracts - Ingested'   => 'Extracts',
             'Edibles - Non-solids'  => 'Beverages',
@@ -529,7 +528,6 @@ class WC_Products {
         }
     }
     
-
     private function extract_product_attributes_and_variations($product_data) {
         $cannabinoids = ['thc', 'cbd', 'cbg', 'cbc', 'cbn'];
         $product_attributes = [];
@@ -643,12 +641,21 @@ class WC_Products {
         ];
     }   
     
-}
+    public function hard_reset_catalog() {
+        global $wpdb;
 
-function get_product_id_by_sku( $sku ) {
-    global $wpdb;
+        // 1. Delete all products (posts + postmeta + term relationships)
+        $wpdb->query("DELETE FROM {$wpdb->posts} WHERE post_type IN ('product','product_variation')");
+        $wpdb->query("DELETE pm FROM {$wpdb->postmeta} pm LEFT JOIN {$wpdb->posts} p ON p.ID = pm.post_id WHERE p.ID IS NULL");
+        $wpdb->query("DELETE tr FROM {$wpdb->term_relationships} tr LEFT JOIN {$wpdb->posts} p ON p.ID = tr.object_id WHERE p.ID IS NULL");
 
-    $product_id = wc_get_product_id_by_sku( $sku );
+        // 2. Delete all product categories
+        $wpdb->query("DELETE FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'product_cat'");
 
-    return $product_id ? intval( $product_id ) : false;
+        // 3. Delete all product tags
+        $wpdb->query("DELETE FROM {$wpdb->term_taxonomy} WHERE taxonomy = 'product_tag'");
+
+        // 4. Clean orphaned terms
+        $wpdb->query("DELETE t FROM {$wpdb->terms} t LEFT JOIN {$wpdb->term_taxonomy} tt ON t.term_id = tt.term_id WHERE tt.term_id IS NULL");
+    }
 }
