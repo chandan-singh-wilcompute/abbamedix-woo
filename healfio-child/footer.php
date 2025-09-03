@@ -105,6 +105,18 @@
      */
     jQuery(function($){
 
+        // Initialize single product page button visibility
+        if ($('body').hasClass('single-product')) {
+            const $variationForm = $('.variations_form');
+            if ($variationForm.length) {
+                // Check if initial variation should be selected
+                setTimeout(function() {
+                    // Trigger change to set initial state
+                    $variationForm.find('.variations select').first().trigger('change');
+                }, 100);
+            }
+        }
+
         // -------------------------
         // Helpers
         // -------------------------
@@ -239,6 +251,13 @@
             const selectedProductId = $btn.data('product-id');
             if (!selectedProductId) return;
 
+            // Check login status immediately on client-side
+            if (!wc_notify_me_params.is_logged_in) {
+                // Instant redirect to login page - no AJAX delay
+                window.location.href = wc_notify_me_params.login_url;
+                return;
+            }
+
             // Save original button content
             const originalText = $btn.html();
 
@@ -246,7 +265,7 @@
             $btn.prop('disabled', true).html('<span class="spinner"></span> Please wait...');
 
             $.post(
-                wc_add_to_cart_params.ajax_url,
+                wc_notify_me_params.ajax_url,
                 {
                     action: 'add_to_notify_list',
                     product_id: selectedProductId
@@ -260,6 +279,13 @@
                         setTimeout(() => $('#notifyMeModal').fadeOut(), 4000);
                     } else if (response && response.data && response.data.redirect) {
                         window.location = response.data.redirect;
+                    } else {
+
+                        $('#notifyMeModal').fadeIn();
+                        $('#notifyMessage')
+                            .text('You will be notified!')
+                            .css('color', 'green');
+                        setTimeout(() => $('#notifyMeModal').fadeOut(), 4000);
                     }
                 }
             ).always(function() {
@@ -523,9 +549,6 @@
                 const $priceBdi = $('.woocommerce-variation.single_variation .price bdi').first();
                 const $cartBtn = $variationForm.find('.single_add_to_cart_button');
 
-                // Hide button immediately to prevent flicker
-                if ($cartBtn.length) $cartBtn.hide();
-
                 if (!variation.is_in_stock) {
                     // Out of stock → disable controls + reset displays
                     $qty.prop('disabled', true);
@@ -543,10 +566,11 @@
                         $cartBtn
                             .prop('disabled', false) // keep clickable
                             .removeClass('disabled')
-                            .addClass('notify-me-button')
+                            .addClass('notify-me-button button-ready')
                             .attr('data-product-id', variation.variation_id)
                             .text('Notify Me')
-                            .show(); // show after update
+                            .show()
+                            .css('display', ''); // ensure it's visible
                     }
 
                     return;
@@ -561,8 +585,10 @@
                 if ($cartBtn.length) {
                     $cartBtn
                         .removeClass('notify-me-button')
-                        .text(wc_add_to_cart_params.i18n_add_to_cart || 'Add to cart')
-                        .show(); // show after update
+                        .addClass('button-ready')
+                        .text('Add to cart')
+                        .show()
+                        .css('display', ''); // ensure it's visible
                 }
 
                 // Store unit price
@@ -650,6 +676,15 @@
     { touchpointId: "6f4f4755162c438199a48936ea0bceff", accountId: "", region: "td-ca-1" },
     { enableValidation: false, enableEmoji: true, enableUserInput: true, enableAttachments: true }
   );
+</script>
+
+<script>
+    document.querySelectorAll(".dropdown > a.menu-item").forEach((trigger) => {
+        trigger.addEventListener("click", function (e) {
+            e.preventDefault(); // prevent link navigation if needed
+            this.parentElement.classList.toggle("open");
+        });
+    });
 </script>
 
 

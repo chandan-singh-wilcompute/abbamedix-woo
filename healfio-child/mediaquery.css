@@ -217,8 +217,15 @@
   .stepsWrapper:before {
     top: 205px;
   }
+  .myProfile h1 {
+    margin-bottom: 20px;
+  }
+  .myProfile p {
+    word-wrap: anywhere;
+    word-break: break-word;
+  }
   .myProfile p strong {
-    max-width: 160px;
+    white-space: nowrap;
   }
   .spacerHide {
     display: none;
@@ -441,7 +448,6 @@
     font-size: 18px;
   }
   .prescription-wrapper {
-    padding: 0 10px;
     font-size: 14px;
   }
   .white-card,
@@ -528,10 +534,63 @@
   .slick-slide img {
     object-fit: cover;
   }
+  .myProfile .btnGroup {
+    flex-direction: column;
+    align-items: flex-start;
+    white-space: nowrap;
+  }
+  .myProfile .btnGroup br {
+    display: none;
+  }
+  .renewalFormBtn {
+    margin-left: 0;
+    margin-top: 15px;
+  }
+  .scriptHistoryWrapper {
+    padding-top: 20px;
+  }
+  .orderHistory .tbfoot button {
+    font-size: 12px;
+  }
+  .myacc-order .tbhead td,
+  .myacc-order .tbbody td {
+    white-space: nowrap;
+  }
+  .orderLog {
+    order: -1;
+    margin-bottom: 50px;
+  }
+  .orderLog h1 {
+    display: none;
+  }
+  .woocommerce table.shop_table_responsive tr:nth-child(2n) td,
+  .woocommerce-page table.shop_table_responsive tr:nth-child(2n) td {
+    background-color: #c7c5c6;
+  }
+  .woocommerce table.shop_table_responsive tr:nth-last-child(2) td,
+  .woocommerce-page table.shop_table_responsive tr:nth-last-child(2) td {
+    background-color: transparent;
+  }
+  body.woocommerce-checkout .fc-content.fc-container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  #order_received_page > .elementor-container {
+    padding: 0px;
+  }
+  div.woocommerce .fc-wrapper #order_review table.woocommerce-checkout-review-order-table .product-quantity {
+    background-color: #535156 !important;
+  }
+  .header-profile:hover .dropdown-menu {
+    display: none;
+  }
+  .header-profile.open .dropdown-menu {
+    display: block;
+  }
 }
 @media (max-width: 379px) {
   #pr-nav {
-    padding: 10px 5px !important;
+    padding: 10px 0px !important;
   }
   .woocommerce ul.products li.product a img {
     min-height: 350px !important;

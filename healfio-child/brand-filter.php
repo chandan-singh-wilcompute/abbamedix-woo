@@ -1,6 +1,6 @@
-+-<?php
+<?php
 	/**
-	 * Template Name: Product filter
+	 * Template Name: Brand Filter
 	 *
 	 * @package WordPress
 	 * @subpackage Healfio-child
@@ -18,15 +18,10 @@
 </section> -->
 
 	<section class="woocommerce productFilterResultWrapper">
-		<?php
-			if ( function_exists( 'wc_print_notices' ) ) {
-				wc_print_notices();
-			}
-		?>
 		<?php echo do_shortcode('[my_custom_filter]');?>
 		
 		<?php // echo do_shortcode('[products paginate="true" columns="4" per_page="12"]');
-			echo do_shortcode('[custom_product_filter_results]');
+			echo do_shortcode('[custom_brand_filter_results]');
 		?>	
 
 	</section>

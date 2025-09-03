@@ -30,9 +30,10 @@ $allowed_html = array(
 
 $current_user = wp_get_current_user();
 $user_id = $current_user->ID;
+$user_ample_id = get_user_meta($user_id, 'client_login_id', true);
 
 // Get custom user meta
-$phone_number        = get_user_meta($user_id, 'phone_number', true);
+$phone_number        = get_user_meta($user_id, 'billing_phone', true);
 $date_of_birth       = get_user_meta($user_id, 'date_of_birth', true);
 $prescription        = get_user_meta($user_id, 'prescription_text', true);
 $prescription_until  = get_user_meta($user_id, 'prescription_until', true);
@@ -54,7 +55,7 @@ $status = Ample_Session_Cache::get('status', false);
 			<div class="group1">
 				<h5 class="mt-0">PERSONAL INFORMATION</h5>
 				<p><strong>Client Name</strong> <?php echo esc_html($current_user->display_name); ?></p>
-				<p><strong>Client ID</strong> <?php echo esc_html($user_id); ?></p>
+				<p><strong>Client ID</strong> <?php echo esc_html($user_ample_id); ?></p>
 				<p><strong>Phone Number</strong> <?php echo esc_html($phone_number); ?></p>
 				<p><strong>Date of Birth</strong> <?php echo esc_html($date_of_birth); ?></p>
 				<p><strong>Email Address</strong> <?php echo esc_html($current_user->user_email); ?></p>
@@ -64,12 +65,14 @@ $status = Ample_Session_Cache::get('status', false);
 				<h5 class="mt-0">PERSONAL INFORMATION</h5>
 				<p><span class="badgeApproved"><?php echo $status; ?></span></p>
 				<p><strong>Registration Date</strong> <?php echo esc_html($current_user->user_registered); ?></p>
-				<button id="registrationDcoument" class="registrationDcoument"><i class="bi bi-cloud-arrow-down-fill"></i> &nbsp; Registration Document</button>
-				<?php if($needs_renewal) : ?>
-					<a id="renewalFormBtn" class="renewalFormBtn" href="<?php bloginfo('url'); ?>/my-account/renewal"><i class="bi bi-repeat"></i> &nbsp; Renewal Form</a>
-				<?php else : ?>
-					<a id="renewalFormBtn" class="renewalFormBtn" href="<?php bloginfo('url'); ?>/my-account/renewal"><i class="bi bi-repeat"></i> &nbsp; Renewal Form</a>
-				<?php endif; ?>
+				<p class="btnGroup">
+					<button id="registrationDcoument" class="registrationDocument"><i class="bi bi-cloud-arrow-down-fill"></i> &nbsp; Registration Document</button>
+					<?php if($needs_renewal) : ?>
+						<a id="renewalFormBtn" class="renewalFormBtn" href="<?php bloginfo('url'); ?>/my-account/renewal"><i class="bi bi-repeat"></i> &nbsp; Renewal Form</a>
+					<?php else : ?>
+						<a id="renewalFormBtn" class="renewalFormBtn" href="<?php bloginfo('url'); ?>/my-account/renewal"><i class="bi bi-repeat"></i> &nbsp; Renewal Form</a>
+					<?php endif; ?>
+				</p>
 			</div>
 			
 			<div class="group3">

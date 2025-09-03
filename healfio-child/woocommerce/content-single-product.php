@@ -41,9 +41,13 @@ if (post_password_required()) {
                 <?php
                 if ( $product ) {
                     echo '<h1 class="product-title">' . esc_html( $product->get_name() ) . '</h1>';
+                    $brand_name = $product->get_attribute('Brand');
+                    
+                    if ($brand_name) {
+                        echo '<h6 class="subTitle">' . esc_html($brand_name) . '</h6>';
+                    }
                 }
                 ?>
-                <h6 class="subTitle">MTL Cannabis</h6>
             </div>
         </div>
         

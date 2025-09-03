@@ -289,6 +289,33 @@ class WC_Products {
             }
         }
 
+        if (isset($productData['brand_name']))
+        {
+            $brand_name = $productData['brand_name']; // dynamically from your data
+
+            // Create term if it doesn't exist
+            $term = term_exists( $brand_name, 'pa_brand' );
+            if ( ! $term ) {
+                $term = wp_insert_term( $brand_name, 'pa_brand' );
+            }
+            // Assign to product
+            wp_set_object_terms( $product_id, $brand_name, 'pa_brand' );
+
+            // Mark product attributes (so it shows in frontend filters too)
+            $product_attributess = [];
+            $product_attributess['pa_brand'] = [
+                'name'         => 'pa_brand',
+                'value'        => '',
+                'is_visible'   => 1,
+                'is_variation' => 0,
+                'is_taxonomy'  => 1,
+            ];
+
+            $product->set_attributes( $product_attributess );
+            $product->save();
+        }
+        
+
         // Add cannabinoid attributes (as range values)
         foreach ($cannabinoid_values as $cannabinoid => $units) {
             $parts = [];
@@ -416,15 +443,16 @@ class WC_Products {
             if ( ! $variation->managing_stock() ) {
                 $variation->set_manage_stock( true );
             }
-
-            // Get current stock
-            $current_stock = $variation->get_stock_quantity();
-
-            if ($current_stock == 0) {
+            
+            if ($sku_data['in_stock']) {
                 $variation->set_stock_quantity( 10 );
                 $variation->set_stock_status( 'instock' );
+            } else {
+                $variation->set_stock_quantity(0);
+                $variation->set_stock_status('outofstock');
             }
         
+            $variation->set_low_stock_amount(5); // set threshold to 5
             $variation->save();
         }
     
@@ -527,119 +555,6 @@ class WC_Products {
             }
         }
     }
-    
-    private function extract_product_attributes_and_variations($product_data) {
-        $cannabinoids = ['thc', 'cbd', 'cbg', 'cbc', 'cbn'];
-        $product_attributes = [];
-        $variation_attributes = [];
-        $variations = [];
-        $combined_cannabinoids = [];
-    
-        // 1. Add product-level attributes
-        $product_level_keys = [
-            'product_strain_name' => 'Strain',
-            'brand_name' => 'Brand',
-            'price_per_gram' => 'Price Per Gram',
-        ];
-    
-        foreach ($product_level_keys as $key => $label) {
-            if (!empty($product_data[$key])) {
-                $product_attributes[$label] = [
-                    'name' => $label,
-                    'value' => $product_data[$key],
-                    'is_visible' => true,
-                    'is_taxonomy' => false,
-                    'is_variation' => false,
-                ];
-            }
-        }
-    
-        // 2. Loop through SKUs (variations)
-        foreach ($product_data['skus'] as $index => $sku) {
-            $variation = [
-                'attributes' => [],
-                'meta_data' => [],
-                'regular_price' => isset($sku['unit_price']) ? number_format($sku['unit_price'] / 100, 2, '.', '') : '',
-                'sku' => $sku['product_id'] . '-' . $sku['id'],
-            ];
-    
-            // 2a. Add PACKAGE SIZE attribute
-            $net_weight = is_null($sku_data['net_weight']) ? '0' : $sku_data['net_weight'];
-            $package_size = $net_weight . 'g';
-
-            $variation['attributes']['PACKAGE SIZE'] = $package_size;
-            $variation_attributes['PACKAGE SIZE'][] = $package_size;
-            
-    
-            // 2b. Process cannabinoid profile
-            $cannabinoid_profile = $sku['cannabinoid_profile'] ?? [];
-            $cannabinoid_summary = [];
-    
-            foreach ($cannabinoid_profile as $key => $values) {
-                foreach ($cannabinoids as $cannabinoid) {
-                    if (stripos($key, $cannabinoid) !== false && !preg_match('/acid|potential|actual|unit/i', $key)) {
-                        $unit = '%';
-                        if (strpos($key, 'mg_g') !== false) {
-                            $unit = 'mg/g';
-                        } elseif (strpos($key, 'mg_ml') !== false) {
-                            $unit = 'mg/ml';
-                        }
-    
-                        $clean_name = strtoupper($cannabinoid);
-                        $value = $values['high'] ?? null;
-    
-                        if ($value !== null) {
-                            $formatted_value = "{$value}{$unit}";
-                            $cannabinoid_summary[] = "{$clean_name}: {$formatted_value}";
-    
-                            // Add to variation meta
-                            $variation['meta_data'][] = [
-                                'key' => $clean_name,
-                                'value' => $formatted_value
-                            ];
-    
-                            // Add to product-level attribute list for combined display
-                            $combined_cannabinoids[$clean_name][] = $formatted_value;
-                        }
-                    }
-                }
-            }
-    
-            $variations[] = $variation;
-        }
-    
-        // 3. Finalize PACKAGE SIZE as a product-level attribute
-        foreach ($variation_attributes as $name => $values) {
-            $product_attributes[$name] = [
-                'name' => $name,
-                'value' => implode(' | ', array_unique($values)),
-                'is_visible' => true,
-                'is_taxonomy' => false,
-                'is_variation' => true,
-            ];
-        }
-    
-        // 4. Add cannabinoid attributes to product-level for display
-        foreach ($combined_cannabinoids as $name => $values) {
-            $sequence = [];
-            foreach ($values as $idx => $val) {
-                $sequence[] = ($idx + 1) . ") " . $val;
-            }
-    
-            $product_attributes[$name] = [
-                'name' => $name,
-                'value' => implode(' | ', $sequence),
-                'is_visible' => true,
-                'is_taxonomy' => false,
-                'is_variation' => false,
-            ];
-        }
-    
-        return [
-            'attributes' => array_values($product_attributes),
-            'variations' => $variations
-        ];
-    }   
     
     public function hard_reset_catalog() {
         global $wpdb;

@@ -21,10 +21,11 @@ defined( 'ABSPATH' ) || exit;
 
 do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 <div class="container orderHistory">
-	<h1>ORDER HISTORY</h1>
+	
 	<?php if ( $has_orders ) : ?>
 	<div class="row">
 		<div class="col-md-9 orderHistoryTable">
+			<h1>ORDER HISTORY</h1>
 			<div class="wrapper-orders mb-5">		
 				<?php foreach ( $customer_orders->orders as $customer_order ) : 
 						$order      = wc_get_order( $customer_order ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -64,6 +65,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 			</div>
 		</div>
 		<div class="col-md-3 orderLog">
+			<h1>&nbsp;</h1>
 			<h4 class="mt-0">ORDER LOG</h4>
 			<p>
 				Access a log of all your orders from within a specific data range

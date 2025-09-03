@@ -124,11 +124,18 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
                     <i class="bi bi-heart"></i>
                     <i class="bi bi-heart-fill"></i>
                 </span>
-              ' . get_the_title() . '
+            ' . get_the_title() . '
             </h2>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
+        // Get the brand attribute value dynamically
+		$brand_name = $product->get_attribute('Brand');
+		// $brand_name = $brand_name ? $brand_name : 'Brand NA';
+		
+        if ($brand_name) {
+            echo '<div class="prodcard-brand"><label>' . esc_html($brand_name) . '</label></div>';
+        }
+		
 		//echo '<div class="prodcard-brand-name"><label>MTL Canabis</label></div>';  
-		echo '<div class="prodcard-brand"><label>MTL Canabis</label></div>';  
         
         echo '<div class="childGroup">';
        
@@ -888,6 +895,171 @@ function fix_shortcode_pagination($query) {
 }
 add_action('pre_get_posts', 'fix_shortcode_pagination');
 
+
+function custom_brand_filter_results_shortcode() {
+    $request_uri = $_SERVER['REQUEST_URI'];
+    preg_match('#brand-filter/([^/]+)#', $request_uri, $matches);
+
+    // Start output buffering
+    ob_start();
+    echo '<div class="container-fluid">';
+
+    if (isset($matches[1])) {
+
+        $filter_string = $matches[1];
+        $brands = explode('+', $filter_string);
+        $brand = $brands[0];
+        $total_products = 0;
+        $term_results = [];
+
+        // Capture the current orderby value
+        $orderby = isset($_GET['orderby']) ? wc_clean(wp_unslash($_GET['orderby'])) : 'menu_order';
+
+        // Default order settings
+        $order_args = [
+            'orderby' => 'menu_order',
+            'order' => 'ASC',
+            'meta_key' => '',
+        ];
+
+        switch ($order_by) {
+            case 'price':
+                $order_args['orderby'] = 'meta_value_num';
+                $order_args['meta_key'] = '_price';
+                $order_args['order'] = 'ASC';
+                break;
+            case 'price-desc':
+                $order_args['orderby'] = 'meta_value_num';
+                $order_args['meta_key'] = '_price';
+                $order_args['order'] = 'DESC';
+                break;
+            case 'date':
+                $order_args['orderby'] = 'date';
+                $order_args['order'] = 'DESC';
+                break;
+            case 'popularity':
+                $order_args['orderby'] = 'meta_value_num';
+                $order_args['meta_key'] = 'total_sales';
+                $order_args['order'] = 'DESC';
+                break;
+            case 'rating':
+                $order_args['orderby'] = 'meta_value_num';
+                $order_args['meta_key'] = '_wc_average_rating';
+                $order_args['order'] = 'DESC';
+                break;
+            default:
+                $order_args['orderby'] = 'menu_order';
+                $order_args['order'] = 'ASC';
+                break;
+        }
+
+        $brand = urldecode( $brand ); 
+        // $term = get_term_by( 'name', $brand, 'pa_brand' );
+
+        // if ( $term && ! is_wp_error( $term ) ) {
+        //     $brand_slug = $term->slug;
+        // } else {
+        //     $brand_slug = '';
+        // }
+
+        $args = [
+            'post_type'  => 'product',
+            'posts_per_page' => -1,
+            'orderby'        => $orderby_args['orderby'],
+            'order'          => $orderby_args['order'],
+            'meta_key'       => isset($orderby_args['meta_key']) ? $orderby_args['meta_key'] : '',
+            'tax_query' => [
+                [
+                    'taxonomy' => 'pa_brand',  // your attribute taxonomy
+                    'field'    => 'name',      // or 'slug'
+                    'terms'    => $brand,      // replace with brand name
+                ],
+            ],
+        ];
+
+        if (!empty($order_args['meta_key'])) {
+            $args['meta_key'] = $order_args['meta_key'];
+        }
+        $query = new WP_Query($args);
+
+        if ($query->have_posts()) {
+            $term_results = [
+                'brand'  => $brand,
+                'query' => $query,
+            ];
+            $total_products += $query->found_posts;
+        }
+
+        // Show Top Bar only if there are results
+        
+            echo '<div class="productTopbar">';
+            echo '<p class="product-count">Found ' . $total_products . ' products</p>';
+
+            echo '<form class="woocommerce-ordering" method="get">';
+            echo '<select name="orderby" class="orderby" onchange="this.form.submit()">';
+
+            $orderby_options = apply_filters('woocommerce_catalog_orderby', [
+                'menu_order' => __('Default sorting', 'woocommerce'),
+                'popularity' => __('Sort by popularity', 'woocommerce'),
+                'rating'     => __('Sort by average rating', 'woocommerce'),
+                'date'       => __('Sort by latest', 'woocommerce'),
+                'price'      => __('Sort by price: low to high', 'woocommerce'),
+                'price-desc' => __('Sort by price: high to low', 'woocommerce'),
+            ]);
+
+            foreach ($orderby_options as $id => $label) {
+                echo '<option value="' . esc_attr($id) . '" ' . selected($orderby, $id, false) . '>' . esc_html($label) . '</option>';
+            }
+
+            echo '</select>';
+
+            // Preserve other GET parameters
+            foreach ($_GET as $key => $value) {
+                if ($key === 'orderby') {
+                    continue;
+                }
+                if (is_array($value)) {
+                    foreach ($value as $val) {
+                        echo '<input type="hidden" name="' . esc_attr($key) . '[]" value="' . esc_attr($val) . '">';
+                    }
+                } else {
+                    echo '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '">';
+                }
+            }
+
+            echo '</form>';
+            echo '</div>'; // End productTopbar
+        
+
+            $query = $term_results['query'];
+            $color_class = 'category-gummies';
+            echo '<div class="titleWrapper '. $color_class .'">
+                    <div class="container-fluid">
+                        <a id="goback" class="backBtn" style="display:none">Back</a>
+                        <h5>' . esc_html($brand) . '</h5>
+                    </div>
+                </div>';
+        if ($total_products > 0) {
+            echo '<ul class="products elementor-grid columns-4">';
+            while ($query->have_posts()) {
+                $query->the_post();
+                wc_get_template_part('content', 'product');
+            }
+            echo '</ul>';
+            wp_reset_postdata();
+        } else {
+            echo '<div class="noProductFound"><div class="alert alert-danger" role="alert">No products found.</div></div>';
+        }
+        
+    } else {
+        echo '<div class="noProductFound"><div class="alert alert-danger" role="alert">No filter terms selected.</div></div>';
+    }
+    echo '</div>'; // End container
+    return ob_get_clean();
+}
+add_shortcode('custom_brand_filter_results', 'custom_brand_filter_results_shortcode');
+
+
 // Add rewrite rule for pretty category filters like /product-filter/slug+slug/
 function register_product_filter_rewrite_rule() {
   add_rewrite_rule(
@@ -905,6 +1077,24 @@ function register_product_filter_rewrite_rule() {
 }
 
 add_action('init', 'register_product_filter_rewrite_rule');
+
+// Add rewrite rule for pretty category filters like /product-filter/slug+slug/
+function register_brand_filter_rewrite_rule() {
+    add_rewrite_rule(
+        '^brand-filter/([^/]+)/?$',
+        'index.php?pagename=brand-filter&filter_slugs=$matches[1]',
+        'top'
+    );
+
+    // Match: /product-filter/Strawberry/page/2/
+    add_rewrite_rule(
+			'^brand-filter/([^/]+)/page/([0-9]+)/?$',
+			'index.php?pagename=brand-filter&filter_slugs=$matches[1]&paged=$matches[2]',
+			'top'
+    );
+}
+
+add_action('init', 'register_brand_filter_rewrite_rule');
 
 // Add rewrite rule for pretty category filters like /featured-filter/slug+slug/
 function register_featured_filter_rewrite_rule() {
@@ -1547,6 +1737,12 @@ function enqueue_custom_scripts() {
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce'    => wp_create_nonce('view_order_doc_nonce'),
     ));
+    wp_localize_script('jquery', 'wc_notify_me_params', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('view_order_doc_nonce'),
+        'is_logged_in' => is_user_logged_in(),
+        'login_url' => wc_get_page_permalink('myaccount'),
+    ));
 }
 
 // Strain type
@@ -1911,3 +2107,153 @@ add_shortcode('show_subcats', function ($atts) {
     <?php
     return ob_get_clean();
 });
+
+
+// Logos Grid Shortcode with Clickable Links
+function custom_logos_grid_shortcode() {
+
+    $logos = array(
+        'Abba Vets' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/av-logo.jpg'
+        ),
+        'bl' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/being-logo.jpg'
+        ),
+        'Box Hot' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/bf-logo.jpg'
+        ),
+        'BoxHot' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/cg-logo.jpg'
+        ),
+        'C3 Innovative Solutions Inc.' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/dcs-logo.jpg'
+        ),
+        'Carmel Cannabis' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/kp-logo.jpg'
+        ),
+        'DEBUNK' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/noon-logo.jpg'
+        ),
+        'Decibel' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/earthwolf-logo.jpg'
+        ),
+        'Dymond Concentrates' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/filed-trip-logo.jpg'
+        ),
+        'Emprise' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/emblem-logo.jpg'
+        ),
+        'Foray' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/foray-logo.jpg'
+        ),
+        "Farmer's Cut" => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/fuga-logo.jpg'
+        ),
+        'General Admission' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/gron-logo.jpg'
+        ),
+        'Glacial Gold' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/olli-logo.jpg'
+        ),
+        'Homestead' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/mpl-logo.jpg'
+        ),
+        'Hot Box' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/opticann-logo.jpg'
+        ),
+        'MTL' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/mtl-logo.jpg'
+        ),
+        'MTL Cannabis' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/replay-logo.jpg'
+        ),
+        'Northbound' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/rho-logo.jpg'
+        ),
+        'Rubicon' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/polar-logo.jpg'
+        ),
+        'Token' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/proofly-logo.jpg'
+        ),
+        'Abba Medix' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/opticann-logo.jpg'
+        ),
+        'Joint Craft' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/proofly-logo.jpg'
+        ),
+        "Jungl' CakeJungl' Cake" => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/mtl-logo.jpg'
+        ),
+        'Loosh Inc.' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/foray-logo.jpg'
+        ),
+        'Lowkey' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/emblem-logo.jpg'
+        ),
+        'Medipharm Labs' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/kp-logo.jpg'
+        ),
+        'ufeelu' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/being-logo.jpg'
+        ),
+        'Wayfarer' => array(
+            'img' => 'https://groiq.ca/ecommerce-test-api/wp-content/uploads/2025/06/cg-logo.jpg'
+        )
+    );
+
+    $brands = get_terms( array(
+        'taxonomy'   => 'pa_brand',
+        'hide_empty' => true,
+    ) );
+
+    $visible_brands = array();
+
+    foreach ( $brands as $brand ) {
+        $products = wc_get_products( array(
+            'status'    => 'publish',
+            'limit'     => 1,
+            'tax_query' => array(
+                array(
+                    'taxonomy' => 'pa_brand',
+                    'field'    => 'term_id',
+                    'terms'    => $brand->term_id,
+                ),
+            ),
+        ) );
+
+        if ( ! empty( $products ) ) {
+            $visible_brands[] = $brand;
+        }
+    }
+
+    $brand_names = wp_list_pluck( $visible_brands, 'name' );
+
+
+    $output = '<div class="custom-logos-grid">';
+    foreach ($brand_names as $brand_name) {
+        $logo = $logos[$brand_name];
+        if (is_array($logo)) {
+            $output .= '<div class="logo-item">
+                        <a href="' . esc_url(home_url('brand-filter/'.$brand_name.'/')) . '" target="_blank" rel="noopener" alt="' . $brand_name . '">
+                            <img src="' . esc_url($logo['img']) . '" alt="' . $brand_name . '">
+                        </a>
+                    </div>';
+        } else {
+            $logo = $logos['Abba Vets'];
+            $output .= '<div class="logo-item">
+                        <a href="' . esc_url(home_url('brand-filter/'.$brand_name.'/')) . '" target="_blank" rel="noopener" alt="' . $brand_name . '">
+                            <img src="' . esc_url($logo['img']) . '" alt="' . $brand_name . '">
+                        </a>
+                    </div>';
+        }
+    }
+    $output .= '</div>';
+
+    // echo '<pre>';
+    // print_r( $brand_names );
+    // echo '</pre>';
+
+    return $output;
+}
+add_shortcode('logos_grid', 'custom_logos_grid_shortcode');

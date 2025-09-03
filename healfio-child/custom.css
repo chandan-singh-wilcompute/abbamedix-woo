@@ -655,6 +655,7 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
   content: '';
   background: #f3f3f3;
   z-index: -1;
+  display: none;
 }
 .registration input::placeholder {
   color: #ffffff;
@@ -671,7 +672,8 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
 .registration .elementor-field-group input[type="text"],
 .registration .elementor-field-group input[type="number"],
 .registration .elementor-field-group input[type="email"],
-.registration .elementor-field-group input[type="password"] {
+.registration .elementor-field-group input[type="password"],
+.registration .elementor-field-group select {
   border: 0;
   border-radius: 0;
   -webkit-box-shadow: 0 0 0 30px #6EB0BE inset !important;
@@ -763,13 +765,18 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
 .registration input[type="radio"]:before {
   content: '';
   position: absolute;
-  right: 4px;
-  top: 4px;
+  left: 0;
+  right: 0;
+  top: 3px;
   font-size: 20px;
   z-index: 2;
   width: 22px;
   height: 22px;
   border-radius: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
 }
 .registration input[type="radio"]:checked:before {
   background-color: #ffffff;
@@ -3859,6 +3866,10 @@ li.category-concentrates .swatch-item.selected {
   .rxDeduInfo {
     position: static;
     width: auto;
+    font-size: 14px;
+    margin-left: 15px;
+    height: 30px;
+    line-height: 35px;
   }
 }
 .skillBar {
@@ -3912,7 +3923,7 @@ li.category-concentrates .swatch-item.selected {
   max-width: 1170px;
   margin: 100px auto 0;
 }
-.registrationDcoument,
+.registrationDocument,
 .renewalFormBtn {
   padding: 8px 15px;
   border: 0;
@@ -3921,7 +3932,7 @@ li.category-concentrates .swatch-item.selected {
   align-items: center;
   transition: all 0.3s ease-in-out;
 }
-.registrationDcoument i,
+.registrationDocument i,
 .renewalFormBtn i {
   font-size: 20px;
   line-height: 20px;
@@ -4130,4 +4141,28 @@ li.category-concentrates .swatch-item.selected {
   color: #000000;
   line-height: 24px;
   padding-left: 10px;
+}
+.custom-logos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px;
+  text-align: center;
+}
+@media screen and (max-width: 767px) {
+  .custom-logos-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+}
+.custom-logos-grid .logo-item a {
+  display: inline-block;
+  border: solid 1px #f1f8f9;
+}
+.custom-logos-grid .logo-item img {
+  max-width: 100%;
+  height: auto;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.custom-logos-grid .logo-item img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }

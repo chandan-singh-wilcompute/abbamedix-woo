@@ -232,7 +232,7 @@ $tags = get_tag_subcategory_structure();
         <h5>Flower</h5>
         <div class="labelGroup">
           <?php 
-              $sc = $categories['Dried Flower'];
+              $sc = $categories['Flower'];
               foreach($sc as $s):
           ?>
 
