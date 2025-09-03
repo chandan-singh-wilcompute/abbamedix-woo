@@ -58,6 +58,7 @@ function setup_session_for_user() {
         ample_connect_log("Re-initializing session data for user: " . $user->ID);
         
         Client_Information::fetch_information();
+        
         get_purchasable_products_and_store_in_session($user->ID);
         // get_order_from_api_and_update_session($user->ID);
         // get_shipping_rates_and_store_in_session($user->ID);
@@ -65,7 +66,8 @@ function setup_session_for_user() {
     }
 
     $order_id = Ample_Session_Cache::get('order_id', false);
-    if (!$order_id) {
+    $status = Ample_Session_Cache::get('status', 'Lead');
+    if ($status == "Approved" && !$order_id) {
         get_order_from_api_and_update_session($user->ID);
     }
 }

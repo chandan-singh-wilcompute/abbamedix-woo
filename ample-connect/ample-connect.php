@@ -84,6 +84,7 @@ add_action('plugins_loaded', 'ample_connect_include_functions');
 function ample_connect_include_functions() {
     require_once plugin_dir_path(__FILE__) . 'includes/functions.php';
     require_once plugin_dir_path(__FILE__) . 'includes/product-restrictions.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/purchasable-products-filter.php';
     require_once plugin_dir_path(__FILE__) . 'includes/webhooks/web-hooks-products.php';
     require_once plugin_dir_path(__FILE__) . 'includes/webhooks/web-hooks-clients.php';
     require_once plugin_dir_path(__FILE__) . 'includes/wc_classes/class-wc-orders.php';
@@ -92,6 +93,7 @@ function ample_connect_include_functions() {
     require_once plugin_dir_path(__FILE__) . 'includes/admin/order-tracking-admin.php';
     require_once plugin_dir_path(__FILE__) . 'includes/webhooks/web-hooks-orders.php';
     require_once plugin_dir_path(__FILE__) . 'includes/custom-shipping.php';
+    require_once plugin_dir_path(__FILE__) . 'includes/account-approval-check.php';
     //require_once plugin_dir_path(__FILE__) . 'includes/custom-payment.php';
 }
 

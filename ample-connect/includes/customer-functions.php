@@ -12,7 +12,7 @@ function register_patient_on_ample($patient_data) {
             "first_name" => $patient_data['first_name'],
             "middle_name" => $patient_data['middle_name'],
             "last_name" => $patient_data['last_name'],
-            "telephone_1" => "555-555-5555",
+            "telephone_1" => $patient_data['telephone_1'],
             "date_of_birth" => $patient_data['date_of_birth'],
             "email" => $patient_data['email'],
             "status" => 'Lead'
@@ -58,20 +58,23 @@ function get_purchasable_products_and_store_in_session($user_id = "") {
         return true;
     }
 
-    $purchasable_products_url = AMPLE_CONNECT_WOO_CLIENT_URL . $client_id . '/purchasable_products';
+    // $purchasable_products_url = AMPLE_CONNECT_WOO_CLIENT_URL . $client_id . '/purchasable_products';
+    $purchasable_products_url = AMPLE_CONNECT_WOO_CLIENT_URL . $client_id . '/purchasable_products?lite=true';
     
     $products = ample_request($purchasable_products_url);
 
-    if (empty($products)) {
-        return array();
-    }
+    Ample_Session_Cache::set('purchasable_products', $products);
+    
+    // if (empty($products)) {
+    //     return array();
+    // }
 
-    $allowed_skus = array();
-    foreach ($products as $product) {
-        $allowed_skus[] = 'sku-' . $product['id'];
-    }
+    // $allowed_skus = array();
+    // foreach ($products as $product) {
+    //     $allowed_skus[] = 'sku-' . $product['id'];
+    // }
 
-    Ample_Session_Cache::set('purchasable_products', $allowed_skus);
+    // Ample_Session_Cache::set('purchasable_products', $allowed_skus);
 
     return true;
 }
