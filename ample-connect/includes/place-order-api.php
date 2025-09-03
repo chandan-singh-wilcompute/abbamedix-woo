@@ -106,36 +106,6 @@ function custom_add_to_order($cart_item_key, $product_id, $quantity, $variation_
 }
 
 
-// add_action('woocommerce_remove_cart_item', 'ample_cart_updated', 10, 2);
-// function ample_cart_updated($cart_item_key, $cart) {
-//     $line_item = $cart->removed_cart_contents[$cart_item_key];
-//     $product = wc_get_product($line_item['variation_id'] ?: $line_item['product_id']);
-//     $sku_id = explode("-", $product->get_sku())[1];
-    
-//     // $order = get_order_id_from_api();
-//     $order_id = Ample_Session_Cache::get('order_id');
-//     $order_items = Ample_Session_Cache::get('order_items');
-//     if($order_id) {
-//         $order_item_id = null;
-//         foreach ($order_items as $item) {
-//             if ($item['sku_id'] == $sku_id) {
-//                 $order_item_id = $item['id'];
-//                 break;
-//             }
-//         }
-
-//         if($order_item_id){
-//             $response = remove_from_order($order_id, $order_item_id);
-//             if (is_wp_error($response)) {
-//                 error_log('API call failed: ' . $response->get_error_message());
-//             } else {
-//                 error_log('API call succeeded: ' . wp_remote_retrieve_body($response));
-//             }
-//         }
-//     }
-
-// }
-
 add_action('woocommerce_cart_item_removed', 'ample_cart_updated', 10, 2);
 function ample_cart_updated($cart_item_key, $cart) {
     $line_item = $cart->removed_cart_contents[$cart_item_key] ?? null;

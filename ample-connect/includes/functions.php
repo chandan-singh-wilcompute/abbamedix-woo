@@ -2217,21 +2217,16 @@ function handle_add_to_notify_list() {
     // $email = sanitize_email($_POST['email']);
     $product_id = intval($_POST['product_id']);
 
-    // if (!is_email($email)) {
-    //     wp_send_json_error('Invalid email address.');
-    // }
+    $user_id = get_current_user_id();
+    $client_id = get_user_meta($user_id, 'client_id', true);
 
-    // Store in custom table or post meta
-    // $existing = get_post_meta($product_id, '_notify_me_list', true);
-    // if (!is_array($existing)) {
-    //     $existing = [];
-    // }
-
-    // if (!in_array($email, $existing)) {
-    //     $existing[] = $email;
-    //     update_post_meta($product_id, '_notify_me_list', $existing);
-    // }
-
+    $url = AMPLE_CONNECT_CLIENTS_URL . '/notify_when_back_in_stock';
+    $arg = array (
+        "sku_id" => $product_id,
+        "client_id" => $client_id
+    );
+    
+    $response = ample_request($url, 'PUT', $arg);
     wp_send_json_success('You will be notified!');
 
     // if ( $was_successful ) {

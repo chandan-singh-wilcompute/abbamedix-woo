@@ -119,7 +119,7 @@ td.product-total {
 
 .product-quantity,
 .product-remove {
-    background-color: #ffffff
+    background-color: #ffffff !important;
 }
 
 .product-subtotal {
@@ -987,6 +987,16 @@ button.notify-me-button {
     background-color: #929E31;
 }
 
+/* Prevent button flicker on single product page */
+.single-product .variations_form .single_add_to_cart_button {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.single-product .variations_form .single_add_to_cart_button.button-ready {
+    opacity: 1;
+}
+
 .spinner {
     display: inline-block;
     width: 14px;
@@ -1001,4 +1011,31 @@ button.notify-me-button {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1199px) {
+  .primary-menu li a:hover {
+    background: transparent;
+    width: 100%;
+    margin-left: 0;
+    padding: 0;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 769px) {
+  .quantity-minus, 
+  .quantity-plus{
+      width: 40px;
+      height: 40px;
+  }
+
+  .woocommerce table.shop_table td.product-remove {
+      padding-top: 10px !important;
+  }
+
+  .product-name {
+    font-size: 14px;
+  } 
+ 
 }

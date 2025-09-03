@@ -802,6 +802,7 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
     content: '';
     background: #f3f3f3;
     z-index: -1;
+    display: none;
   }
 }
 
@@ -825,7 +826,8 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
     input[type="text"],
     input[type="number"],
     input[type="email"],
-    input[type="password"] {
+    input[type="password"],
+    select {
       border: 0;
       border-radius: 0;
       -webkit-box-shadow: 0 0 0 30px #6EB0BE inset !important;
@@ -931,14 +933,20 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
       content: '';
       position: absolute;
       
-      right: 4px;
-      top: 4px;
+      left: 0;
+      right: 0;
+      top: 3px;
       font-size: 20px;
       z-index: 2;
 
       width: 22px;
       height: 22px;
       border-radius: 100%;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto;
     }
 
     &:checked:before {
@@ -4368,6 +4376,10 @@ li {
   @media screen and (max-width: 768px){
     position: static;
     width: auto;
+    font-size: 14px;
+    margin-left: 15px;
+    height: 30px;
+    line-height: 35px;
   }
 }
 
@@ -4435,7 +4447,7 @@ li {
   margin: 100px auto 0;
 }
 
-.registrationDcoument,
+.registrationDocument,
 .renewalFormBtn {
   padding: 8px 15px;
   border: 0;
@@ -4463,8 +4475,6 @@ li {
 }
 
 #renewalForm {
-
-  
 
   input::placeholder {
     color: #ffffff;
@@ -4703,3 +4713,31 @@ li {
     }
   }
 } 
+
+
+.custom-logos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 20px;
+    text-align: center;
+
+    @media screen and (max-width: 767px) {
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+
+    .logo-item {
+      a {
+        display: inline-block;
+        border: solid 1px #f1f8f9;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        &:hover {
+          transform: scale(1.05);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+      }
+    }
+}

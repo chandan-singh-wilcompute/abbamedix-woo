@@ -117,7 +117,7 @@ jQuery(document).ready(function($) {
         button.prop('disabled', true).text('Loading...');
 
         $.ajax({
-            url: wc_add_to_cart_params.ajax_url,
+            url: wc_notify_me_params.ajax_url,
             method: 'POST',
             data: {
                 action: 'view_order_document',

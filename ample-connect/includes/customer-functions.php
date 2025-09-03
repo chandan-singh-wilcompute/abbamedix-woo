@@ -437,11 +437,11 @@ function add_to_order($order_id, $sku_id, $quantity) {
     );
     $data = ample_request($url, 'PUT', $body);
     
-    // if (is_array($data) && array_key_exists('id', $data)) {
-    //     Client_Information::fetch_information();
-    //     store_current_order_to_session($data, $user_id);
-    //     // get_shipping_rates_and_store_in_session();
-    // }
+    if (is_array($data) && array_key_exists('id', $data)) {
+        // Client_Information::fetch_information();
+        store_current_order_to_session($data, $user_id);
+        // get_shipping_rates_and_store_in_session();
+    }
     
     return $data;
 }

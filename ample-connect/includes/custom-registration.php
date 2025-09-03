@@ -181,51 +181,59 @@ function patient_registration_action($record, $handler) {
         $form_fields[$id] = sanitize_text_field($field['value']);
     }
 
+    $email = sanitize_text_field($form_fields['field_728ed5d1']);
+    // Check if email is already registered
+    if (email_exists($email)) {
+        // $handler->add_action( 'redirect_url', home_url( '/registration/?reg_msg=email_exists' ) );
+        $handler->add_response_data( 'redirect_url', home_url( '/registration/?reg_msg=email_exists' ) );
+        return;
+    }
+
     // $form_fields = $record->get('fields');
     // ample_connect_log($form_fields);
     // Retrieve form data
     $first_name = sanitize_text_field($form_fields['firstname']);
-    $middle_name = sanitize_text_field($form_fields['email']);
-    $last_name = sanitize_text_field($form_fields['message']);
+    $middle_name = sanitize_text_field($form_fields['middle_name']);
+    $last_name = sanitize_text_field($form_fields['last_name']);
     // ample_connect_log("name = $first_name $middle_name $last_name");
     $dob_year = intval($form_fields['field_871115a']);
     $dob_month = intval($form_fields['field_434268a']);
     $dob_day = intval($form_fields['field_701927b']);
     $gender = sanitize_text_field($form_fields['field_2a0ac5c']);
-    $is_veteran = isset($form_fields['field_583befa']) ? 'Yes' : 'No';
+    $is_veteran = sanitize_text_field($form_fields['field_583befa']);
     $address_pobox = sanitize_text_field($form_fields['field_84f70c1']);
     $address_street = sanitize_text_field($form_fields['field_e48311f']);
     $address_city = sanitize_text_field($form_fields['field_cea79fa']);
-    $address_province = sanitize_text_field($form_fields['field_46e27da']);
+    $address_province = sanitize_text_field($form_fields['provice_1']['value']);
     $address_postal_code = sanitize_text_field($form_fields['field_81d3861']);
     $mailing_pobox = sanitize_text_field($form_fields['field_5dcb0ca']);
     $mailing_street = sanitize_text_field($form_fields['field_3b67ce9']);
     $mailing_city = sanitize_text_field($form_fields['field_b03cb1a']);
-    $mailing_province = sanitize_text_field($form_fields['field_cbac568']);
+    $mailing_province = sanitize_text_field($form_fields['provice_2']['value']);
     $mailing_postal_code = sanitize_text_field($form_fields['field_c97e896']);
     $shipping_pobox = sanitize_text_field($form_fields['field_696ba6d']);
     $shipping_street = sanitize_text_field($form_fields['field_4d0a974']);
     $shipping_city = sanitize_text_field($form_fields['field_afdd091']);
-    $shipping_province = sanitize_text_field($form_fields['field_51adbb6']);
+    $shipping_province = sanitize_text_field($form_fields['provice_3']['value']);
     $shipping_postal_code = sanitize_text_field($form_fields['field_3e39d38']);
     $has_caregiver = isset($form_fields['field_1c2a8a5']) ? 'Yes' : 'No';
+    $is_consent = isset($form_fields['field_e365754']) ? 'Yes' : 'No';
     $email = sanitize_text_field($form_fields['field_728ed5d1']);
     $password = sanitize_text_field($form_fields['field_f4cc2f5']);
-    // $billing_phone = sanitize_text_field($form_fields['field_583befa']);
+    $billing_phone = sanitize_text_field($form_fields['field_b3f82c6']);
+    $alternate_phone = sanitize_text_field($form_fields['field_7134d38']);
+    
     // Validate form data (add your own validation as needed)
 
     // Create user
     $username = sanitize_user($first_name . $last_name);
     $username = custom_registration_generate_unique_username($username);
     $user_id = wp_create_user($username, $password, $email);
-    // Check if email is already registered
-    if (email_exists($email)) {
-        $handler->add_response_data( 'redirect_url', home_url( '/registration/?reg_msg=email_exists' ) );
-    }
 
     if (is_wp_error($user_id)) {
         //return array('status' => false, 'message' => 'Error creating user: ' . $user_id->get_error_message());
         $handler->add_response_data( 'redirect_url', home_url( '/registration/?reg_msg=error' ) );
+        return;
     }
 
     // Set user as a Customer
@@ -244,6 +252,7 @@ function patient_registration_action($record, $handler) {
     update_user_meta($user_id, 'dob_year', $dob_year);
     update_user_meta($user_id, 'dob_month', $dob_month);
     update_user_meta($user_id, 'dob_day', $dob_day);
+    update_user_meta($user_id, 'date_of_birth', "$dob_year-$dob_month-$dob_day");
     update_user_meta($user_id, 'gender', $gender);
     update_user_meta($user_id, 'is_veteran', $is_veteran);
     update_user_meta($user_id, 'billing_address_1', $address_pobox);
@@ -251,6 +260,7 @@ function patient_registration_action($record, $handler) {
     update_user_meta($user_id, 'billing_city', $address_city);
     update_user_meta($user_id, 'billing_state', $address_province);
     update_user_meta($user_id, 'billing_phone', $billing_phone);
+    update_user_meta($user_id, 'alternate_phone', $alternate_phone);
     update_user_meta($user_id, 'billing_postcode', $address_postal_code);
     update_user_meta($user_id, 'mailing_pobox', $mailing_pobox);
     update_user_meta($user_id, 'mailing_street', $mailing_street);
@@ -263,15 +273,18 @@ function patient_registration_action($record, $handler) {
     update_user_meta($user_id, 'shipping_state', $shipping_province);
     update_user_meta($user_id, 'shipping_postcode', $shipping_postal_code);
     update_user_meta($user_id, 'has_caregiver', $has_caregiver);
+    update_user_meta($user_id, 'is_consent', $is_consent);
     update_user_meta($user_id, 'status', 'Lead');
 
 
+    $billing_phone = $billing_phone ? $billing_phone : '555-555-5555';
     $patient_data = array(
         'first_name' => $first_name,
-        'middle_name' => $first_name,
-        'last_name' => $first_name,
+        'middle_name' => $middle_name,
+        'last_name' => $last_name,
         'date_of_birth' => "$dob_year-$dob_month-$dob_day",
-        'telephone_1' => '555-555-5555',
+        'telephone_1' => $billing_phone,
+        'telephone_2' => $alternate_phone,
         'email' => $email,
         'password' => $password
     );
@@ -288,6 +301,7 @@ function patient_registration_action($record, $handler) {
         $ample_client_response = register_patient_on_ample($patient_data);
         if (!isset($ample_client_response['id'])) {
             $handler->add_response_data( 'redirect_url', home_url( '/my-account/?registration=failure' ) );
+            return;
         }
     }
 
@@ -300,18 +314,19 @@ function patient_registration_action($record, $handler) {
     $reg_data = array(
         'gender' => $gender,
         'telephone_1' => $billing_phone,
-        'street_1' => $address_pobox,
-        'street_2' => $address_street,
+        'street_1' => $address_street,
+        'street_2' => $address_pobox,
         'city' => $address_city,
         'province' => $address_province,
         'postal_code' => $address_postal_code,
-        'mailing_street_1' => $mailing_pobox,
-        'mailing_street_2' => $mailing_street,
+        'mailing_street_1' => $mailing_street,
+        'mailing_street_2' => $mailing_pobox,
         'mailing_city' => $mailing_city,
         'mailing_province' => $mailing_province,
         'mailing_postal_code' => $mailing_postal_code,
     );
 
+    ample_connect_log($reg_data);
     $update_response = update_registration_details_on_ample($client_id, $active_registration_id, $reg_data);
 
     ample_connect_log("update registration - ");
@@ -330,6 +345,7 @@ function patient_registration_action($record, $handler) {
     // );
 
     $handler->add_response_data( 'redirect_url', home_url( '/my-account/?registration=success' ) );
+    return;
 }
 add_action( 'elementor_pro/forms/new_record', 'patient_registration_action', 10, 2 );
 
