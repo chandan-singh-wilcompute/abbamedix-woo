@@ -133,6 +133,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 		
         if ($brand_name) {
             echo '<div class="prodcard-brand"><label>' . esc_html($brand_name) . '</label></div>';
+        } else {
+            echo '<div class="prodcard-brand" style="opacity:0;"><label>&nbsp;</label></div>';
         }
 		
 		//echo '<div class="prodcard-brand-name"><label>MTL Canabis</label></div>';  
