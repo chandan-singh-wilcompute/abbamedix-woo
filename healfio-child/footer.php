@@ -631,6 +631,10 @@
             if (notices.length > 0) {
             setTimeout(() => {
                 notices.forEach(el => {
+                // Skip approval status notice - keep it permanent
+                if (el.classList.contains('ample-approval-notice')) {
+                    return;
+                }
                 el.style.transition = 'opacity 1s ease-out';
                 el.style.opacity = '0';
                 setTimeout(() => el.style.display = 'none', 800);
@@ -640,6 +644,14 @@
         }
         $(document).ready(fadeWooNotices);
         $(document.body).on('updated_wc_div wc_fragments_refreshed', fadeWooNotices);
+
+        // -------------------------
+        // Approval notice close button
+        // -------------------------
+        $(document).on('click', '.ample-approval-close', function(e) {
+            e.preventDefault();
+            $(this).closest('.ample-approval-notice').fadeOut(300);
+        });
 
     }); // end jQuery wrapper
 </script>

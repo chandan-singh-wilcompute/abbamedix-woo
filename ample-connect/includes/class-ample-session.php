@@ -73,6 +73,7 @@ class Ample_Session_Cache {
         if (self::is_session_available()) {
             $session_keys = [
                 'purchasable_products',
+                'purchasable_product_ids',
                 'order_id',
                 'custom_shipping_rates',
                 'custom_tax_data',

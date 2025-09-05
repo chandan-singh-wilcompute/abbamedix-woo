@@ -7,37 +7,35 @@ require_once plugin_dir_path(__FILE__) . '/customer-functions.php';
 add_filter('woocommerce_add_to_cart_validation', 'custom_add_to_cart_validation', 10, 5);
 function custom_add_to_cart_validation($passed, $product_id, $quantity, $variation_id, $variations) {
     
-    if (is_user_logged_in()) {
-        // $allowed_skus = get_purchasable_products();
-        $allowed_skus = Ample_Session_Cache::get('purchasable_products');
-        if (!empty($allowed_skus)) {
-            $allowed_ids = get_product_ids_by_skus($allowed_skus);
-            if (!in_array($product_id, $allowed_ids)) {
-                wc_add_notice('This product cannot be added to the cart.', 'error');
-                return false;
-            }
-        }
-    } else {
+    if (!is_user_logged_in()) {
         wc_add_notice('You need to be logged in to add this product to the cart.', 'error');
         return false;
     }
-
-    if ($variation_id) {
-        $variation = wc_get_product($variation_id);
-        $attribute_package_size = ((float)$variation->get_attribute('package-size')) * $quantity;
-    } else {
-        $product = wc_get_product($product_id);
-        $attribute_package_size = ((float)$product->get_attribute('package-size'))  * $quantity;
+    
+    // OPTIMIZED: Use cached product IDs instead of database query
+    $allowed_product_ids = ample_get_cached_purchasable_product_ids();
+    
+    if (empty($allowed_product_ids) || (count($allowed_product_ids) === 1 && $allowed_product_ids[0] === 0)) {
+        wc_add_notice('This product cannot be added to the cart.', 'error');
+        return false;
+    }
+    
+    // Quick array lookup instead of database query
+    if (!in_array($product_id, $allowed_product_ids)) {
+        wc_add_notice('This product cannot be added to the cart.', 'error');
+        return false;
     }
 
-    $total_package_size = 0;
+    // OPTIMIZED: Get package size efficiently
+    $current_product = wc_get_product($variation_id ?: $product_id);
+    $attribute_package_size = ((float)$current_product->get_attribute('package-size')) * $quantity;
+
+    // OPTIMIZED: Calculate cart total package size more efficiently
+    $total_package_size = $attribute_package_size;
     foreach (WC()->cart->get_cart() as $cart_item) {
-        $product = wc_get_product($cart_item['variation_id'] ?: $cart_item['product_id']);
-        $package_size = $product->get_attribute('package-size');
-        $quantity = $cart_item['quantity'];
-        $total_package_size += floatval($package_size) * $quantity;
+        $package_size = floatval($cart_item['data']->get_attribute('package-size'));
+        $total_package_size += $package_size * $cart_item['quantity'];
     }
-    $total_package_size += $attribute_package_size;
     // $order = get_order_id_from_api();
     $order_id = Ample_Session_Cache::get('order_id');
 
@@ -60,19 +58,16 @@ add_action('woocommerce_add_to_cart', 'custom_add_to_order', 10, 6);
 function custom_add_to_order($cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data) {
     // Validate session is available
     if (!Ample_Session_Cache::is_session_available()) {
-        ample_connect_log("Session not available during add to cart");
         return;
     }
-    if ($variation_id) {
-        $variation = wc_get_product($variation_id);
-        $sku = $variation->get_sku();
-        $sku_array = explode("-", $sku);
-        $sku_id = $sku_array[1];
-    } else {
-        $product = wc_get_product($product_id);
-        $sku = $product->get_sku();
-        $sku_array = explode("-", $sku);
-        $sku_id = $sku_array[1];
+    $current_product = wc_get_product($variation_id ?: $product_id);
+    $sku = $current_product->get_sku();
+    $sku_array = explode("-", $sku);
+    $sku_id = $sku_array[1] ?? null;
+    
+    if (!$sku_id) {
+        ample_connect_log("Invalid SKU format for product ID: " . ($variation_id ?: $product_id));
+        return;
     }
 
     $order_id = Ample_Session_Cache::get('order_id');
@@ -90,12 +85,7 @@ function custom_add_to_order($cart_item_key, $product_id, $quantity, $variation_
             }
 
             if (!$found_in_cart) {
-                $response = add_to_order($order_id, $sku_id, $quantity);
-                if (is_wp_error($response)) {
-                    error_log('API call failed: ' . $response->get_error_message());
-                    return;
-                }
-                ample_connect_log("Added SKU {$sku_id} with qty {$quantity}");
+                add_to_order($order_id, $sku_id, $quantity);
             }
         } catch (Exception $e) {
             ample_connect_log('Exception during add to order: ' . $e->getMessage());
@@ -104,6 +94,8 @@ function custom_add_to_order($cart_item_key, $product_id, $quantity, $variation_
         ample_connect_log('No order_id available during add to cart');
     }
 }
+
+
 
 
 add_action('woocommerce_cart_item_removed', 'ample_cart_updated', 10, 2);
@@ -153,20 +145,50 @@ function ample_cart_updated($cart_item_key, $cart) {
 
 
 
-add_action('woocommerce_before_cart', 'calculate_total_package_size');
-function calculate_total_package_size() {
-    $total_package_size = 0;
-    // $get_available_to_order = Client_Information::get_available_to_order();
-    $get_available_to_order  = Ample_Session_Cache::get('available_to_order');
-    // Loop through cart items
-    foreach (WC()->cart->get_cart() as $cart_item) {
-        $product = wc_get_product($cart_item['variation_id'] ?: $cart_item['product_id']);
-        $package_size = $product->get_attribute('package-size');
-        $quantity = $cart_item['quantity'];
-        $total_package_size += floatval($package_size) * $quantity;
+// OPTIMIZED: Only register cart calculations on cart/checkout pages
+add_action('wp', 'ample_conditional_cart_hooks');
+
+/**
+ * Conditionally register cart-related hooks only when needed
+ */
+function ample_conditional_cart_hooks() {
+    // Only register cart calculation hooks on cart and checkout pages
+    if (is_cart()) {
+        add_action('woocommerce_before_cart', 'ample_optimized_cart_calculations', 10);
+    }
+    
+    if (is_checkout()) {
+        add_action('woocommerce_before_checkout_form', 'ample_optimized_checkout_calculations', 10);
+    }
+}
+function ample_optimized_cart_calculations() {
+    // Only run if cart exists and has items
+    if (!WC()->cart || WC()->cart->is_empty()) {
+        return;
     }
 
-    // Output the total package size
+    // Cache the calculation to avoid multiple runs
+    static $cart_hash = '';
+    $current_hash = WC()->cart->get_cart_hash();
+    if ($cart_hash === $current_hash) {
+        return; // Already calculated for this cart state
+    }
+    $cart_hash = $current_hash;
+
+    $total_package_size = 0;
+    $get_available_to_order = Ample_Session_Cache::get('available_to_order');
+    
+    // Loop through cart items once
+    foreach (WC()->cart->get_cart() as $cart_item) {
+        $product = wc_get_product($cart_item['variation_id'] ?: $cart_item['product_id']);
+        if ($product) {
+            $package_size = $product->get_attribute('package-size');
+            $quantity = $cart_item['quantity'];
+            $total_package_size += floatval($package_size) * $quantity;
+        }
+    }
+
+    // Output the total package size (only on cart page)
     echo '<div id="total-package-size" style="display: none;">' . $total_package_size . '</div>';
     echo '<div id="available-to-order" style="display: none;">' . $get_available_to_order . '</div>';   
 }
@@ -323,35 +345,60 @@ function cart_item_quantity_update_ample_after($cart_item_key, $quantity, $old_q
 
 
 // checkout page 
-add_action('woocommerce_before_checkout_form', 'calculate_total_package_size_in_checkout_page');
-function calculate_total_package_size_in_checkout_page() {
-    $total_package_size = 0;
-    // $get_available_to_order = Client_Information::get_available_to_order();
-    $get_available_to_order  = Ample_Session_Cache::get('available_to_order');
-    // Loop through checkout items
-    foreach (WC()->cart->get_cart() as $cart_item) {
-        $product = wc_get_product($cart_item['variation_id'] ?: $cart_item['product_id']);
-        $package_size = $product->get_attribute('package-size');
-        $quantity = $cart_item['quantity'];
-        $total_package_size += floatval($package_size) * $quantity;
+// OPTIMIZED: Now registered conditionally in ample_conditional_cart_hooks()
+// add_action('woocommerce_before_checkout_form', 'ample_optimized_checkout_calculations');
+function ample_optimized_checkout_calculations() {
+    // Only run if cart exists and has items
+    if (!WC()->cart || WC()->cart->is_empty()) {
+        return;
     }
 
+    // Cache the calculation to avoid multiple runs
+    static $checkout_cart_hash = '';
+    $current_hash = WC()->cart->get_cart_hash();
+    if ($checkout_cart_hash === $current_hash) {
+        return; // Already calculated for this cart state
+    }
+    $checkout_cart_hash = $current_hash;
+
+    $total_package_size = 0;
+    $get_available_to_order = Ample_Session_Cache::get('available_to_order');
+    
+    // Loop through checkout items once
+    foreach (WC()->cart->get_cart() as $cart_item) {
+        $product = wc_get_product($cart_item['variation_id'] ?: $cart_item['product_id']);
+        if ($product) {
+            $package_size = $product->get_attribute('package-size');
+            $quantity = $cart_item['quantity'];
+            $total_package_size += floatval($package_size) * $quantity;
+        }
+    }
+
+    // Handle shipping method selection (only on checkout)
     $chosen_shipping_method = Ample_Session_Cache::get('applied_shipping_rate'); 
-
-    if (empty($chosen_shipping_method) != "") {
-        // Example: "custom_shipping_api:rate_9636d7efcd10478d99698cf085b5b678"
-
+    if (!empty($chosen_shipping_method)) {
         // Store for later (your own key)
         WC()->session->set('chosen_shipping_methods', ["custom_shipping_api" => $chosen_shipping_method]);
     }
 
-    // Output the total package size
+    // Output the total package size (only on checkout page)
     echo '<div id="total-package-size" style="display: none;">' . $total_package_size . '</div>';
     echo '<div id="available-to-order" style="display: none;">' . $get_available_to_order . '</div>';
 }
 
 
-add_action('woocommerce_product_query', 'filter_products_based_on_login_status');
+// OPTIMIZED: Only register when on shop pages 
+add_action('wp', 'ample_conditional_login_status_filtering');
+
+/**
+ * Conditionally register login status filtering only when needed
+ */
+function ample_conditional_login_status_filtering() {
+    // Only register product query filtering on shop-related pages
+    if (is_shop() || is_product_category() || is_product_tag() || is_product_taxonomy()) {
+        add_action('woocommerce_product_query', 'filter_products_based_on_login_status', 10);
+    }
+}
 function filter_products_based_on_login_status($query) {
     if (is_user_logged_in()) {
         // $allowed_skus = get_purchasable_products();
@@ -374,8 +421,53 @@ function filter_products_based_on_login_status($query) {
     }
 }
 
-// Apply discount to cart items
-// add_action( 'woocommerce_before_calculate_totals', 'apply_discount_after_api', 10, 1 );
+// Apply individual API discounts from order_items session data to cart items
+add_action('woocommerce_before_calculate_totals', 'apply_individual_api_discounts_to_cart', 15, 1);
+
+/**
+ * Apply individual API discounts from order_items session to WooCommerce cart
+ * This syncs individual discounts from third-party system to WooCommerce checkout
+ */
+function apply_individual_api_discounts_to_cart($cart) {
+    // Standard guards
+    if (is_admin() && !defined('DOING_AJAX')) return;
+    if (!$cart || $cart->is_empty()) return;
+    
+    // Only run on checkout page for discounts
+    if (!is_checkout()) return;
+    
+    // Cache to prevent multiple runs for same cart state
+    static $discounts_cart_hash = '';
+    $current_hash = $cart->get_cart_hash();
+    if ($discounts_cart_hash === $current_hash) {
+        return; // Already calculated for this cart state
+    }
+    $discounts_cart_hash = $current_hash;
+
+    ample_connect_log("Applying individual API discounts to cart");
+    
+    // Apply API discounts to individual cart items from order_items session
+    foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
+        if (!empty($cart_item['api_discounts'])) {
+            $total_discount = 0;
+            $notes = [];
+            foreach ($cart_item['api_discounts'] as $discount) {
+                $amount = floatval($discount['dollar_amount']) / 100;
+                $total_discount += $amount;
+                $notes[] = $discount['discount_type_name'] . " -$" . number_format($amount, 2);
+            }
+
+            if ($total_discount > 0) {
+                $label = $cart_item['data']->get_name() . ' discount';
+                if (!empty($notes)) {
+                    $label .= ' (' . implode(', ', $notes) . ')';
+                }
+                $cart->add_fee($label, -$total_discount);
+                ample_connect_log("Applied individual discount: $total_discount for " . $cart_item['data']->get_name());
+            }
+        }
+    }
+}
 // function apply_discount_after_api( $cart ) {
 //     // Loop through each item in the cart
 //     foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
@@ -399,73 +491,83 @@ function filter_products_based_on_login_status($query) {
 //     }
 // }
 
-add_action('woocommerce_before_calculate_totals', 'apply_api_discounts_to_cart_items', 20, 1);
-function apply_api_discounts_to_cart_items($cart) {
-    if (is_admin() && !defined('DOING_AJAX')) return;
-    if (!WC()->cart) return;
+// OPTIMIZED: Combined totals and fees calculation
+// add_action('woocommerce_before_calculate_totals', 'ample_optimized_cart_totals_calculation', 15, 1);
+// function ample_optimized_cart_totals_calculation($cart) {
+//     // Standard guards
+//     if (is_admin() && !defined('DOING_AJAX')) return;
+//     if (!$cart || $cart->is_empty()) return;
 
-    // 2. Run only on checkout page
-    if (!is_checkout()) return;
+//     // Cache to prevent multiple runs for same cart state
+//     static $totals_cart_hash = '';
+//     $current_hash = $cart->get_cart_hash();
+//     if ($totals_cart_hash === $current_hash) {
+//         return; // Already calculated for this cart state
+//     }
+//     $totals_cart_hash = $current_hash;
 
-    // 3. Prevent multiple executions in same request
-    // static $ran = false;
-    // if ($ran) return;
-    // $ran = true;
+//     // Only run on checkout page for discounts
+//     if (!is_checkout()) return;
 
-    // // 4. Prevent re-running unless page reload happens
-    // $session = WC()->session;
-    // $reload_flag = $session->get('my_calc_flag');
-
-    // if ($reload_flag === WC()->cart->get_cart_hash()) {
-    //     return; // already handled this exact cart state in this reload
-    // }
-
-    // // Save current hash so it won’t run again until reload
-    // $session->set('my_calc_flag', WC()->cart->get_cart_hash());
+//     ample_connect_log("optimized cart totals calculation called");
     
-    ample_connect_log("before calculate total hook called");
-    foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
-        if (!empty($cart_item['api_discounts'])) {
+//     // 1. Apply API discounts to individual cart items
+//     foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
+//         if (!empty($cart_item['api_discounts'])) {
+//             $total_discount = 0;
+//             $notes = [];
+//             foreach ($cart_item['api_discounts'] as $discount) {
+//                 $amount = floatval($discount['dollar_amount']) / 100;
+//                 $total_discount += $amount;
+//                 $notes[] = $discount['discount_type_name'] . " -$" . number_format($amount, 2);
+//             }
 
-            // Ensure we always have the original price saved
-            // if (!isset($cart_item['original_price'])) {
-            //     $cart->cart_contents[$cart_item_key]['original_price'] = $cart_item['data']->get_regular_price();
-            //     if (!$cart->cart_contents[$cart_item_key]['original_price']) {
-            //         $cart->cart_contents[$cart_item_key]['original_price'] = $cart_item['data']->get_price();
-            //     }
-            // }
+//             if ($total_discount > 0) {
+//                 $label = $cart_item['data']->get_name() . ' discount';
+//                 if (!empty($notes)) {
+//                     $label .= ' (' . implode(', ', $notes) . ')';
+//                 }
+//                 $cart->add_fee($label, -$total_discount);
+//             }
+//         }
+//     }
 
-            // $original_price = $cart->cart_contents[$cart_item_key]['original_price'];
+//     // 2. Apply custom taxes and fees (integrated from apply_selected_custom_discount)
+//     $custom_taxes = Ample_Session_Cache::get('custom_tax_data');
+//     if (!empty($custom_taxes) && is_array($custom_taxes)) {
+//         foreach ($custom_taxes as $tax_label => $amount_cents) {
+//             $amount_dollars = floatval($amount_cents) / 100;
+//             $cart->add_fee(ucfirst($tax_label), $amount_dollars, false);
+//         }
+//     }
 
-            // Calculate discount
-            $total_discount = 0;
-            $notes = [];
-            foreach ($cart_item['api_discounts'] as $discount) {
-                $amount = floatval($discount['dollar_amount']) / 100;
-                $total_discount += $amount;
-                $notes[] = $discount['discount_type_name'] . " -$" . number_format($amount, 2);
-            }
-
-            // // Apply new price based on ORIGINAL
-            // $new_price = max(0, $original_price - $total_discount);
-            // $cart_item['data']->set_price($new_price);
-
-            // // Save discount note
-            // $cart->cart_contents[$cart_item_key]['custom_discount_note'] = implode(', ', $notes);
-
-            if ($total_discount > 0) {
-                $label = $cart_item['data']->get_name() . ' discount';
-                if (!empty($notes)) {
-                    $label .= ' (' . implode(', ', $notes) . ')';
-                }
-
-                $cart->add_fee($label, -$total_discount);
-            }
-
-            // ample_connect_log("Applied discount → original: $original_price, discount: $total_discount, new: $new_price");
-        }
-    }
-}
+//     // 3. Apply fixed amount discounts
+//     $discounts = Ample_Session_Cache::get('applied_discounts', []);
+//     if ($discounts) {
+//         foreach($discounts as $d) {
+//             $cart->add_fee($d['desc'], -(floatval($d['amount'])/100), false);
+//         }
+//     }
+    
+//     // 4. Apply percentage-based policies
+//     $policies = Ample_Session_Cache::get('applied_policies', []);
+//     if ($policies) {
+//         foreach($policies as $p){
+//             $cart_total = 0;
+//             foreach ($cart->get_cart() as $item) {
+//                 $cart_total += $item['line_total'] + $item['line_tax'];
+//             }
+//             $cart_total += $cart->get_shipping_total() + $cart->get_shipping_tax();
+//             $fee_total = 0;
+//             foreach ($cart->get_fees() as $fee) {
+//                 $fee_total += $fee->amount;
+//             }
+//             $cart_total += $fee_total;
+//             $discount_amount = $cart_total * (floatval($p['percentage']) / 100);
+//             $cart->add_fee($p['desc'], -$discount_amount, false);
+//         }
+//     }
+// }
 
 
 
