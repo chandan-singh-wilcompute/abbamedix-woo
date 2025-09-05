@@ -341,7 +341,7 @@ td.product-remove a {
     }
 
     #pr-nav {
-        height: auto;
+        height: 121.8px;
         padding: 0.8rem 1.5rem 1rem;
     }
 
@@ -1038,4 +1038,9 @@ button.notify-me-button {
     font-size: 14px;
   } 
  
+}
+
+
+form[name="checkout"] a[aria-label="Change: My contact"], form[name="checkout"] a[aria-label="Change: Shipping to"], form[name="checkout"] a[aria-label="Change: Billing to"]  {
+    display: none !important;
 }

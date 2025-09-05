@@ -5,6 +5,7 @@ if (!defined('ABSPATH')) {
 
 /**
  * Filter products based on purchasable_products session data
+ * OPTIMIZED: Uses pre-calculated product IDs from session
  */
 function ample_filter_products_by_purchasable($query) {
     // Only filter on frontend shop/archive pages
@@ -22,37 +23,28 @@ function ample_filter_products_by_purchasable($query) {
         return;
     }
 
-    // Get purchasable products from session
-    $purchasable_products = Ample_Session_Cache::get('purchasable_products');
+    // OPTIMIZED: Use pre-calculated product IDs instead of recalculating
+    $allowed_product_ids = ample_get_cached_purchasable_product_ids();
     
-    if (empty($purchasable_products) || !is_array($purchasable_products)) {
-        // No products available - hide all
-        $query->set('post__in', [0]);
-        return;
-    }
-
-    // Extract product IDs from purchasable products
-    $allowed_product_ids = [];
-    foreach ($purchasable_products as $product) {
-        if (isset($product['id'])) {
-            // Convert API product ID to WooCommerce product ID
-            // The API ID needs to be prefixed with 'sku-' to match WooCommerce SKU
-            $sku = 'sku-' . $product['id'];
-            $product_id = wc_get_product_id_by_sku($sku);
-            if ($product_id) {
-                $allowed_product_ids[] = $product_id;
-            }
-        }
-    }
-
     if (!empty($allowed_product_ids)) {
         $query->set('post__in', $allowed_product_ids);
     } else {
-        // No matching products found - hide all
+        // No products available - hide all
         $query->set('post__in', [0]);
     }
 }
-add_action('pre_get_posts', 'ample_filter_products_by_purchasable');
+// OPTIMIZED: Only register hook when on shop-related pages
+add_action('wp', 'ample_conditional_product_filtering_hooks');
+
+/**
+ * Conditionally register product filtering hooks only when needed
+ */
+function ample_conditional_product_filtering_hooks() {
+    // Only register product filtering hooks on shop-related pages
+    if (is_shop() || is_product_category() || is_product_tag() || is_product_taxonomy()) {
+        add_action('pre_get_posts', 'ample_filter_products_by_purchasable', 10);
+    }
+}
 
 /**
  * Hide products from catalog that are not in purchasable list
@@ -500,3 +492,83 @@ function ample_validate_cart_quantities() {
     }
 }
 add_action('woocommerce_check_cart_items', 'ample_validate_cart_quantities');
+
+/**
+ * Helper function to get pre-calculated purchasable product IDs from session
+ * This is much faster than calculating them each time
+ */
+function ample_get_cached_purchasable_product_ids() {
+    // Only for logged-in users
+    if (!is_user_logged_in()) {
+        return [];
+    }
+
+    // Get pre-calculated product IDs from session
+    $product_ids = Ample_Session_Cache::get('purchasable_product_ids');
+    
+    if (empty($product_ids) || !is_array($product_ids)) {
+        // Try to calculate from purchasable_products if available
+        $product_ids = ample_calculate_and_cache_product_ids();
+        if (empty($product_ids)) {
+            return [0]; // Return [0] to show no products
+        }
+    }
+
+    return $product_ids;
+}
+
+/**
+ * Calculate and cache product IDs from purchasable products session data
+ * OPTIMIZED: Uses wc_get_product_id_by_sku for faster lookups
+ */
+function ample_calculate_and_cache_product_ids() {
+    $purchasable_products = Ample_Session_Cache::get('purchasable_products');
+    
+    if (empty($purchasable_products) || !is_array($purchasable_products)) {
+        return [];
+    }
+
+    $product_ids = [];
+    
+    foreach ($purchasable_products as $purchasable) {
+        if (isset($purchasable['id'])) {
+            $sku = 'sku-' . $purchasable['id'];
+            
+            // OPTIMIZED: Use WooCommerce's built-in function
+            $product_id = wc_get_product_id_by_sku($sku);
+            if ($product_id) {
+                $product_ids[] = $product_id;
+            }
+        }
+    }
+    
+    // Cache the calculated IDs
+    if (!empty($product_ids)) {
+        Ample_Session_Cache::set('purchasable_product_ids', $product_ids);
+    }
+    
+    return $product_ids;
+}
+
+/**
+ * Enhanced query args helper that includes purchasable filter upfront
+ * Uses pre-calculated product IDs for maximum performance
+ */
+function ample_get_filtered_product_query_args($base_args = []) {
+    // Get pre-calculated purchasable product IDs
+    $purchasable_ids = ample_get_cached_purchasable_product_ids();
+    
+    // Merge with base args
+    $args = array_merge([
+        'post_type' => 'product',
+        'post_status' => 'publish',
+    ], $base_args);
+    
+    // Add purchasable filter
+    if (!empty($purchasable_ids)) {
+        $args['post__in'] = $purchasable_ids;
+    }
+    
+    return $args;
+}
+

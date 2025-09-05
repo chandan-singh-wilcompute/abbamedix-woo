@@ -38,7 +38,6 @@ function setup_session_for_user_once() {
     setup_session_for_user();
 }
 add_action('template_redirect', 'setup_session_for_user_once');
-add_action('wp', 'setup_session_for_user_once');
 
 function setup_session_for_user() {
     ample_connect_log("Setup session for user called");
@@ -1728,6 +1727,7 @@ function healfio_update_cart_total_fragment( $fragments ) {
 }
 
 
+// OPTIMIZED: This functionality moved to ample_optimized_cart_totals_calculation
 add_action('woocommerce_cart_calculate_fees', 'apply_selected_custom_discount', 20, 1);
 function apply_selected_custom_discount($cart) {
     // ample_connect_log("custon discount is being applied");
@@ -2041,6 +2041,7 @@ add_action('template_redirect', function() {
             'session_initialized',
             'order_id',
             'purchasable_products',
+            'purchasable_product_ids',
             'custom_shipping_rates',
             'custom_tax_data',
             'applicable_discounts',
@@ -2249,3 +2250,4 @@ function show_manual_discount_note($item_data, $cart_item) {
     }
     return $item_data;
 }
+

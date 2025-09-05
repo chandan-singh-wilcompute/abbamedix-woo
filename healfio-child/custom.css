@@ -4166,3 +4166,27 @@ li.category-concentrates .swatch-item.selected {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+.categoriesScroller .swiper {
+  overflow-x: scroll;
+  padding-bottom: 40px;
+}
+.categoriesScroller .swiper::-webkit-scrollbar {
+  height: 20px;
+  background: #58757e;
+}
+.categoriesScroller .swiper::-webkit-scrollbar-track {
+  height: 20px;
+  background: #58757e;
+}
+.categoriesScroller .swiper::-webkit-scrollbar-thumb {
+  height: 20px;
+  background-color: #fff;
+  background-image: url(../healfio-child/img/scrollbar-handle.jpg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 80px;
+}
+.categoriesScroller .swiper-slide {
+  max-width: 272.5px;
+}

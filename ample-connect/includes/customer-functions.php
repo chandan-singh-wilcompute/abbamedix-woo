@@ -63,18 +63,29 @@ function get_purchasable_products_and_store_in_session($user_id = "") {
     
     $products = ample_request($purchasable_products_url);
 
+    // Store original products data
     Ample_Session_Cache::set('purchasable_products', $products);
     
-    // if (empty($products)) {
-    //     return array();
-    // }
-
-    // $allowed_skus = array();
-    // foreach ($products as $product) {
-    //     $allowed_skus[] = 'sku-' . $product['id'];
-    // }
-
-    // Ample_Session_Cache::set('purchasable_products', $allowed_skus);
+    // OPTIMIZATION: Calculate and store WooCommerce product IDs upfront
+    $allowed_product_ids = [];
+    if (!empty($products) && is_array($products)) {
+        foreach ($products as $product) {
+            if (isset($product['id'])) {
+                // Convert API product ID to WooCommerce product ID
+                $sku = 'sku-' . $product['id'];
+                $product_id = wc_get_product_id_by_sku($sku);
+                if ($product_id) {
+                    $allowed_product_ids[] = $product_id;
+                }
+            }
+        }
+    }
+    
+    // Store pre-calculated WooCommerce product IDs for efficient filtering
+    $final_ids = !empty($allowed_product_ids) ? $allowed_product_ids : [0];
+    Ample_Session_Cache::set('purchasable_product_ids', $final_ids);
+    
+    ample_connect_log("Stored " . count($final_ids) . " purchasable product IDs in session");
 
     return true;
 }

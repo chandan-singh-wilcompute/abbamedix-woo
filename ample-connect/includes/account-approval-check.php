@@ -48,9 +48,18 @@ function ample_connect_display_approval_notice() {
     
     // Add a persistent notice
     ?>
-    <div class="woocommerce-info ample-approval-notice" style="background: #fff3cd; border-left-color: #f0ad4e; margin-bottom: 20px;">
+    <div class="woocommerce-info ample-approval-notice" style="background: #fff3cd; border-left-color: #f0ad4e; margin-bottom: 20px; position: relative; padding-right: 50px;">
+        <button type="button" class="ample-approval-close" style="position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 24px; font-weight: bold; color: #856404; cursor: pointer; padding: 4px; width: 32px; height: 32px; line-height: 1; border-radius: 4px; display: flex; align-items: center; justify-content: center;" title="Close">&times;</button>
         <strong>Account Status:</strong> <?php echo esc_html($message); ?>
     </div>
+    <style>
+    .ample-approval-notice::before {
+        display: none !important;
+    }
+    .ample-approval-close:hover {
+        background: rgba(133, 100, 4, 0.1) !important;
+    }
+    </style>
     <?php
 }
 

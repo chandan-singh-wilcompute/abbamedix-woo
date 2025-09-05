@@ -555,7 +555,6 @@ function custom_product_filter_results_shortcode() {
     echo '<div class="container-fluid">';
 
     if (isset($matches[1])) {
-
         $filter_string = $matches[1];
         $sub_categories = explode('+', $filter_string);
         $total_products = 0;
@@ -571,7 +570,7 @@ function custom_product_filter_results_shortcode() {
             'meta_key' => '',
         ];
 
-        switch ($order_by) {
+        switch ($orderby) { // Fix: use $orderby instead of undefined $order_by
             case 'price':
                 $order_args['orderby'] = 'meta_value_num';
                 $order_args['meta_key'] = '_price';
@@ -612,9 +611,8 @@ function custom_product_filter_results_shortcode() {
             $args = [
                 'post_type'      => 'product',
                 'posts_per_page' => -1,
-                'orderby'        => $orderby_args['orderby'],
-                'order'          => $orderby_args['order'],
-                'meta_key'       => isset($orderby_args['meta_key']) ? $orderby_args['meta_key'] : '',
+                'orderby'        => $order_args['orderby'],
+                'order'          => $order_args['order'],
                 'tax_query'      => [[
                     'taxonomy' => 'product_cat',
                     'field'    => 'slug',
@@ -622,9 +620,22 @@ function custom_product_filter_results_shortcode() {
                     'include_children' => false,
                 ]],
             ];
+            
             if (!empty($order_args['meta_key'])) {
                 $args['meta_key'] = $order_args['meta_key'];
             }
+
+            // Apply purchasable product filter for logged-in users
+            if (is_user_logged_in()) {
+                $purchasable_ids = ample_get_cached_purchasable_product_ids();
+                if (!empty($purchasable_ids)) {
+                    $args['post__in'] = $purchasable_ids;
+                } else {
+                    // No purchasable products - skip this category
+                    continue;
+                }
+            }
+            
             $query = new WP_Query($args);
 
             if ($query->have_posts()) {
@@ -800,6 +811,17 @@ function custom_featured_filter_results_shortcode() {
                 $args['meta_key'] = $order_args['meta_key'];
             }
 
+            // Apply purchasable product filter for logged-in users
+            if (is_user_logged_in()) {
+                $purchasable_ids = ample_get_cached_purchasable_product_ids();
+                if (!empty($purchasable_ids)) {
+                    $args['post__in'] = $purchasable_ids;
+                } else {
+                    // No purchasable products - skip this entry
+                    continue;
+                }
+            }
+
             $query = new WP_Query($args);
 
             if ($query->have_posts()) {
@@ -895,7 +917,25 @@ function fix_shortcode_pagination($query) {
         }
     }
 }
-add_action('pre_get_posts', 'fix_shortcode_pagination');
+// OPTIMIZED: Only register pagination fix when needed
+add_action('wp', 'healfio_conditional_pagination_hooks');
+
+/**
+ * Conditionally register pagination and filtering hooks only when needed
+ */
+function healfio_conditional_pagination_hooks() {
+    // Register pagination fix on pages that need it
+    if (is_home() || is_archive() || is_search() || is_shop() || is_product_category()) {
+        add_action('pre_get_posts', 'fix_shortcode_pagination', 10);
+    }
+    
+    // Register brand filtering only on shop pages
+    if (is_shop() || is_product_category() || is_product_tag()) {
+        add_action('pre_get_posts', 'filter_products_by_brand', 10);
+        // Also register the brand filter checkboxes
+        add_action('woocommerce_before_shop_loop', 'add_brand_filter_checkboxes', 15);
+    }
+}
 
 
 function custom_brand_filter_results_shortcode() {
@@ -1143,7 +1183,8 @@ add_filter('posts_where', 'filter_products_by_multiple_keywords', 10, 2);
 
 
 // Add brand filter checkboxes above product listings
-add_action('woocommerce_before_shop_loop', 'add_brand_filter_checkboxes', 15);
+// OPTIMIZED: Now registered conditionally in healfio_conditional_pagination_hooks()
+// add_action('woocommerce_before_shop_loop', 'add_brand_filter_checkboxes', 15);
 function add_brand_filter_checkboxes() {
     if (!is_shop() && !is_product_category()) return;
 
@@ -1188,7 +1229,8 @@ function add_brand_filter_checkboxes() {
 
 
 // Modify WooCommerce product query based on selected brands
-add_action('pre_get_posts', 'filter_products_by_brand');
+// OPTIMIZED: This will be registered conditionally
+// add_action('pre_get_posts', 'filter_products_by_brand');
 function filter_products_by_brand($query) {
     if (!is_admin() && $query->is_main_query() && (is_shop() || is_product_category())) {
         if (!empty($_GET['product_brand'])) {
@@ -2259,3 +2301,36 @@ function custom_logos_grid_shortcode() {
     return $output;
 }
 add_shortcode('logos_grid', 'custom_logos_grid_shortcode');
+
+
+
+/**
+ * Make checkout fields read-only (not editable) but still visible and submitted.
+ */
+add_filter( 'woocommerce_form_field', function( $field, $key, $args, $value ) {
+    // Apply only to billing, shipping and order notes (not payment/shipping methods)
+    if ( strpos( $key, 'billing_' ) === 0 || strpos( $key, 'shipping_' ) === 0 || $key === 'order_comments' ) {
+
+        // For input/text/textarea fields → set readonly
+        if ( in_array( $args['type'], [ 'text', 'email', 'tel', 'textarea', 'number', 'postcode' ] ) ) {
+            $field = str_replace( '<input', '<input readonly="readonly"', $field );
+            $field = str_replace( '<textarea', '<textarea readonly="readonly"', $field );
+        }
+
+        // For selects (country, state) → replace with text + hidden input
+        if ( $args['type'] === 'select' ) {
+            $label = ! empty( $args['label'] ) ? '<label class="">' . esc_html( $args['label'] ) . '</label>' : '';
+            $display_value = $args['options'][$value] ?? $value;
+
+            $field  = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) . '" id="' . esc_attr( $key ) . '_field">';
+            $field .= $label;
+            $field .= '<span class="readonly-field">' . esc_html( $display_value ) . '</span>';
+            $field .= '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
+            $field .= '</p>';
+        }
+    }
+    return $field;
+}, 10, 4 );
+
+// Remove Additional Notes from checkout
+add_filter( 'woocommerce_enable_order_notes_field', '__return_false' );
