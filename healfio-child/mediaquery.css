@@ -85,6 +85,11 @@
   .featuredFilterResultWrapper .container-fluid {
     max-width: 1488px;
   }
+  .woocommerce-ResetPassword {
+    height: 100%;
+    max-width: 650px;
+    margin: 100px auto 100px !important;
+  }
 }
 @media screen and (max-width: 1199px) {
   :root #main-header {
@@ -586,6 +591,22 @@
   }
   .header-profile.open .dropdown-menu {
     display: block;
+  }
+  .woocommerce-ResetPassword {
+    margin-left: 15px;
+    margin-right: 15px;
+    padding: 2rem !important;
+    margin-bottom: 50px !important;
+  }
+  .woocommerce-ResetPassword button {
+    width: 100%;
+  }
+  .custom-reset-form {
+    margin: 30px 15px 30px;
+    padding: 25px;
+  }
+  .custom-reset-form button {
+    max-width: 100%;
   }
 }
 @media (max-width: 379px) {

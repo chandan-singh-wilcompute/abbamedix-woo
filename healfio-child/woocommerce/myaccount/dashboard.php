@@ -87,7 +87,7 @@ $status = Ample_Session_Cache::get('status', false);
 						echo '<div class="ccinfoContainer">';
 						echo '<span><label>' . esc_html($credit_card['brand']) . '</label><br><label>' . esc_html($credit_card['protected_card_number']) . '</label></span>';
 						echo '<span>Expiry: ' . esc_html($credit_card['expiry']) . '</span>';
-						echo '<span><a role="button" class="btnCardRemove"><i class="bi bi-x"></i></a></span>';
+						//echo '<span><a role="button" class="btnCardRemove"><i class="bi bi-x"></i></a></span>';
 						echo '</div>';
 					}
 				}
