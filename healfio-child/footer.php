@@ -653,6 +653,338 @@
             $(this).closest('.ample-approval-notice').fadeOut(300);
         });
 
+        // -------------------------
+        // AJAX Add to Cart for Variable Products (Single Product Page)
+        // -------------------------
+        var singleProductProcessing = false;
+        
+        $(document).on('submit', 'form.variations_form', function(e) {
+            e.preventDefault();
+            
+            // Prevent multiple submissions
+            if (singleProductProcessing) {
+                return false;
+            }
+            
+            const $form = $(this);
+            const $button = $form.find('.single_add_to_cart_button');
+            
+            // Skip if it's a notify-me button
+            if ($button.hasClass('notify-me-button')) {
+                return;
+            }
+            
+            singleProductProcessing = true;
+            const formData = $form.serialize();
+            const originalText = $button.text();
+            
+            // Show loading state
+            $button.prop('disabled', true).text('Adding...');
+            
+            // Add nonce for security
+            const postData = formData + '&action=woocommerce_add_to_cart&_wpnonce=' + wc_add_to_cart_params.nonce;
+            
+            $.post(wc_add_to_cart_params.ajax_url, postData)
+                .done(function(response) {
+                    console.log('Single product AJAX response:', response);
+                    
+                    if (response && response.fragments) {
+                        // Update cart fragments
+                        $.each(response.fragments, function(key, value) {
+                            $(key).replaceWith(value);
+                        });
+                        
+                        // Trigger cart update event
+                        $(document.body).trigger('wc_fragments_refreshed');
+                        
+                        // Refresh gram quota information
+                        refreshGramQuota();
+                        
+                        // Get product name for toast (try multiple selectors)
+                        let productName = $('.product_title, .entry-title, h1.product_title, h1.entry-title, .product-title, .single-product h1, .single-product .product_title, .singleProductContainer .product-title').first().text().trim();
+                        
+                        // Debug: log what we found
+                        console.log('Product name found:', productName);
+                        console.log('Available elements:', {
+                            '.product_title': $('.product_title').length,
+                            '.entry-title': $('.entry-title').length, 
+                            'h1': $('h1').length,
+                            'document.title': document.title
+                        });
+                        
+                        // Fallback to page title if no product name found
+                        if (!productName) {
+                            productName = document.title.split(' - ')[0].split(' | ')[0].trim() || 'Product';
+                        }
+                        
+                        // Show toast notification
+                        showToast(`${productName} added to cart!`, 'success');
+                        
+                        // Show success on button
+                        $button.text('Added!');
+                        
+                    } else {
+                        console.warn('No fragments in response, but request succeeded');
+                        
+                        // Still show success feedback
+                        const productName = $('.product_title, .entry-title, h1.product_title, h1.entry-title, .product-title, .single-product h1, .single-product .product_title, .singleProductContainer .product-title').first().text().trim() || 'Product';
+                        showToast(`${productName} added to cart!`, 'success');
+                        refreshGramQuota();
+                        $button.text('Added!');
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    console.error('Single product AJAX failed:', status, error, xhr.responseText);
+                    
+                    // Show error feedback
+                    $button.text('Error - Try Again');
+                    
+                    // Show error toast
+                    const productName = $('.product_title, .entry-title, h1.product_title, h1.entry-title, .product-title, .single-product h1, .single-product .product_title, .singleProductContainer .product-title').first().text().trim() || 'Product';
+                    showToast(`Failed to add ${productName} to cart. Please try again.`, 'error');
+                })
+                .always(function() {
+                    // Always reset after delay regardless of success/failure
+                    setTimeout(function() {
+                        $button.prop('disabled', false).text(originalText);
+                        singleProductProcessing = false;
+                    }, 2000);
+                });
+        });
+
+        // -------------------------
+        // Gram Quota Refresh System
+        // -------------------------
+        function refreshGramQuota() {
+            // Check if GramQuotaAjax is available (from the ample-connect plugin)
+            if (typeof GramQuotaAjax !== 'undefined' && GramQuotaAjax.ajax_url) {
+                fetch(GramQuotaAjax.ajax_url + '?action=get_gram_quota_data', {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Refreshing gram quota data:", data);
+                    if (data && typeof data.policy_grams === 'number' && typeof data.prescription_grams === 'number') {
+                        updateGramBar(data.policy_grams, data.prescription_grams);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error refreshing gram quota:', err);
+                });
+            }
+        }
+
+        function updateGramBar(policyGrams, presGrams) {
+            // Update the gram info in the header/top area
+            const rxDed = document.getElementById('rx-dedu-info');
+            if (rxDed) {
+                rxDed.innerText = `${presGrams} gr remaining`;
+            }
+            
+            // Update cart page gram info if we're on cart page
+            const pathSegments = window.location.pathname.split('/').filter(Boolean);
+            const lastSegment = pathSegments[pathSegments.length - 1];
+
+            if (lastSegment === 'cart') {
+                const policyvalue = document.getElementById('policyvalue');
+                const prescvalue = document.getElementById('prescvalue');
+
+                if (prescvalue) {
+                    prescvalue.innerHTML = `<div class="skillBar">
+                        You have <strong class="skillvalue">${presGrams}g</strong> left in your prescription.
+                    </div>`;
+                }
+
+                if (policyvalue) {
+                    policyvalue.innerHTML = `<div class="skillBar">
+                        You have <strong class="skillvalue">${policyGrams}g</strong> left in your policy.
+                    </div>`;
+                }
+            }
+        }
+
+        // -------------------------
+        // Global Overlay System
+        // -------------------------
+        function showGlobalOverlay() {
+            // Remove existing overlay
+            $('.global-cart-overlay').remove();
+            
+            // Create overlay element
+            const overlay = $(`
+                <div class="global-cart-overlay">
+                    <div class="overlay-content">
+                        <div class="overlay-spinner"></div>
+                        <div class="overlay-text">Processing...</div>
+                    </div>
+                </div>
+            `);
+            
+            // Add to page
+            $('body').append(overlay);
+            
+            // Show with animation
+            setTimeout(() => overlay.addClass('show'), 10);
+        }
+
+        function hideGlobalOverlay() {
+            $('.global-cart-overlay').removeClass('show');
+            setTimeout(() => $('.global-cart-overlay').remove(), 300);
+        }
+
+        // -------------------------
+        // Toast Notification System
+        // -------------------------
+        function showToast(message, type = 'success') {
+            // Remove existing toasts
+            $('.custom-toast').remove();
+            
+            // Create toast element
+            const toast = $(`
+                <div class="custom-toast custom-toast-${type}">
+                    <div class="toast-content">
+                        <span class="toast-icon">${type === 'success' ? '✓' : '⚠'}</span>
+                        <span class="toast-message">${message}</span>
+                        <button class="toast-close" onclick="$(this).parent().parent().fadeOut()">&times;</button>
+                    </div>
+                </div>
+            `);
+            
+            // Add to page
+            $('body').append(toast);
+            
+            // Show with animation
+            setTimeout(() => toast.addClass('show'), 100);
+            
+            // Auto hide after 4 seconds
+            setTimeout(() => {
+                toast.removeClass('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // -------------------------
+        // Prevent form submission for product cards to avoid page reload
+        // -------------------------
+        $(document).on('submit', 'li.product form.cart', function(e) {
+            e.preventDefault();
+            // Trigger button click instead of form submission
+            $(this).find('.single_add_to_cart_button').trigger('click');
+        });
+
+
+        // -------------------------
+        // AJAX Add to Cart for Product Cards (Shop/Archive Pages ONLY) 
+        // -------------------------
+        $(document).on('click', 'li.product .single_add_to_cart_button:not(.notify-me-button)', function(e) {
+            // Skip if we're on a single product page
+            if ($('body').hasClass('single-product')) {
+                return;
+            }
+            e.preventDefault();
+            
+            const $button = $(this);
+            const $form = $button.closest('form.cart');
+            const $card = $button.closest('li.product');
+            
+            // Get product data
+            const productId = $form.find('input[name="product_id"]').val() || $card.data('product_id');
+            const variationId = $form.find('input[name="variation_id"]').val() || 0;
+            const quantity = $form.find('input[name="quantity"]').val() || 1;
+            
+            if (!productId) {
+                console.error('No product ID found');
+                return;
+            }
+            
+            const originalText = $button.text();
+            
+            // Show loading state and prevent other interactions
+            $button.prop('disabled', true).text('Adding...');
+            $card.addClass('adding-to-cart');
+            
+            // Add global overlay to prevent other add-to-cart clicks
+            showGlobalOverlay();
+            
+            // Disable all other add-to-cart buttons
+            $('.single_add_to_cart_button').not($button).prop('disabled', true);
+            
+            // AJAX call to add product to cart
+            $.ajax({
+                type: 'POST',
+                url: wc_add_to_cart_params.ajax_url,
+                data: {
+                    action: 'woocommerce_ajax_add_to_cart',
+                    product_id: productId,
+                    quantity: quantity,
+                    variation_id: variationId
+                },
+                success: function(response) {
+                    console.log('Add to cart success:', response);
+                    
+                    // Handle WooCommerce response
+                    if (response.success && response.data) {
+                        // Update cart fragments if available
+                        if (response.data.fragments) {
+                            $.each(response.data.fragments, function(key, value) {
+                                $(key).replaceWith(value);
+                            });
+                            $(document.body).trigger('wc_fragments_refreshed');
+                        } else {
+                            // Fallback: trigger manual cart refresh
+                            $(document.body).trigger('wc_fragment_refresh');
+                        }
+                        
+                        // Refresh gram quota information
+                        refreshGramQuota();
+                    }
+                    
+                    // Get product name for toast
+                    const productName = $card.find('.woocommerce-loop-product__title, .product-title, h3 a, h2 a').first().text().trim() || 'Product';
+                    
+                    // Show toast notification
+                    showToast(`${productName} added to cart!`, 'success');
+                    
+                    // Show success feedback on button
+                    $button.text('Added!');
+                    $card.addClass('added-to-cart');
+                    
+                    // Reset button after delay
+                    setTimeout(function() {
+                        $button.prop('disabled', false).text(originalText);
+                        $card.removeClass('adding-to-cart added-to-cart');
+                        
+                        // Remove global overlay and re-enable all buttons
+                        hideGlobalOverlay();
+                        $('.single_add_to_cart_button').prop('disabled', false);
+                    }, 2000);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Add to cart failed:', status, error, xhr.responseText);
+                    
+                    // Get product name for error toast
+                    const productName = $card.find('.woocommerce-loop-product__title, .product-title, h3 a, h2 a').first().text().trim() || 'Product';
+                    
+                    // Show error toast
+                    showToast(`Failed to add ${productName} to cart. Please try again.`, 'error');
+                    
+                    // Show error feedback on button
+                    $button.text('Try Again');
+                    $card.removeClass('adding-to-cart');
+                    
+                    // Reset button after delay
+                    setTimeout(function() {
+                        $button.prop('disabled', false).text(originalText);
+                        
+                        // Remove global overlay and re-enable all buttons
+                        hideGlobalOverlay();
+                        $('.single_add_to_cart_button').prop('disabled', false);
+                    }, 3000);
+                }
+            });
+        });
+
     }); // end jQuery wrapper
 </script>
 

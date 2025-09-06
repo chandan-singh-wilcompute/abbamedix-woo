@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 require_once plugin_dir_path(__FILE__) . '/customer-functions.php';
 
 add_filter('woocommerce_add_to_cart_validation', 'custom_add_to_cart_validation', 10, 5);
-function custom_add_to_cart_validation($passed, $product_id, $quantity, $variation_id, $variations) {
+function custom_add_to_cart_validation($passed, $product_id, $quantity, $variation_id = 0, $variations = array()) {
     
     if (!is_user_logged_in()) {
         wc_add_notice('You need to be logged in to add this product to the cart.', 'error');

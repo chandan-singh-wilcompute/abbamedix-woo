@@ -864,6 +864,180 @@ a.page-numbers {
 	max-width: 1170px;
 }
 
+/* Fix toast message position ONLY on cart page - don't affect other pages */
+.woocommerce-cart .woocommerce-notices-wrapper {
+	position: relative !important;
+	top: auto !important;
+	left: auto !important;
+	right: auto !important;
+	margin: 20px auto 30px auto !important;
+	max-width: 1170px;
+	z-index: 1;
+}
+
+/* AJAX Add to Cart Loading States */
+li.product.adding-to-cart {
+	position: relative;
+	opacity: 0.7;
+}
+
+li.product.adding-to-cart::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 30px;
+	height: 30px;
+	margin: -15px 0 0 -15px;
+	border: 3px solid #f3f3f3;
+	border-top: 3px solid #A7AF39;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	z-index: 10;
+}
+
+li.product.added-to-cart {
+	border: 2px solid #A7AF39;
+	transition: border 0.3s ease;
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+/* Toast Notification Styles */
+.custom-toast {
+	position: fixed;
+	top: 20px;
+	right: 20px;
+	max-width: 400px;
+	z-index: 10000;
+	opacity: 0;
+	transform: translateX(100%);
+	transition: all 0.3s ease;
+}
+
+.custom-toast.show {
+	opacity: 1;
+	transform: translateX(0);
+}
+
+.toast-content {
+	display: flex;
+	align-items: center;
+	padding: 15px 20px;
+	border-radius: 8px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.custom-toast-success .toast-content {
+	background-color: white;
+	color: #333;
+	border: 1px solid #ddd;
+}
+
+.custom-toast-error .toast-content {
+	background-color: #ef4444;
+	color: white;
+}
+
+.toast-icon {
+	font-size: 16px;
+	margin-right: 10px;
+	font-weight: bold;
+}
+
+.toast-message {
+	flex: 1;
+	margin-right: 10px;
+}
+
+.toast-close {
+	background: none;
+	border: none;
+	color: inherit;
+	font-size: 18px;
+	cursor: pointer;
+	padding: 0;
+	opacity: 0.8;
+	transition: opacity 0.2s;
+}
+
+.toast-close:hover {
+	opacity: 1;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+	.custom-toast {
+		right: 10px;
+		left: 10px;
+		max-width: none;
+	}
+	
+	.toast-content {
+		padding: 12px 15px;
+		font-size: 13px;
+	}
+}
+
+/* Global Cart Processing Overlay */
+.global-cart-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.global-cart-overlay.show {
+	opacity: 1;
+}
+
+.overlay-content {
+	background-color: white;
+	padding: 30px;
+	border-radius: 10px;
+	text-align: center;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+	max-width: 300px;
+	width: 90%;
+}
+
+.overlay-spinner {
+	width: 40px;
+	height: 40px;
+	border: 4px solid #f3f3f3;
+	border-top: 4px solid #A7AF39;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin: 0 auto 15px;
+}
+
+.overlay-text {
+	font-size: 16px;
+	color: #333;
+	font-weight: 500;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Disable pointer events on buttons when overlay is active */
+.global-cart-overlay ~ * .single_add_to_cart_button:not(.processing) {
+	pointer-events: none;
+	opacity: 0.6;
+}
+
 .woocommerce a.button {
     border-radius: 0;
 }
