@@ -525,11 +525,10 @@ function remove_from_order($order_id, $order_item_id) {
         return $data;
     }
     
-    // if (is_array($data) && array_key_exists('id', $data)) {
-    //     Client_Information::fetch_information();
-    //     store_current_order_to_session($data, $user_id);
-    //     // get_shipping_rates_and_store_in_session();
-    // }
+    if (is_array($data) && array_key_exists('id', $data)) {
+        // Update session with the updated order data after removal
+        store_current_order_to_session($data, $user_id);
+    }
     return $data;
 }
 

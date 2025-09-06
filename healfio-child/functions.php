@@ -1779,7 +1779,7 @@ function enqueue_custom_scripts() {
     wp_enqueue_script('wc-add-to-cart-variation'); // Needed for variation handling
     wp_localize_script('jquery', 'wc_add_to_cart_params', array(
         'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce'    => wp_create_nonce('view_order_doc_nonce'),
+        'nonce'    => wp_create_nonce('woocommerce-cart'),
     ));
     wp_localize_script('jquery', 'wc_notify_me_params', array(
         'ajax_url' => admin_url('admin-ajax.php'),
@@ -2334,3 +2334,68 @@ add_filter( 'woocommerce_form_field', function( $field, $key, $args, $value ) {
 
 // Remove Additional Notes from checkout
 add_filter( 'woocommerce_enable_order_notes_field', '__return_false' );
+
+
+// Redirect default reset link to custom page
+add_action( 'login_form_rp', 'custom_password_reset_redirect' );
+add_action( 'login_form_resetpass', 'custom_password_reset_redirect' );
+
+function custom_password_reset_redirect() {
+    $redirect_url = home_url( '/reset-password/' ); // change slug if different
+
+    if ( isset( $_REQUEST['key'] ) && isset( $_REQUEST['login'] ) ) {
+        $redirect_url = add_query_arg( [
+            'key'   => sanitize_text_field( $_REQUEST['key'] ),
+            'login' => sanitize_text_field( $_REQUEST['login'] ),
+        ], $redirect_url );
+    }
+
+    wp_safe_redirect( $redirect_url );
+    exit;
+}
+
+
+// Shortcode for custom reset password form
+add_shortcode( 'custom_reset_password', function() {
+    if ( ! isset( $_GET['key'], $_GET['login'] ) ) {
+        return '<p class="error">Invalid reset link.</p>';
+    }
+
+    ob_start(); ?>
+    <form method="post" class="custom-reset-form">
+        <p>
+            <label for="pass1">New password</label>
+            <input type="password" name="pass1" id="pass1" required>
+        </p>
+        <p>
+            <label for="pass2">Confirm new password</label>
+            <input type="password" name="pass2" id="pass2" required>
+        </p>
+        <p>
+            <button type="submit" name="custom_reset_submit">Reset Password</button>
+        </p>
+    </form>
+    <?php
+    return ob_get_clean();
+});
+
+
+add_action( 'template_redirect', function() {
+    if ( isset( $_POST['custom_reset_submit'], $_GET['key'], $_GET['login'] ) ) {
+        $user = check_password_reset_key( sanitize_text_field( $_GET['key'] ), sanitize_text_field( $_GET['login'] ) );
+
+        if ( is_wp_error( $user ) ) {
+            wp_die( $user->get_error_message() );
+        }
+
+        if ( $_POST['pass1'] !== $_POST['pass2'] ) {
+            wp_die( 'Passwords do not match.' );
+        }
+
+        reset_password( $user, $_POST['pass1'] );
+
+        // Redirect after success
+        wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) . '?password-reset=success' );
+        exit;
+    }
+});

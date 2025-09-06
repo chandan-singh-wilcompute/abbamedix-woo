@@ -2239,6 +2239,45 @@ function handle_add_to_notify_list() {
     // }
 }
 
+// Simple AJAX handler that doesn't conflict with WooCommerce
+add_action('wp_ajax_woocommerce_ajax_add_to_cart', 'handle_ajax_add_to_cart');
+add_action('wp_ajax_nopriv_woocommerce_ajax_add_to_cart', 'handle_ajax_add_to_cart');
+
+function handle_ajax_add_to_cart() {
+    $product_id = absint($_POST['product_id']);
+    $quantity = absint($_POST['quantity']) ?: 1;
+    $variation_id = absint($_POST['variation_id']) ?: 0;
+    
+    if (!$product_id) {
+        wp_send_json_error('Invalid product');
+        return;
+    }
+    
+    $passed_validation = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, array());
+    
+    if ($passed_validation && WC()->cart->add_to_cart($product_id, $quantity, $variation_id)) {
+        do_action('woocommerce_ajax_added_to_cart', $product_id);
+        
+        // Clear any WooCommerce notices to prevent them showing on reload
+        wc_clear_notices();
+        
+        // Get cart fragments like WooCommerce does
+        $data = array(
+            'message' => 'Product added to cart',
+            'fragments' => apply_filters('woocommerce_add_to_cart_fragments', array()),
+            'cart_hash' => WC()->cart->get_cart_hash()
+        );
+        
+        wp_send_json_success($data);
+    } else {
+        // Get WooCommerce error notices
+        $error_notices = wc_get_notices('error');
+        $error_message = !empty($error_notices) ? strip_tags($error_notices[0]['notice']) : 'Failed to add product to cart';
+        wc_clear_notices(); // Clear notices
+        
+        wp_send_json_error($error_message);
+    }
+}
 
 add_filter('woocommerce_get_item_data', 'show_manual_discount_note', 10, 2);
 function show_manual_discount_note($item_data, $cart_item) {

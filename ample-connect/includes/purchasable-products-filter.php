@@ -54,6 +54,11 @@ function ample_product_is_visible($visible, $product_id) {
     if (!is_user_logged_in()) {
         return $visible;
     }
+    
+    // Don't filter on cart page - allow products in cart to be clickable
+    if (is_cart()) {
+        return $visible;
+    }
 
     // Get purchasable products from session
     $purchasable_products = Ample_Session_Cache::get('purchasable_products');
