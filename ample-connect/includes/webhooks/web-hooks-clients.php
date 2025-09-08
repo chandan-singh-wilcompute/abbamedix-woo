@@ -6,7 +6,7 @@ require_once dirname(plugin_dir_path(__FILE__)) . '/wc_classes/class-wc-customer
 
 // Webhook for Patient Details Update Notification from Ample
 add_action('rest_api_init', function() {
-    register_rest_route('webhooks/v1/', 'clients', array(
+    register_rest_route('webhooks/v1', 'clients', array(
         'methods' => 'POST',
         'callback' => 'handle_clients_webhook',
         'permission_callback' => '__return_true'

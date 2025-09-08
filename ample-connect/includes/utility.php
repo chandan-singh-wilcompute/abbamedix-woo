@@ -76,7 +76,6 @@ function api_call($endpoint, $method, $data, $headers, $log, $expired = false) {
         ample_connect_log("EndPoint: " . $endpoint, true);
         //ample_connect_log($data, true);
     }
-        
 
     $args = [
         'method'    => $method,

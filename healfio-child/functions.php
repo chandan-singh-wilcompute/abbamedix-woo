@@ -2,6 +2,212 @@
 // Exit if accessed directly
 if ( !defined( 'ABSPATH' ) ) exit;
 
+// ==========================================================================
+// AMPLE FILTER SYSTEM - INITIALIZATION
+// Phase 1: THC/CBD Range Filters (ABBA Issue #8)
+// ==========================================================================
+
+// Load Ample Filter System
+function ample_filter_system_init() {
+    // Define feature flags
+    if (!defined('AMPLE_FILTER_THC_CBD_ENABLED')) {
+        define('AMPLE_FILTER_THC_CBD_ENABLED', true);
+    }
+    if (!defined('AMPLE_FILTER_BRANDS_ENABLED')) {
+        define('AMPLE_FILTER_BRANDS_ENABLED', false); // Phase 2
+    }
+    if (!defined('AMPLE_FILTER_SORTING_ENABLED')) {
+        define('AMPLE_FILTER_SORTING_ENABLED', false); // Phase 3
+    }
+    if (!defined('AMPLE_FILTER_LEGACY_MODE')) {
+        define('AMPLE_FILTER_LEGACY_MODE', true); // Fallback support
+    }
+    
+    // Load Ample Filter classes
+    $ample_filter_path = get_stylesheet_directory() . '/ample-filters/';
+    
+    if (file_exists($ample_filter_path)) {
+        require_once $ample_filter_path . 'class-ample-cache.php';
+        require_once $ample_filter_path . 'class-ample-slider.php';
+        require_once $ample_filter_path . 'class-ample-dual-range-slider.php';
+        require_once $ample_filter_path . 'endpoints.php';
+        require_once $ample_filter_path . 'class-ample-filter.php';
+        
+        // Initialize the system
+        if (class_exists('Ample_Filter')) {
+            Ample_Filter::init();
+        }
+    }
+}
+
+/**
+ * Enqueue all Ample Filter System assets
+ * 
+ * This function loads all JavaScript and CSS files for the complete Ample product filtering system.
+ * Originally created for dual-range THC/CBD sliders but has evolved to handle all filter types.
+ * 
+ * Filter Components Included:
+ * - Dual-range sliders (THC/CBD with visual handles)
+ * - Multi-select filters (Size, Dominance, Terpenes, Brands, Categories)
+ * - Filter engine (product matching and display logic)  
+ * - URL parameter management (browser history and bookmarkable URLs)
+ * - Button indicators (visual feedback for active filters)
+ * - Product display helpers (grid updates and animations)
+ * 
+ * Dependencies:
+ * - jQuery (WordPress core)
+ * - All scripts properly ordered with dependency chain
+ * - REST API endpoints for filter data
+ * 
+ * @since ABBA Issue #8 (dual-range implementation)
+ * @updated ABBA Issue #10 (size/dominance filters)  
+ * @updated ABBA Issue #11 (terpenes filter)
+ * @updated ABBA Issue #12 (brands/categories filters)
+ * 
+ * @return void
+ */
+add_action('wp_enqueue_scripts', 'ample_enqueue_filter_system_assets');
+
+function ample_enqueue_filter_system_assets() {
+    // Dual-range slider assets
+    wp_enqueue_script(
+        'ample-dual-range-slider-manual',
+        get_stylesheet_directory_uri() . '/ample-filters/dual-range-slider.js',
+        ['jquery'],
+        '1.0.0',
+        true
+    );
+    
+    wp_enqueue_style(
+        'ample-dual-range-slider-manual',
+        get_stylesheet_directory_uri() . '/ample-filters/dual-range-slider.css',
+        [],
+        '1.0.0'
+    );
+    
+    // Filter engine (already has product loading and filtering logic)
+    wp_enqueue_script(
+        'ample-filter-engine',
+        get_stylesheet_directory_uri() . '/js/ample-filter-engine.js',
+        ['jquery'],
+        '1.0.0',
+        true
+    );
+    
+    // Slider-to-filter integration
+    wp_enqueue_script(
+        'ample-slider-integration',
+        get_stylesheet_directory_uri() . '/js/ample-slider-integration.js',
+        ['jquery', 'ample-dual-range-slider-manual', 'ample-filter-engine'],
+        '1.0.0',
+        true
+    );
+    
+    // Product display helper
+    wp_enqueue_script(
+        'ample-product-display',
+        get_stylesheet_directory_uri() . '/js/ample-product-display.js',
+        ['jquery', 'ample-filter-engine'],
+        '1.0.0',
+        true
+    );
+    
+    // Integration styles
+    wp_enqueue_style(
+        'ample-filter-integration',
+        get_stylesheet_directory_uri() . '/css/ample-filter-integration.css',
+        [],
+        '1.0.0'
+    );
+    
+    // My Account page typography styles
+    if (is_account_page()) {
+        wp_enqueue_style(
+            'my-account-typography',
+            get_stylesheet_directory_uri() . '/css/my-account-typography.css',
+            [],
+            '1.0.0'
+        );
+    }
+    
+    // Button indicators for visual feedback
+    wp_enqueue_script(
+        'ample-button-indicators',
+        get_stylesheet_directory_uri() . '/js/ample-button-indicators.js',
+        ['jquery', 'ample-slider-integration'],
+        '1.0.0',
+        true
+    );
+    
+    // Size filter integration (ABBA Issue #10)
+    wp_enqueue_script(
+        'ample-size-filter',
+        get_stylesheet_directory_uri() . '/js/ample-size-filter.js',
+        ['jquery', 'ample-filter-engine'],
+        '1.0.0',
+        true
+    );
+    
+    // Dominance filter integration (ABBA Issue #10 - Phase 2)
+    wp_enqueue_script(
+        'ample-dominance-filter',
+        get_stylesheet_directory_uri() . '/js/ample-dominance-filter.js',
+        ['jquery', 'ample-filter-engine'],
+        '1.0.0',
+        true
+    );
+    
+    // Terpenes filter integration (ABBA Issue #11 - Phase 1)
+    wp_enqueue_script(
+        'ample-terpenes-filter',
+        get_stylesheet_directory_uri() . '/js/ample-terpenes-filter.js',
+        ['jquery', 'ample-filter-engine'],
+        '1.0.0',
+        true
+    );
+    
+    // Brand filter integration (ABBA Issue #12 - Phase 2)
+    wp_enqueue_script(
+        'ample-brand-filter',
+        get_stylesheet_directory_uri() . '/js/ample-brand-filter.js',
+        ['jquery', 'ample-filter-engine'],
+        '1.0.0',
+        true
+    );
+    
+    // Category filter integration (ABBA Issue #12 - Phase 3)
+    wp_enqueue_script(
+        'ample-category-filter',
+        get_stylesheet_directory_uri() . '/js/ample-category-filter.js',
+        ['jquery', 'ample-filter-engine'],
+        '1.0.0',
+        true
+    );
+    
+    // Pass configuration to JavaScript
+    wp_localize_script('ample-filter-engine', 'AmpleFilterConfig', [
+        'rest_url' => home_url('/wp-json/ample/v1/'),
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('ample-filter'),
+        'debug' => WP_DEBUG, // Keep debug mode as is
+        'version' => '1.0.0',
+        'liveFiltering' => false, // Set to true for live filtering without Apply button
+        'performance' => [
+            'debounce_ms' => 100,
+            'cache_ttl' => 900 // 15 minutes
+        ],
+        'features' => [
+            'legacy_mode' => true // Enable URL parameter updates
+        ]
+    ]);
+}
+
+add_action('init', 'ample_filter_system_init', 1);
+
+// ==========================================================================
+// END AMPLE FILTER SYSTEM
+// ==========================================================================
+
 // BEGIN ENQUEUE PARENT ACTION
 // AUTO GENERATED - Do not modify or remove comment markers above or below:
 
@@ -114,11 +320,14 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
     // Define your custom function
     function my_custom_template_loop_product_title() {
+        // Debug - reduced logging
+        // error_log("CUSTOM FUNCTION CALLED: my_custom_template_loop_product_title");
+        
         // Get the product object
         global $product;
 
         echo '<div class="group">';
-        // Output the product title
+        // Output the product title              
         echo '<h2 class="' . esc_attr( apply_filters( 'woocommerce_product_loop_title_classes', 'woocommerce-loop-product__title' ) ) . '">       
                 <span class="favouriteIcon">
                     <i class="bi bi-heart"></i>
@@ -127,17 +336,9 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
             ' . get_the_title() . '
             </h2>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
-        // Get the brand attribute value dynamically
-		$brand_name = $product->get_attribute('Brand');
-		// $brand_name = $brand_name ? $brand_name : 'Brand NA';
-		
-        if ($brand_name) {
-            echo '<div class="prodcard-brand"><label>' . esc_html($brand_name) . '</label></div>';
-        } else {
-            echo '<div class="prodcard-brand" style="opacity:0;"><label>&nbsp;</label></div>';
-        }
-		
-		//echo '<div class="prodcard-brand-name"><label>MTL Canabis</label></div>';  
+		// Get dynamic brand from product attributes
+        $brand = get_product_brand($product);
+        echo '<div class="prodcard-brand"><label>' . esc_html($brand) . '</label></div>';  
         
         echo '<div class="childGroup">';
        
@@ -145,28 +346,82 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
         // Get the THC attribute value
         $thc_value = $product->get_attribute('thc');
         if ( ! empty( $thc_value ) ) {
-            // echo '<div class="product-list-attribute"><strong>THC :</strong> <span>' . esc_html( $thc_value ) . '</span></div>';
-            echo '<div class="product-list-attribute"><strong>THC:</strong> <span>32%</span></div>';
+            echo '<div class="product-list-attribute"><strong>THC:</strong> <span>' . esc_html( $thc_value ) . '</span></div>';
         }
 		
         // Get the CBD attribute value
         $cbd_value = $product->get_attribute('cbd');
         if ( ! empty( $cbd_value ) ) {
-            // echo '<div class="product-list-attribute"><strong>CBD :</strong> <span>' . esc_html( $cbd_value ) . '</span></div>';
-            echo '<div class="product-list-attribute"><strong>CBD:</strong> <span>0.03%</span></div>';
+            echo '<div class="product-list-attribute"><strong>CBD:</strong> <span>' . esc_html( $cbd_value ) . '</span></div>';
         }
 		
 		echo '</div>';
 		
         echo '</div>';
-        echo'<div class="prodcard-tags">
-                Terpenes &nbsp; 4.95%
-                <p>Myrcele - Limonede - Linalool </p>
-             </div>';
+        
+        // Get dynamic terpenes for this product
+        $product_terpenes = get_single_product_terpenes($product);
+        $terpene_total = get_product_terpene_total($product);
+        
+        // Always show terpenes section for consistent layout
+        echo '<div class="prodcard-tags">';
+        if (!empty($terpene_total)) {
+            // Products with real terpene data
+            echo 'Terpenes &nbsp; ' . esc_html($terpene_total) . '%
+                  <p>' . esc_html($product_terpenes) . '</p>';
+        } else if (strpos($product_terpenes, 'Terpene data not available') === false) {
+            // Products without terpenes but with categories - show without label
+            echo '<p>' . esc_html($product_terpenes) . '</p>';
+        } else {
+            // Products with no useful data - maintain consistent height with invisible content
+            echo '<p style="visibility: hidden; margin: 0; line-height: 20px;">&nbsp;</p>';
+        }
+        echo '</div>';
         echo '</div>';
     }
 
 }
+
+/**
+ * Get product rating display for list view
+ * Returns star icon + rating score for top-right corner
+ */
+function get_product_rating_display($product) {
+    if (!$product) return '';
+    
+    $rating = (float) $product->get_average_rating();
+    $review_count = $product->get_review_count();
+    
+    // Only show rating if there are reviews
+    if ($rating === 0.0 || $review_count === 0) {
+        return '';
+    }
+    
+    // Format: ⭐ 4.6 (optional review count)
+    $display = '<i class="bi bi-star-fill"></i> ' . number_format($rating, 1);
+    
+    // Add review count if significant (10+ reviews)
+    if ($review_count >= 10) {
+        $display .= ' (' . $review_count . ')';
+    }
+    
+    return $display;
+}
+
+/**
+ * Add rating icon overlay to product loop items
+ */
+function add_product_rating_overlay() {
+    global $product;
+    
+    if (!$product) return;
+    
+    $rating_display = get_product_rating_display($product);
+    if (!empty($rating_display)) {
+        echo '<span class="ratingIcon">' . $rating_display . '</span>';
+    }
+}
+add_action('woocommerce_before_shop_loop_item', 'add_product_rating_overlay', 15);
 
 add_action( 'init', 'custom_remove_default_loop_price' );
 function custom_remove_default_loop_price() {
@@ -454,7 +709,7 @@ add_shortcode('product_category_filter_form', 'render_dynamic_product_category_f
 //         echo '<p class="product-count">' . $query->post_count . ' of ' . $query->found_posts . ' products</p>';
 
 //         echo '<form class="woocommerce-ordering" method="get">
-//             <select name="orderby" class="orderby" onchange="this.form.submit()">';
+//             <select name="orderby" class="orderby" >';
                 
 //                 $orderby_options = apply_filters( 'woocommerce_catalog_orderby', [
 //                     'menu_order' => __( 'Default sorting', 'woocommerce' ),
@@ -552,6 +807,7 @@ function custom_product_filter_results_shortcode() {
 
     // Start output buffering
     ob_start();
+    
     echo '<div class="container-fluid">';
 
     if (isset($matches[1])) {
@@ -559,6 +815,7 @@ function custom_product_filter_results_shortcode() {
         $sub_categories = explode('+', $filter_string);
         $total_products = 0;
         $term_results = [];
+
 
         // Capture the current orderby value
         $orderby = isset($_GET['orderby']) ? wc_clean(wp_unslash($_GET['orderby'])) : 'menu_order';
@@ -570,7 +827,7 @@ function custom_product_filter_results_shortcode() {
             'meta_key' => '',
         ];
 
-        switch ($orderby) { // Fix: use $orderby instead of undefined $order_by
+        switch ($orderby) {
             case 'price':
                 $order_args['orderby'] = 'meta_value_num';
                 $order_args['meta_key'] = '_price';
@@ -613,6 +870,9 @@ function custom_product_filter_results_shortcode() {
                 'posts_per_page' => -1,
                 'orderby'        => $order_args['orderby'],
                 'order'          => $order_args['order'],
+                'meta_key'       => isset($order_args['meta_key']) ? $order_args['meta_key'] : '',
+                'orderby'        => $order_args['orderby'],
+                'order'          => $order_args['order'],
                 'tax_query'      => [[
                     'taxonomy' => 'product_cat',
                     'field'    => 'slug',
@@ -653,7 +913,7 @@ function custom_product_filter_results_shortcode() {
             echo '<p class="product-count">Found ' . $total_products . ' products</p>';
 
             echo '<form class="woocommerce-ordering" method="get">';
-            echo '<select name="orderby" class="orderby" onchange="this.form.submit()">';
+            echo '<select name="orderby" class="orderby" >';
 
             $orderby_options = apply_filters('woocommerce_catalog_orderby', [
                 'menu_order' => __('Default sorting', 'woocommerce'),
@@ -719,6 +979,7 @@ function custom_product_filter_results_shortcode() {
     return ob_get_clean();
 }
 add_shortcode('custom_product_filter_results', 'custom_product_filter_results_shortcode');
+
 
 
 // Custom Featured menu filter 
@@ -839,7 +1100,7 @@ function custom_featured_filter_results_shortcode() {
             echo '<p class="product-count">Found ' . $total_products . ' products</p>';
 
             echo '<form class="woocommerce-ordering" method="get">';
-            echo '<select name="orderby" class="orderby" onchange="this.form.submit()">';
+            echo '<select name="orderby" class="orderby" >';
 
             $orderby_options = apply_filters('woocommerce_catalog_orderby', [
                 'menu_order' => __('Default sorting', 'woocommerce'),
@@ -1305,59 +1566,22 @@ function my_custom_product_filter() {
     <!-- Your Custom HTML Goes Here -->
 		<div class="productFilter">
 			<div class="filterDropdown">
-					<button class="toggleBtn" id="tch">THC</button>
+					<button class="toggleBtn" id="thc">THC</button>
 					<div class="dropdown">
-					<label>THC Range</label>
-					<div class="slider">
-							<div class="progress"></div>
-					</div>
-					<div class="range-input">
-							<input type="range" class="range-min" min="0.00" max="45.00" step="0.01">
-							<input type="range" class="range-max" min="0.00" max="45.00" step="0.01">
-					</div>
-					<div class="price-input">
-							<div class="field">
-							<input type="number" class="input-min" value="0.00">
-							</div>
-							<div class="separator">To</div>
-							<div class="field">
-							<input type="number" class="input-max" value="45.00">
-							</div>
-					</div>
-					
-					<button type="submit" class="btnApply">Apply</button>
+					<?php echo Ample_Dual_Range_Slider::render_thc_slider(); ?>
 					</div>
 			</div>
 
 			<div class="filterDropdown">
 					<button class="toggleBtn" id="cbd">CBD</button>
 					<div class="dropdown range-second">
-					<label>CBD Range</label>
-					<div class="slider">
-							<div class="progress"></div>
-					</div>
-					<div class="range-input">
-							<input type="range" class="range-min range-input-second range-min" step="0.001" min="0.00" max="0.03">
-							<input type="range" class="range-max range-input-second range-max" step="0.001" min="0.00" max="0.03">
-					</div>
-					<div class="price-input">
-							<div class="field">
-							<input type="number" class="input-min price-input-second input-min" step="0.001" min="0.00" max="0.03" value="0.00">
-							</div>
-							<div class="separator">To</div>
-							<div class="field">
-							<input type="number" class="input-max price-input-second input-max" step="0.001" min="0.00" max="0.03" value="0.03">
-							</div>
-					</div>
-					
-					<button type="submit" class="btnApply">Apply</button>
+					<?php echo Ample_Dual_Range_Slider::render_cbd_slider(); ?>
 					</div>
 			</div>
 
 			<div class="filterDropdown">
 					<button class="toggleBtn" id="size">size</button>
 					<div class="dropdown">
-					<label>size</label>
 					<?php echo do_shortcode('[product_sizes]'); ?>
 					</div>
 			</div>
@@ -1365,7 +1589,6 @@ function my_custom_product_filter() {
 			<div class="filterDropdown">
 					<button class="toggleBtn" id="dominance">dominance</button>
 					<div class="dropdown">
-					<label>dominance</label>					
 					<?php echo do_shortcode('[product_dominance]'); ?>
 					</div>
 			</div>
@@ -1373,42 +1596,24 @@ function my_custom_product_filter() {
 			<div class="filterDropdown">
 					<button class="toggleBtn" id="terpenes">terpenes</button>
 					<div class="dropdown">
-						<label>terpenes</label>
 						<?php echo do_shortcode('[terpene_checkboxes]'); ?>
 					</div>
 			</div>
 
 			<div class="filterDropdown">
-					<button class="toggleBtn" id="brand">brand</button>
+					<button class="toggleBtn" id="brands">BRANDS</button>
 					<div class="dropdown">
-					<label>brand</label>
-					<?php
-						// Get all product brands
-						$brands = get_terms([
-								'taxonomy'   => 'product_brand',
-								'hide_empty' => false, // Set to true if you only want brands with products
-						]);
-
-						if (!empty($brands) && !is_wp_error($brands)) {
-								echo '<form id="brand-filter">';
-								foreach ($brands as $brand) {
-										echo '<label>';
-										echo '<input type="checkbox" name="product_brand[]" value="' . esc_attr($brand->slug) . '">';
-										echo esc_html($brand->name);
-										echo '</label>';
-								}
-								echo '<button type="submit" class="btnApply">Apply</button>';
-								echo '</form>';
-						}
-						?>					
+					<?php echo do_shortcode('[brand_checkboxes]'); ?>					
 					</div>
 			</div>
 
-			<div class="filterDropdown">
-					<button class="toggleBtn" id="categories">categories</button>
+			<div class="filterDropdown" style="display: none;" data-abba-issue="51">
+					<!-- ABBA Issue #51: Category filter hidden due to URL base category conflicts
+					     Customer may want to revert immediately - easy restoration by removing style="display: none;"
+					     Original functionality preserved in [category_checkboxes] shortcode for future restoration -->
+					<button class="toggleBtn" id="categories">CATEGORIES</button>
 					<div class="dropdown">
-					<label>categories</label>
-					<?php echo do_shortcode('[product-filter-category]'); ?>
+					<?php echo do_shortcode('[category_checkboxes]'); ?>
 					</div>
 			</div>
 		</div>
@@ -1492,76 +1697,660 @@ function enqueue_ajax_filter_script() {
 add_action('wp_head', 'enqueue_ajax_filter_script');
 
 
-// Register shortcode to display terpene checkboxes
-function render_terpene_checkboxes_shortcode() {
-    $terpenes = ['Myrcene', 'Limonene', 'Pinene', 'Linalool', 'Caryophyllene', 'Humulene', 'Terpinolene', 'Ocimene'];
-
-    $html = '<form method="post" class="terpene-form">';
-    $html .= '<div class="terpene-checkboxes">';
-
-    foreach ($terpenes as $terpene) {
-        $id = 'terpene_' . strtolower($terpene);
-        $html .= '<label style="display:block;margin-bottom:5px;">';
-        $html .= '<input type="checkbox" name="terpenes[]" value="' . esc_attr($terpene) . '"> ' . esc_html($terpene);
-        $html .= '</label>';
+// Helper function to get all unique terpenes from product data (ABBA Issue #11)
+function get_product_terpenes() {
+    global $wpdb;
+    
+    // ABBA Issue #51: Scope to base categories from URL
+    $base_categories = abba_get_base_categories();
+    $scoped_variation_ids = [];
+    
+    if (!empty($base_categories)) {
+        // Get products in base categories, then their variations
+        $scoped_query = new WP_Query([
+            'post_type' => 'product',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'tax_query' => [
+                [
+                    'taxonomy' => 'product_cat',
+                    'field' => 'slug',
+                    'terms' => $base_categories,
+                    'operator' => 'IN'
+                ]
+            ]
+        ]);
+        
+        if (empty($scoped_query->posts)) {
+            return []; // No products in base categories
+        }
+        
+        // Get all variations for scoped products
+        $product_ids_list = implode(',', array_map('intval', $scoped_query->posts));
+        $variation_ids = $wpdb->get_col("
+            SELECT ID FROM {$wpdb->posts} 
+            WHERE post_type = 'product_variation' 
+            AND post_parent IN ({$product_ids_list})
+            AND post_status = 'publish'
+        ");
+        
+        if (empty($variation_ids)) {
+            return []; // No variations in scoped products
+        }
+        
+        $scoped_variation_ids = $variation_ids;
     }
+    
+    // Query for all terpene meta keys with counts
+    $where_clause = "";
+    if (!empty($scoped_variation_ids)) {
+        $ids_list = implode(',', array_map('intval', $scoped_variation_ids));
+        $where_clause = "AND post_id IN ({$ids_list})";
+    }
+    
+    $terpene_data = $wpdb->get_results("
+        SELECT 
+            REPLACE(meta_key, 'terpene_', '') as terpene_name,
+            COUNT(*) as product_count 
+        FROM {$wpdb->postmeta} 
+        WHERE meta_key LIKE 'terpene_%' 
+        AND meta_key != 'terpene_total-terpenes'
+        {$where_clause}
+        GROUP BY meta_key 
+        ORDER BY terpene_name ASC
+    ");
+    
+    $terpenes = [];
+    foreach ($terpene_data as $terpene) {
+        if (!empty($terpene->terpene_name)) {
+            // Format terpene name for display (capitalize, clean up)
+            $display_name = ucwords(str_replace(['-', '_'], ' ', $terpene->terpene_name));
+            $terpenes[] = [
+                'name' => $display_name,
+                'slug' => $terpene->terpene_name,
+                'count' => $terpene->product_count
+            ];
+        }
+    }
+    
+    return $terpenes;
+}
 
-    $html .= '</div>';
-    $html .= '<button type="submit" class="btnApply">Apply</button>'; // Optional
-    $html .= '</form>';
+// Dynamic terpenes filter shortcode with real product data (ABBA Issue #11)
+function dynamic_product_terpenes_multiselect_shortcode() {
+    ob_start();
+    
+    // Get real terpenes from database
+    $terpenes = get_product_terpenes();
+    
+    if (empty($terpenes)) {
+        echo '<p>No terpenes found.</p>';
+        return ob_get_clean();
+    }
+    
+    echo '<div class="ample-terpenes-filter-container">';
+    echo '<div class="ample-terpenes-filter-header">';
+    echo '<label class="ample-terpenes-filter-label">TERPENE OPTIONS</label>';
+    echo '</div>';
+    echo '<div class="ample-terpenes-options">';
+    
+    foreach ($terpenes as $terpene) {
+        $terpene_id = 'terpene-' . sanitize_title($terpene['slug']);
+        $terpene_value = $terpene['name'];
+        $display_text = $terpene['name'] . ' (' . $terpene['count'] . ')';
+        
+        echo '<div class="filter-option">';
+        echo '<input type="checkbox" id="' . esc_attr($terpene_id) . '" value="' . esc_attr($terpene_value) . '" data-terpene="' . esc_attr($terpene['slug']) . '">';
+        echo '<label for="' . esc_attr($terpene_id) . '">' . esc_html($display_text) . '</label>';
+        echo '</div>';
+    }
+    
+    echo '</div>'; // .ample-terpenes-options
+    
+    echo '<div class="ample-terpenes-filter-actions">';
+    echo '<button type="button" class="ample-terpenes-apply-button">Apply</button>';
+    echo '</div>';
+    
+    echo '</div>'; // .ample-terpenes-filter-container
+    
+    return ob_get_clean();
+}
 
-    return $html;
+// Legacy shortcode for backward compatibility - now uses real data
+function render_terpene_checkboxes_shortcode() {
+    return dynamic_product_terpenes_multiselect_shortcode();
 }
 add_shortcode('terpene_checkboxes', 'render_terpene_checkboxes_shortcode');
+add_shortcode('product_terpenes_multiselect', 'dynamic_product_terpenes_multiselect_shortcode');
+
+
+// Helper function to get all unique brands from product attributes (ABBA Issue #12 Phase 2)
+function get_product_brands() {
+    global $wpdb;
+    
+    // ABBA Issue #51: Scope to base categories from URL
+    $base_categories = abba_get_base_categories();
+    $scoped_product_ids = [];
+    
+    if (!empty($base_categories)) {
+        // Get products only in base categories
+        $scoped_query = new WP_Query([
+            'post_type' => 'product',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'fields' => 'ids',
+            'tax_query' => [
+                [
+                    'taxonomy' => 'product_cat',
+                    'field' => 'slug',
+                    'terms' => $base_categories,
+                    'operator' => 'IN'
+                ]
+            ]
+        ]);
+        $scoped_product_ids = $scoped_query->posts;
+        
+        if (empty($scoped_product_ids)) {
+            return []; // No products in base categories
+        }
+    }
+    
+    // Query for products with brand attribute in _product_attributes
+    $where_clause = "";
+    if (!empty($scoped_product_ids)) {
+        $ids_list = implode(',', array_map('intval', $scoped_product_ids));
+        $where_clause = "AND post_id IN ({$ids_list})";
+    }
+    
+    $products_with_brands = $wpdb->get_results("
+        SELECT post_id, meta_value 
+        FROM {$wpdb->postmeta} 
+        WHERE meta_key = '_product_attributes' 
+        AND meta_value LIKE '%\"brand\"%'
+        {$where_clause}
+    ");
+    
+    $brand_counts = [];
+    
+    foreach ($products_with_brands as $product) {
+        $attributes = maybe_unserialize($product->meta_value);
+        
+        if (is_array($attributes) && isset($attributes['brand'])) {
+            $brand_data = $attributes['brand'];
+            
+            // Extract brand value from attribute structure
+            $brand_value = '';
+            if (isset($brand_data['value']) && !empty($brand_data['value'])) {
+                $brand_value = trim($brand_data['value']);
+            }
+            
+            if (!empty($brand_value)) {
+                // Handle multiple brands separated by | or ,
+                $brand_names = preg_split('/[|,]/', $brand_value);
+                
+                foreach ($brand_names as $brand_name) {
+                    $brand_name = trim($brand_name);
+                    if (!empty($brand_name)) {
+                        if (!isset($brand_counts[$brand_name])) {
+                            $brand_counts[$brand_name] = 0;
+                        }
+                        $brand_counts[$brand_name]++;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Also check product titles for additional brands (fallback)
+    $title_brands = $wpdb->get_results("
+        SELECT post_title, ID
+        FROM {$wpdb->posts} 
+        WHERE post_type = 'product' 
+        AND post_status = 'publish'
+        {$where_clause}
+        AND (
+            post_title LIKE '%Wildflower%' OR
+            post_title LIKE '%Wana%' OR  
+            post_title LIKE '%Simply Bare%' OR
+            post_title LIKE '%1964%' OR
+            post_title LIKE '%Proofly%' OR
+            post_title LIKE '%MTL%' OR
+            post_title LIKE '%Rubicon%' OR
+            post_title LIKE '%Carmel%'
+        )
+    ");
+    
+    foreach ($title_brands as $product) {
+        $title = $product->post_title;
+        $brand_matches = [];
+        
+        // Extract known brand names from titles
+        if (preg_match('/\b(Wildflower|Wana|Simply Bare|1964|Proofly|MTL|Rubicon|Carmel)\b/i', $title, $brand_matches)) {
+            $brand_name = $brand_matches[1];
+            if (!isset($brand_counts[$brand_name])) {
+                $brand_counts[$brand_name] = 0;
+            }
+            $brand_counts[$brand_name]++;
+        }
+    }
+    
+    // Convert to format matching terpenes structure
+    $brands = [];
+    foreach ($brand_counts as $brand_name => $count) {
+        $brands[] = [
+            'name' => $brand_name,
+            'slug' => sanitize_title($brand_name),
+            'count' => $count
+        ];
+    }
+    
+    // Sort alphabetically by name for easier finding
+    usort($brands, function($a, $b) {
+        return strcasecmp($a['name'], $b['name']);
+    });
+    
+    return $brands;
+}
+
+// Dynamic brands filter shortcode with real product data (ABBA Issue #12 Phase 2)  
+function dynamic_product_brands_multiselect_shortcode() {
+    ob_start();
+    
+    // Get real brands from database
+    $brands = get_product_brands();
+    
+    if (empty($brands)) {
+        echo '<p>No brands found.</p>';
+        return ob_get_clean();
+    }
+    
+    echo '<div class="ample-brand-filter-container">';
+    echo '<div class="ample-brand-filter-header">';
+    echo '<label class="ample-brand-filter-label">BRAND OPTIONS</label>';
+    echo '</div>';
+    echo '<div class="ample-brand-options">';
+    
+    foreach ($brands as $brand) {
+        $brand_id = 'brand-' . sanitize_title($brand['slug']);
+        $brand_value = $brand['name'];
+        $display_text = $brand['name'] . ' (' . $brand['count'] . ')';
+        
+        echo '<div class="filter-option">';
+        echo '<input type="checkbox" id="' . esc_attr($brand_id) . '" value="' . esc_attr($brand_value) . '" data-brand="' . esc_attr($brand['slug']) . '">';
+        echo '<label for="' . esc_attr($brand_id) . '">' . esc_html($display_text) . '</label>';
+        echo '</div>';
+    }
+    
+    echo '</div>'; // .ample-brand-options
+    
+    echo '<div class="ample-brand-filter-actions">';
+    echo '<button type="button" class="ample-brand-apply-button">Apply</button>';
+    echo '</div>';
+    
+    echo '</div>'; // .ample-brand-filter-container
+    
+    return ob_get_clean();
+}
+
+// Legacy shortcode for backward compatibility - now uses real data
+function render_brand_checkboxes_shortcode() {
+    return dynamic_product_brands_multiselect_shortcode();
+}
+add_shortcode('brand_checkboxes', 'render_brand_checkboxes_shortcode');
+add_shortcode('product_brands_multiselect', 'dynamic_product_brands_multiselect_shortcode');
+
+
+// Helper function to get all unique categories from WooCommerce taxonomy (ABBA Issue #12 Phase 3)
+function get_product_categories() {
+    // Get all WooCommerce product categories - keep hierarchy for proper querying
+    $categories = get_terms([
+        'taxonomy' => 'product_cat',
+        'hide_empty' => true, // Only show categories with products
+        'orderby' => 'name', // Use name first, we'll sort by count after
+        'order' => 'ASC'
+    ]);
+    
+    if (is_wp_error($categories) || empty($categories)) {
+        return [];
+    }
+    
+    $formatted_categories = [];
+    
+    foreach ($categories as $category) {
+        // Skip "Uncategorized" if it exists
+        if (strtolower($category->name) === 'uncategorized') {
+            continue;
+        }
+        
+        // Build hierarchical name (Parent > Child)
+        $display_name = $category->name;
+        if ($category->parent > 0) {
+            $parent = get_term($category->parent, 'product_cat');
+            if ($parent && !is_wp_error($parent)) {
+                $display_name = $parent->name . ' > ' . $category->name;
+            }
+        }
+        
+        $formatted_categories[] = [
+            'name' => $display_name,
+            'original_name' => $category->name,
+            'slug' => $category->slug,
+            'count' => $category->count,
+            'parent_id' => $category->parent
+        ];
+    }
+    
+    // Sort alphabetically by display name (keeps parents and children in logical order)
+    usort($formatted_categories, function($a, $b) {
+        return strcasecmp($a['name'], $b['name']);
+    });
+    
+    return $formatted_categories;
+}
+
+// Dynamic categories filter shortcode with real product data (ABBA Issue #12 Phase 3)
+function dynamic_product_categories_multiselect_shortcode() {
+    ob_start();
+    
+    // Get real categories from database
+    $categories = get_product_categories();
+    
+    
+    if (empty($categories)) {
+        echo '<p>No categories found.</p>';
+        return ob_get_clean();
+    }
+    
+    echo '<div class="ample-category-filter-container">';
+    echo '<div class="ample-category-filter-header">';
+    echo '<label class="ample-category-filter-label">CATEGORY OPTIONS</label>';
+    echo '</div>';
+    echo '<div class="ample-category-options">';
+    
+    foreach ($categories as $category) {
+        $category_id = 'category-' . sanitize_title($category['slug']);
+        $category_value = $category['name'];
+        
+        // Create styled display text for hierarchical categories
+        if (strpos($category['name'], ' > ') !== false) {
+            // This is a child category with Parent > Child format
+            $parts = explode(' > ', $category['name']);
+            $parent_part = $parts[0];
+            $child_part = $parts[1];
+            $styled_text = '<span class="category-parent">' . esc_html($parent_part) . '</span>' .
+                          '<span class="category-separator">&gt;</span>' . 
+                          '<span class="category-child">' . esc_html($child_part) . '</span>' .
+                          ' (' . $category['count'] . ')';
+        } else {
+            // This is a parent category
+            $styled_text = esc_html($category['name']) . ' (' . $category['count'] . ')';
+        }
+        
+        echo '<div class="filter-option">';
+        echo '<input type="checkbox" id="' . esc_attr($category_id) . '" value="' . esc_attr($category_value) . '" data-category="' . esc_attr($category['slug']) . '">';
+        echo '<label for="' . esc_attr($category_id) . '">' . $styled_text . '</label>';
+        echo '</div>';
+    }
+    
+    echo '</div>'; // .ample-category-options
+    
+    echo '<div class="ample-category-filter-actions">';
+    echo '<button type="button" class="ample-category-apply-button">Apply</button>';
+    echo '</div>';
+    
+    echo '</div>'; // .ample-category-filter-container
+    
+    return ob_get_clean();
+}
+
+// Legacy shortcode for backward compatibility - now uses real data
+function render_category_checkboxes_shortcode() {
+    return dynamic_product_categories_multiselect_shortcode();
+}
+add_shortcode('category_checkboxes', 'render_category_checkboxes_shortcode');
+add_shortcode('product_categories_multiselect', 'dynamic_product_categories_multiselect_shortcode');
+
 
 
 // Shortcode to dynamically get and display product sizes (multi-select)
+// Helper function to group sizes by range
+function group_sizes_by_range($sizes) {
+    $groups = [
+        'Small (< 1g)' => [],
+        'Medium (1-5g)' => [],
+        'Large (5-30g)' => [],
+        'XL (> 30g)' => [],
+        'Liquids (ml)' => []
+    ];
+    
+    foreach ($sizes as $size) {
+        if (stripos($size, 'ml') !== false) {
+            $groups['Liquids (ml)'][] = $size;
+        } elseif (preg_match('/(\d+(?:\.\d+)?)\s*g/i', $size, $matches)) {
+            $value = floatval($matches[1]);
+            if ($value < 1) {
+                $groups['Small (< 1g)'][] = $size;
+            } elseif ($value <= 5) {
+                $groups['Medium (1-5g)'][] = $size;
+            } elseif ($value <= 30) {
+                $groups['Large (5-30g)'][] = $size;
+            } else {
+                $groups['XL (> 30g)'][] = $size;
+            }
+        }
+    }
+    
+    // Remove empty groups and sort sizes within groups
+    foreach ($groups as $group_name => $group_sizes) {
+        if (empty($group_sizes)) {
+            unset($groups[$group_name]);
+        } else {
+            sort($groups[$group_name]);
+        }
+    }
+    
+    return $groups;
+}
+
+// ABBA Issue #51: Enhanced size grouping with product counts
+function group_sizes_by_range_with_counts($size_counts) {
+    $groups = [
+        'Small (< 1g)' => [],
+        'Medium (1-5g)' => [],
+        'Large (5-30g)' => [],
+        'XL (> 30g)' => [],
+        'Liquids (ml)' => []
+    ];
+    
+    foreach ($size_counts as $size => $count) {
+        if (stripos($size, 'ml') !== false) {
+            $groups['Liquids (ml)'][] = ['size' => $size, 'count' => $count];
+        } elseif (preg_match('/(\d+(?:\.\d+)?)\s*g/i', $size, $matches)) {
+            $value = floatval($matches[1]);
+            if ($value < 1) {
+                $groups['Small (< 1g)'][] = ['size' => $size, 'count' => $count];
+            } elseif ($value <= 5) {
+                $groups['Medium (1-5g)'][] = ['size' => $size, 'count' => $count];
+            } elseif ($value <= 30) {
+                $groups['Large (5-30g)'][] = ['size' => $size, 'count' => $count];
+            } else {
+                $groups['XL (> 30g)'][] = ['size' => $size, 'count' => $count];
+            }
+        }
+    }
+    
+    // Remove empty groups and sort by size within groups
+    foreach ($groups as $group_name => $group_sizes) {
+        if (empty($group_sizes)) {
+            unset($groups[$group_name]);
+        } else {
+            usort($groups[$group_name], function($a, $b) {
+                return strcmp($a['size'], $b['size']);
+            });
+        }
+    }
+    
+    return $groups;
+}
+
 function dynamic_product_sizes_multiselect_shortcode() {
-    // Replace 'pa_size' with your actual attribute slug
-    $attribute_name = 'pa_size';
-    $taxonomy = wc_sanitize_taxonomy_name($attribute_name);
-
-    // Get all terms (sizes) from the attribute
-    $terms = get_terms([
-        'taxonomy'   => $taxonomy,
-        'hide_empty' => false,
-    ]);
-
-    if (empty($terms) || is_wp_error($terms)) {
+    // ABBA Issue #51: Scope to base categories from URL
+    $base_categories = abba_get_base_categories();
+    $query_args = [
+        'limit' => -1,
+        'status' => 'publish'
+    ];
+    
+    if (!empty($base_categories)) {
+        $query_args['category'] = $base_categories;
+    }
+    
+    // Get sizes directly from WooCommerce database instead of API call
+    $products = wc_get_products($query_args);
+    
+    // Count products per size for display with counts
+    $size_counts = [];
+    foreach ($products as $product) {
+        // Get package-sizes attribute
+        $package_sizes = $product->get_attribute('package-sizes');
+        if ($package_sizes) {
+            // Split by comma if multiple sizes in one attribute
+            $product_sizes = array_map('trim', explode(',', $package_sizes));
+            foreach ($product_sizes as $size) {
+                if ($size) {
+                    if (!isset($size_counts[$size])) {
+                        $size_counts[$size] = 0;
+                    }
+                    $size_counts[$size]++;
+                }
+            }
+        }
+    }
+    
+    if (empty($size_counts)) {
         return '<p>No sizes found.</p>';
     }
-
-    $html = '<form class="product-sizes-form">';
-
-    foreach ($terms as $term) {
-        $html .= '<label style="display:block; margin:4px 0;">';
-        $html .= '<input type="checkbox" name="product_sizes[]" value="' . esc_attr($term->name) . '"> ' . esc_html($term->name);
+    
+    // Group sizes logically with counts
+    $grouped_sizes = group_sizes_by_range_with_counts($size_counts);
+    
+    // Use distinct size filter container structure (styled like THC/CBD but with unique classes)
+    $html = '<div class="ample-size-filter-container" id="ample-size-container">';
+    
+    // Filter header
+    $html .= '<div class="ample-size-filter-header">';
+    $html .= '<label class="ample-size-filter-label">SIZE</label>';
+    $html .= '</div>';
+    
+    // Size options with counts
+    $html .= '<div class="ample-size-options">';
+    foreach ($grouped_sizes as $group_name => $group_sizes) {
+        // Calculate total count for this group
+        $total_count = 0;
+        $size_names = [];
+        foreach ($group_sizes as $size_data) {
+            $total_count += $size_data['count'];
+            $size_names[] = $size_data['size'];
+        }
+        
+        $group_key = sanitize_title($group_name);
+        $html .= '<label class="filter-option">';
+        $html .= '<input type="checkbox" name="size_groups[]" value="' . esc_attr($group_key) . '" data-group="' . esc_attr($group_name) . '" data-sizes="' . esc_attr(implode(',', $size_names)) . '">';
+        $html .= '<span>' . esc_html($group_name) . ' (' . $total_count . ')</span>';
         $html .= '</label>';
     }
-		$html .= '<button type="submit" class="btnApply">Apply</button>'; // Optional
-    $html .= '</form>';
+    $html .= '</div>';
+    
+    // Apply button in actions container (distinct from dual-range)
+    $html .= '<div class="ample-size-filter-actions">';
+    $html .= '<button type="button" class="ample-size-apply-button" data-filter="size" style="background-color: #007866;">Apply Filter</button>';
+    $html .= '</div>';
+    
+    $html .= '</div>';
+    
     return $html;
 }
 add_shortcode('product_sizes', 'dynamic_product_sizes_multiselect_shortcode');
 
 
-// Shortcode to get and display product dominance from attribute
+// Shortcode to get and display product dominance filter (multi-select checkboxes)
 function get_product_dominance_shortcode() {
-    global $product;
-
-    if (!$product || !is_product()) {
-        return '';
+    // This creates the dominance filter dropdown with multi-select checkboxes
+    // Following same pattern as size filter but for strain types
+    
+    // Get all strain values with counts from scoped products
+    $strain_counts = get_product_strains();
+    
+    if (empty($strain_counts)) {
+        return '<p>No strain data available</p>';
     }
-
-    $taxonomy = 'pa_dominance';
-    $terms = wp_get_post_terms($product->get_id(), $taxonomy);
-
-    if (!empty($terms) && !is_wp_error($terms)) {
-        $names = wp_list_pluck($terms, 'name');
-        return '<p>' . esc_html(implode(', ', $names)) . '</p>';
+    
+    // Create multi-select checkbox filter matching size filter structure
+    $html = '<div class="ample-dominance-filter-container" id="ample-dominance-container">';
+    
+    // Filter header
+    $html .= '<div class="ample-dominance-filter-header">';
+    $html .= '<label class="ample-dominance-filter-label">DOMINANCE</label>';
+    $html .= '</div>';
+    
+    $html .= '<div class="ample-dominance-options">';
+    
+    foreach ($strain_counts as $strain => $count) {
+        $strain_clean = sanitize_title($strain);
+        $strain_display = esc_html(ucfirst($strain));
+        
+        $html .= '<div class="filter-option">';
+        $html .= '<input type="checkbox" id="dominance-' . $strain_clean . '" value="' . esc_attr($strain) . '" data-strain="' . esc_attr($strain) . '">';
+        $html .= '<label for="dominance-' . $strain_clean . '">' . $strain_display . ' (' . $count . ')</label>';
+        $html .= '</div>';
     }
+    
+    $html .= '</div>';
+    
+    // Apply button with same styling as size filter
+    $html .= '<div class="ample-dominance-filter-actions">';
+    $html .= '<button type="button" class="ample-dominance-apply-button" data-filter="dominance" style="background-color: #007866;">Apply Filter</button>';
+    $html .= '</div>';
+    
+    $html .= '</div>';
+    
+    return $html;
+}
 
-    return '<p><strong>Dominance:</strong> Not specified</p>';
+// Helper function to get all unique strain values from products
+function get_product_strains() {
+    // ABBA Issue #51: Scope to base categories from URL
+    $base_categories = abba_get_base_categories();
+    $query_args = array(
+        'status' => 'publish',
+        'limit' => -1
+    );
+    
+    if (!empty($base_categories)) {
+        $query_args['category'] = $base_categories;
+    }
+    
+    // Use direct WooCommerce database query (same approach as size filter)
+    $products = wc_get_products($query_args);
+    
+    // Count products per strain for display with counts
+    $strain_counts = array();
+    
+    foreach ($products as $product) {
+        $strain = $product->get_attribute('strain');
+        if (!empty($strain)) {
+            if (!isset($strain_counts[$strain])) {
+                $strain_counts[$strain] = 0;
+            }
+            $strain_counts[$strain]++;
+        }
+    }
+    
+    // Sort strains alphabetically by name
+    ksort($strain_counts);
+    
+    return $strain_counts;
 }
 add_shortcode('product_dominance', 'get_product_dominance_shortcode');
 
@@ -1630,7 +2419,20 @@ function display_variation_swatches() {
         return;
     }
     
-    echo '<div class="shop-variation-swatches" data-product-id="' . $product->get_id() . '">';
+    // Prepare minimal variation data for JavaScript (eliminating AJAX calls)
+    $variation_data = [];
+    foreach ($available_variations as $variation) {
+        $variation_data[] = [
+            'variation_id' => $variation['variation_id'],
+            'display_price' => $variation['display_price'],
+            'price' => $variation['price'], 
+            'regular_price' => $variation['regular_price'],
+            'attributes' => $variation['attributes'],
+            'is_in_stock' => $variation['is_in_stock']
+        ];
+    }
+    
+    echo '<div class="shop-variation-swatches" data-product-id="' . $product->get_id() . '" data-variations="' . esc_attr(wp_json_encode($variation_data)) . '">';
     $currency_symbol = get_woocommerce_currency_symbol();
     $price_html = $product->get_price_html();
     $price = '';
@@ -1735,8 +2537,9 @@ function display_variation_swatches() {
 
 
 
-add_action('wp_ajax_get_variations_for_product', 'get_variations_for_product');
-add_action('wp_ajax_nopriv_get_variations_for_product', 'get_variations_for_product');
+// COMMENTED OUT: No longer needed - variations embedded in HTML data attributes
+// add_action('wp_ajax_get_variations_for_product', 'get_variations_for_product');
+// add_action('wp_ajax_nopriv_get_variations_for_product', 'get_variations_for_product');
 function get_variations_for_product() {
     $product_id = intval($_POST['product_id']);
     $product = wc_get_product($product_id);
@@ -2152,6 +2955,341 @@ add_shortcode('show_subcats', function ($atts) {
     return ob_get_clean();
 });
 
+// Helper function to get brand for a specific product (ABBA Issue #12)
+function get_product_brand($product) {
+    if (!$product) {
+        return 'Brand';
+    }
+    
+    // Try to get brand from product attributes first
+    $brand = $product->get_attribute('brand');
+    
+    if (!empty($brand)) {
+        return trim($brand);
+    }
+    
+    // If no brand attribute, check if we can extract from _product_attributes meta
+    global $wpdb;
+    $product_attributes = get_post_meta($product->get_id(), '_product_attributes', true);
+    
+    if (is_array($product_attributes) && isset($product_attributes['brand'])) {
+        $brand_data = $product_attributes['brand'];
+        if (isset($brand_data['value']) && !empty($brand_data['value'])) {
+            return trim($brand_data['value']);
+        }
+    }
+    
+    return 'Brand'; // Default fallback
+}
+
+// Helper function to get terpene total percentage for a product (ABBA Issue #12)
+function get_product_terpene_total($product) {
+    if (!$product) {
+        return '';
+    }
+    
+    // Check parent product first
+    $terpene_total = get_post_meta($product->get_id(), 'terpene_total-terpenes', true);
+    if (!empty($terpene_total) && $terpene_total != '0') {
+        return $terpene_total;
+    }
+    
+    // If variable product, check variations
+    if ($product->is_type('variable')) {
+        $variations = $product->get_children();
+        foreach ($variations as $variation_id) {
+            $variation_total = get_post_meta($variation_id, 'terpene_total-terpenes', true);
+            if (!empty($variation_total) && $variation_total != '0') {
+                return $variation_total;
+            }
+        }
+    }
+    
+    return '';
+}
+
+// Helper function to get terpenes for a specific product (ABBA Issue #12)
+function get_single_product_terpenes($product) {
+    if (!$product) {
+        // error_log("TERPENE DEBUG: No product provided");
+        return 'Terpenes';
+    }
+    
+    global $wpdb;
+    
+    // For variable products, check variations. For simple products, check the product itself.
+    $post_ids = [$product->get_id()];
+    
+    if ($product->is_type('variable')) {
+        $variations = $product->get_children();
+        if (!empty($variations)) {
+            $post_ids = $variations;
+        }
+    }
+    
+    // Get all terpene meta fields for this product or its variations
+    $post_ids_string = implode(',', array_map('intval', $post_ids));
+    $terpenes = $wpdb->get_results("
+        SELECT meta_key, MAX(CAST(meta_value AS DECIMAL(5,2))) as max_value 
+        FROM {$wpdb->postmeta} 
+        WHERE post_id IN ({$post_ids_string})
+        AND meta_key LIKE 'terpene_%' 
+        AND meta_key != 'terpene_total-terpenes'
+        AND meta_value != '' 
+        AND CAST(meta_value AS DECIMAL(5,2)) > 0
+        GROUP BY meta_key
+        ORDER BY max_value DESC
+        LIMIT 3
+    ");
+    
+    if (empty($terpenes)) {
+        // Better fallback - show product categories instead of hardcoded terpenes
+        $product_categories = wp_get_post_terms($product->get_id(), 'product_cat', array('fields' => 'names'));
+        if (!empty($product_categories)) {
+            return implode(' - ', array_slice($product_categories, 0, 3));
+        }
+        return 'Terpene data not available'; // Last resort fallback
+    }
+    
+    $terpene_names = [];
+    foreach ($terpenes as $terpene) {
+        // Clean up terpene name from meta_key
+        $terpene_name = str_replace('terpene_', '', $terpene->meta_key);
+        $terpene_name = ucwords(str_replace(['-', '_'], ' ', $terpene_name));
+        $terpene_names[] = $terpene_name;
+    }
+    
+    return implode(' - ', $terpene_names);
+}
+
+// Helper function to get terpenes array for a specific product (ABBA Issue #12)
+function get_single_product_terpenes_array($product) {
+    if (!$product) {
+        return [];
+    }
+    
+    global $wpdb;
+    
+    // For variable products, check variations. For simple products, check the product itself.
+    $post_ids = [$product->get_id()];
+    
+    if ($product->is_type('variable')) {
+        $variations = $product->get_children();
+        if (!empty($variations)) {
+            $post_ids = $variations;
+        }
+    }
+    
+    // Get all terpene meta fields for this product or its variations
+    $post_ids_string = implode(',', array_map('intval', $post_ids));
+    $terpenes = $wpdb->get_results("
+        SELECT meta_key, MAX(CAST(meta_value AS DECIMAL(5,2))) as max_value 
+        FROM {$wpdb->postmeta} 
+        WHERE post_id IN ({$post_ids_string})
+        AND meta_key LIKE 'terpene_%' 
+        AND meta_key != 'terpene_total-terpenes'
+        AND meta_value != '' 
+        AND CAST(meta_value AS DECIMAL(5,2)) > 0
+        GROUP BY meta_key
+        ORDER BY max_value DESC
+        LIMIT 3
+    ");
+    
+    if (empty($terpenes)) {
+        return [];
+    }
+    
+    $terpene_names = [];
+    foreach ($terpenes as $terpene) {
+        // Clean up terpene name from meta_key
+        $terpene_name = str_replace('terpene_', '', $terpene->meta_key);
+        $terpene_name = ucwords(str_replace(['-', '_'], ' ', $terpene_name));
+        $terpene_names[] = $terpene_name;
+    }
+    
+    return $terpene_names;
+}
+
+// Customize attribute labels in Additional Information tab (ABBA Issue #49)
+add_filter('woocommerce_display_product_attributes', 'customize_attribute_labels', 5, 2);
+function customize_attribute_labels($product_attributes, $product) {
+    if (!$product_attributes) {
+        return $product_attributes;
+    }
+    
+    // Change attribute labels
+    foreach ($product_attributes as $key => &$attribute) {
+        if (isset($attribute['label'])) {
+            // Change 'STRAIN' to 'Dominance'
+            if ($attribute['label'] === 'STRAIN') {
+                $attribute['label'] = 'Dominance';
+            }
+            // Fix 'BRAND' capitalization to 'Brand' 
+            elseif ($attribute['label'] === 'BRAND' || $attribute['label'] === 'Brands') {
+                $attribute['label'] = 'Brand';
+            }
+        }
+    }
+    return $product_attributes;
+}
+
+// Add terpenes to WooCommerce Additional Information tab with percentages (ABBA Issue #49)
+add_filter('woocommerce_display_product_attributes', 'add_terpenes_to_additional_info', 10, 2);
+function add_terpenes_to_additional_info($product_attributes, $product) {
+    if (!$product) {
+        return $product_attributes;
+    }
+    
+    // Get terpenes with percentages for this product
+    $terpenes_with_percentages = get_single_product_terpenes_with_percentages($product);
+    
+    if (!empty($terpenes_with_percentages)) {
+        $terpenes_string = implode(', ', $terpenes_with_percentages);
+        
+        // Add terpene total percentage if available
+        $terpene_total = get_product_terpene_total($product);
+        if (!empty($terpene_total)) {
+            $terpenes_string = 'Total: ' . $terpene_total . '% (' . $terpenes_string . ')';
+        }
+        
+        $product_attributes['terpenes'] = array(
+            'label' => __('Terpenes', 'woocommerce'),
+            'value' => $terpenes_string
+        );
+    }
+    
+    return $product_attributes;
+}
+
+// Helper function to get terpenes with percentages for Additional Information tab (ABBA Issue #49)
+function get_single_product_terpenes_with_percentages($product) {
+    if (!$product) {
+        return [];
+    }
+    
+    global $wpdb;
+    
+    // For variable products, check variations. For simple products, check the product itself.
+    $post_ids = [$product->get_id()];
+    
+    if ($product->is_type('variable')) {
+        $variations = $product->get_children();
+        if (!empty($variations)) {
+            $post_ids = $variations;
+        }
+    }
+    
+    // Get all terpene meta fields with percentages for this product or its variations
+    $post_ids_string = implode(',', array_map('intval', $post_ids));
+    $terpenes = $wpdb->get_results("
+        SELECT meta_key, MAX(CAST(meta_value AS DECIMAL(5,2))) as max_value 
+        FROM {$wpdb->postmeta} 
+        WHERE post_id IN ({$post_ids_string})
+        AND meta_key LIKE 'terpene_%' 
+        AND meta_key != 'terpene_total-terpenes'
+        AND meta_value != '' 
+        AND CAST(meta_value AS DECIMAL(5,2)) > 0
+        GROUP BY meta_key
+        ORDER BY max_value DESC
+        LIMIT 10
+    ");
+    
+    if (empty($terpenes)) {
+        return [];
+    }
+    
+    $terpene_names_with_percentages = [];
+    foreach ($terpenes as $terpene) {
+        // Clean up terpene name from meta_key
+        $terpene_name = str_replace('terpene_', '', $terpene->meta_key);
+        $terpene_name = ucwords(str_replace(['-', '_'], ' ', $terpene_name));
+        
+        // Format with percentage
+        $terpene_names_with_percentages[] = $terpene_name . ' (' . $terpene->max_value . '%)';
+    }
+    
+    return $terpene_names_with_percentages;
+}
+
+// Helper function to get terpene icon data with fuzzy name matching (ABBA Issue #49)
+function get_terpene_icon_data($terpene_name) {
+    if (empty($terpene_name)) {
+        return ['type' => 'fallback', 'value' => 'limonene'];
+    }
+    
+    // Get WordPress uploads directory URL
+    $uploads_dir = wp_upload_dir();
+    $base_url = $uploads_dir['baseurl'] . '/terp-icons/';
+    
+    // Clean up the database terpene name for matching
+    $clean_name = strtolower(trim($terpene_name));
+    
+    // Strip common terpene prefixes for fuzzy matching
+    $prefixes_to_remove = ['terpene_', 'beta-', 'alpha-', 'd-', 'trans-', 'gamma-', 'cis-'];
+    foreach ($prefixes_to_remove as $prefix) {
+        if (strpos($clean_name, $prefix) === 0) {
+            $clean_name = str_replace($prefix, '', $clean_name);
+            break; // Only remove the first matching prefix
+        }
+    }
+    
+    // Handle special name variations and map to available Abba icon filenames
+    $icon_mapping = [
+        // Exact matches for available icons
+        'bisabolol' => 'Abba_Terps_Bisabolol.png',
+        'borneol' => 'Abba_Terps_Borneol.png',
+        'camphene' => 'Abba_Terps_Camphene.png',
+        'carene' => 'Abba_Terps_Carene.png',
+        'caryophyllene' => 'Abba_Terps_Caryophyllene.png',
+        'eucalyptol' => 'Abba_Terps_Eucalyptol.png',
+        'farnesene' => 'Abba_Terps_Farnesene.png',
+        'geraniol' => 'Abba_Terps_Geraniol.png',
+        'humulene' => 'Abba_Terps_Humulene.png',
+        'limonene' => 'Abba_Terps_Limonene.png',
+        'linalool' => 'Abba_Terps_Linalool.png',
+        'myrcene' => 'Abba_Terps_Myrcene.png',
+        'nerolidol' => 'Abba_Terps_Nerolidol.png',
+        'ocimene' => 'Abba_Terps_Ocimene.png',
+        'pinene' => 'Abba_Terps_Pinene.png',
+        'sabinene' => 'Abba_Terps_Sabinene.png',
+        'terpineol' => 'Abba_Terps_Terpineol.png',
+        'terpinolene' => 'Abba_Terps_Terpinolene.png',
+        
+        // Handle common name variations found in database
+        '3-carene' => 'Abba_Terps_Carene.png',
+        'delta-3-carene' => 'Abba_Terps_Carene.png',
+        'alpha-bisabolol' => 'Abba_Terps_Bisabolol.png',
+        'alpha-humulene' => 'Abba_Terps_Humulene.png',
+        'alpha-pinene' => 'Abba_Terps_Pinene.png',
+        'beta-caryophyllene' => 'Abba_Terps_Caryophyllene.png',
+        'beta-myrcene' => 'Abba_Terps_Myrcene.png',
+        'beta-pinene' => 'Abba_Terps_Pinene.png',
+        'trans-beta-caryophyllene' => 'Abba_Terps_Caryophyllene.png',
+        'trans-caryophyllene' => 'Abba_Terps_Caryophyllene.png',
+        'alpha-terpineol' => 'Abba_Terps_Terpineol.png',
+        'gamma-terpinene' => 'Abba_Terps_Terpinolene.png', // Close match
+    ];
+    
+    // Check for exact match first
+    if (isset($icon_mapping[$clean_name])) {
+        return ['type' => 'url', 'value' => $base_url . $icon_mapping[$clean_name]];
+    }
+    
+    // Try fuzzy matching - check if any key contains the clean name or vice versa
+    foreach ($icon_mapping as $key => $filename) {
+        if (strpos($key, $clean_name) !== false || strpos($clean_name, $key) !== false) {
+            return ['type' => 'url', 'value' => $base_url . $filename];
+        }
+    }
+    
+    // Fallback to existing hardcoded CSS classes for unmatched terpenes
+    $fallback_classes = ['limonene', 'linalool', 'myRecene'];
+    
+    // Use a simple hash-based selection for consistent fallback
+    $fallback_index = abs(crc32($terpene_name)) % count($fallback_classes);
+    return ['type' => 'fallback', 'value' => $fallback_classes[$fallback_index]];
+}
+
 
 // Logos Grid Shortcode with Clickable Links
 function custom_logos_grid_shortcode() {
@@ -2283,13 +3421,6 @@ function custom_logos_grid_shortcode() {
                             <img src="' . esc_url($logo['img']) . '" alt="' . $brand_name . '">
                         </a>
                     </div>';
-        } else {
-            $logo = $logos['Abba Vets'];
-            $output .= '<div class="logo-item">
-                        <a href="' . esc_url(home_url('brand-filter/'.$brand_name.'/')) . '" target="_blank" rel="noopener" alt="' . $brand_name . '">
-                            <img src="' . esc_url($logo['img']) . '" alt="' . $brand_name . '">
-                        </a>
-                    </div>';
         }
     }
     $output .= '</div>';
@@ -2357,6 +3488,22 @@ function custom_password_reset_redirect() {
 
 // Shortcode for custom reset password form
 add_shortcode( 'custom_reset_password', function() {
+
+    if ( isset( $_GET['reset-error'] ) ) {
+        if ( $_GET['reset-error'] === 'password_mismatch' ) {
+            wc_print_notice( __( 'Passwords do not match.', 'woocommerce' ), 'error' );
+        }
+        if ( $_GET['reset-error'] === 'invalid_link' ) {
+            wc_print_notice( __( 'Invalid or expired reset link.', 'woocommerce' ), 'error' );
+        }
+        if ( $_GET['reset-error'] === 'pending_reg' ) {
+            wc_print_notice( __( 'Registration pending please wait for approval.', 'woocommerce' ), 'error' );
+        }
+        if ( $_GET['reset-error'] === 'no_user' ) {
+            wc_print_notice( __( 'No such user exists.', 'woocommerce' ), 'error' );
+        }
+    }
+
     if ( ! isset( $_GET['key'], $_GET['login'] ) ) {
         return '<p class="error">Invalid reset link.</p>';
     }
@@ -2380,22 +3527,14 @@ add_shortcode( 'custom_reset_password', function() {
 });
 
 
-add_action( 'template_redirect', function() {
-    if ( isset( $_POST['custom_reset_submit'], $_GET['key'], $_GET['login'] ) ) {
-        $user = check_password_reset_key( sanitize_text_field( $_GET['key'] ), sanitize_text_field( $_GET['login'] ) );
-
-        if ( is_wp_error( $user ) ) {
-            wp_die( $user->get_error_message() );
-        }
-
-        if ( $_POST['pass1'] !== $_POST['pass2'] ) {
-            wp_die( 'Passwords do not match.' );
-        }
-
-        reset_password( $user, $_POST['pass1'] );
-
-        // Redirect after success
-        wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) . '?password-reset=success' );
-        exit;
+/**
+ * Extract base categories from product-filter URL
+ * ABBA Issue #51: Reuse existing URL parsing logic for filter scoping
+ */
+function abba_get_base_categories() {
+    $request_uri = $_SERVER['REQUEST_URI'];
+    if (preg_match('#product-filter/([^/?]+)#', $request_uri, $matches)) {
+        return array_filter(explode('+', $matches[1]));
     }
-});
+    return [];
+}

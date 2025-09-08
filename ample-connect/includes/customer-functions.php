@@ -20,9 +20,6 @@ function register_patient_on_ample($patient_data) {
         "password" => $patient_data['password'],
         "password_confirmation" => $patient_data['password']
     );
-
-    // ample_connect_log("Body contents = ");
-    // ample_connect_log($body);
     
     $response = ample_request(AMPLE_CONNECT_CLIENTS_URL, 'POST', $body);
 
@@ -306,7 +303,6 @@ function store_current_order_to_session($data, $user_id) {
     }
     // Store Applied Discounts in wc session
     // Ample_Session_Cache::set('policy_events', $policy_events);
-
     // Retrieve applicable_policies
     $applicable_policies = [];
     if (isset($data['applicable_policies']) && is_array($data['applicable_policies'])) {
@@ -722,68 +718,11 @@ function remove_credit_card_token($card_id) {
     return false;
 }
 
-// function apply_custom_tax_from_session( $cart ) {
-//     if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-//         return;
-//     }
-
-//     $custom_taxes = Ample_Session_Cache::get('custom_tax_data');
-//     if (!empty($custom_taxes) && is_array($custom_taxes)) {
-//         foreach ($custom_taxes as $tax_label => $amount_cents) {
-//             $amount_dollars = floatval($amount_cents) / 100;
-
-//             // Add a fee labeled as tax
-//             $cart->add_fee(ucfirst($tax_label), $amount_dollars, false); // true => taxable
-//         }
-//     }
-
-//     // // Get tax data from session (old)
-//     // $tax_data = WC()->session->get( 'custom_tax_data' );
-//     // // ample_connect_log("tax data 2");
-//     // // ample_connect_log(print_r($tax_data, true));
-
-//     // if ( ! empty( $tax_data ) && isset( $tax_data['tax_amount'] ) ) {
-
-//     //     $tax_amount = floatval( $tax_data['tax_amount'] );
-//     //     $tax_label = isset( $tax_data['tax_type'] ) ? strtoupper(sanitize_text_field( $tax_data['tax_type'] )) : 'Custom Tax';
-
-//     //     // Remove previously added custom tax fees to avoid duplication
-//     //     foreach ( $cart->get_fees() as $fee_key => $fee ) {
-//     //         if ( $fee->name === $tax_label ) {
-//     //             unset( $cart->fees[$fee_key] );
-//     //         }
-//     //     }
-
-//     //     // Apply tax as a fee
-//     //     if ( $tax_amount > 0 ) {
-//     //         $cart->add_fee( $tax_label, $tax_amount, true );
-//     //     }
-//     // }
-// }
-// add_action( 'woocommerce_cart_calculate_fees', 'apply_custom_tax_from_session', 10 );
-
 function refresh_order_cached_data() {
     get_order_from_api_and_update_session();
 }
 add_action( 'woocommerce_thankyou', 'refresh_order_cached_data' );
 
-
-// function display_custom_tax_debug_info() {
-//     $tax_data = WC()->session->get( 'custom_tax_data' );
-
-//     if ( ! empty( $tax_data ) && isset( $tax_data['tax_amount'] ) ) {
-//         $tax_amount = floatval( $tax_data['tax_amount'] );
-//         $tax_label = isset( $tax_data['tax_type'] ) ? sanitize_text_field( $tax_data['tax_type'] ) : 'Custom Tax';
-//         $cart_subtotal = WC()->cart->subtotal;
-//         $tax_value = $cart_subtotal * ( $tax_amount / 100 );
-
-//         echo "<tr class='custom-tax-debug'>
-//                 <th>Debug: {$tax_label} ({$tax_amount}%)</th>
-//                 <td>" . wc_price( $tax_value ) . "</td>
-//             </tr>";
-//     }
-// }
-// add_action( 'woocommerce_review_order_before_order_total', 'display_custom_tax_debug_info' );
 
 
 

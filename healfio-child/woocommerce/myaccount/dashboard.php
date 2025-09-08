@@ -30,7 +30,8 @@ $allowed_html = array(
 
 $current_user = wp_get_current_user();
 $user_id = $current_user->ID;
-$user_ample_id = get_user_meta($user_id, 'client_login_id', true);
+$user_ample_id = get_user_meta($user_id, 'client_id', true);
+$user_display_id = get_user_meta($user_id, 'client_display_id', true);
 
 // Get custom user meta
 $phone_number        = get_user_meta($user_id, 'billing_phone', true);
@@ -41,9 +42,9 @@ $order_amount        = get_user_meta($user_id, 'order_amount_available', true);
 $shipping_address    = get_user_meta($user_id, 'shipping_address', true); // Or use WooCommerce address function below
 
 $prescriptions = Ample_Session_Cache::get('prescriptions');
-$prescriptions = array_reverse($prescriptions);
-$current_prescription = Ample_Session_Cache::get('current_prescription');
-$credit_cards = Ample_Session_Cache::get('credit_cards');
+$prescriptions = is_array($prescriptions) ? array_reverse($prescriptions) : [];
+$current_prescription = Ample_Session_Cache::get('current_prescription') ?: [];
+$credit_cards = Ample_Session_Cache::get('credit_cards') ?: [];
 $needs_renewal = Ample_Session_Cache::get('needs_renewal', false);
 $status = Ample_Session_Cache::get('status', false);
 ?>
@@ -54,17 +55,17 @@ $status = Ample_Session_Cache::get('status', false);
 		<div class="col-md-6">
 			<div class="group1">
 				<h5 class="mt-0">PERSONAL INFORMATION</h5>
-				<p><strong>Client Name</strong> <?php echo esc_html($current_user->display_name); ?></p>
-				<p><strong>Client ID</strong> <?php echo esc_html($user_ample_id); ?></p>
-				<p><strong>Phone Number</strong> <?php echo esc_html($phone_number); ?></p>
-				<p><strong>Date of Birth</strong> <?php echo esc_html($date_of_birth); ?></p>
-				<p><strong>Email Address</strong> <?php echo esc_html($current_user->user_email); ?></p>
+				<p><strong>Client Name:</strong> <?php echo esc_html($current_user->display_name); ?></p>
+				<p><strong>Client ID:</strong> <?php echo esc_html($user_display_id ?: $user_ample_id); ?></p>
+				<p><strong>Phone Number:</strong> <?php echo esc_html($phone_number); ?></p>
+				<p><strong>Date of Birth:</strong> <?php echo esc_html($date_of_birth); ?></p>
+				<p><strong>Email Address:</strong> <?php echo esc_html($current_user->user_email); ?></p>
 			</div>
 
 			<div class="group2">	
-				<h5 class="mt-0">PERSONAL INFORMATION</h5>
-				<p><span class="badgeApproved"><?php echo $status; ?></span></p>
-				<p><strong>Registration Date</strong> <?php echo esc_html($current_user->user_registered); ?></p>
+				<h5 class="mt-0">ACCOUNT STATUS</h5>
+				<p><span class="badgeApproved" style="font-size: 1rem; padding: 0.5rem 1.5rem;"><?php echo $status; ?></span></p>
+				<p><strong>Registration Date:</strong> <?php echo esc_html($current_user->user_registered); ?></p>
 				<p class="btnGroup">
 					<button id="registrationDcoument" class="registrationDocument"><i class="bi bi-cloud-arrow-down-fill"></i> &nbsp; Registration Document</button>
 					<?php if($needs_renewal) : ?>
@@ -84,6 +85,21 @@ $status = Ample_Session_Cache::get('status', false);
 					echo '<div class="ccinfoContainer"><p class="alert alert-info">No saved cards found.</p></div>';
 				} else {
 					foreach ($credit_cards as $credit_card) {
+						$card_icon = '';
+						switch (strtolower($credit_card['brand'])) {
+							case 'visa':
+								$card_icon = '<i class="bi bi-credit-card-2-front" style="color: #1a1f71; font-size: 1.4rem;"></i>';
+								break;
+							case 'mastercard':
+								$card_icon = '<i class="bi bi-credit-card-2-front" style="color: #eb001b; font-size: 1.4rem;"></i>';
+								break;
+							case 'amex':
+							case 'american express':
+								$card_icon = '<i class="bi bi-credit-card-2-front" style="color: #006fcf; font-size: 1.4rem;"></i>';
+								break;
+							default:
+								$card_icon = '<i class="bi bi-credit-card-2-front" style="font-size: 1.4rem;"></i>';
+						}
 						echo '<div class="ccinfoContainer">';
 						echo '<span><label>' . esc_html($credit_card['brand']) . '</label><br><label>' . esc_html($credit_card['protected_card_number']) . '</label></span>';
 						echo '<span>Expiry: ' . esc_html($credit_card['expiry']) . '</span>';
@@ -98,30 +114,27 @@ $status = Ample_Session_Cache::get('status', false);
 		<div class="col-md-6 prescriptionInformation">
 			<div class="group1">
 				<h5 class="mt-0">PRESCRIPTION Information</h5>
-				<p><strong>Prescription</strong> <?php echo $current_prescription['number_of_grams'] ? esc_html($current_prescription['number_of_grams']) . 'g / day' : 'NA'; ?></p>
-				<p><strong>Amount Available for Order</strong> 
-				<ul>
+				<p><strong>Prescription:</strong> <?php echo !empty($current_prescription['number_of_grams']) ? esc_html($current_prescription['number_of_grams']) . 'g / day' : 'NA'; ?></p>
+				<p><strong>Amount Available for Order:</strong> 
+				<ul style="margin-left: 1rem;">
 					<li>
-						Now : <?php echo $current_prescription['available_to_order'] ? esc_html($current_prescription['available_to_order']) . ' grams' : 'NA'; ?></p>
+						Now: <?php echo !empty($current_prescription['available_to_order']) ? esc_html($current_prescription['available_to_order']) . ' grams' : 'NA'; ?>
 					</li>
 					<li>
-						<?php echo array_key_first($current_prescription['available_to_order_future']); ?> : <?php echo $current_prescription['available_to_order'] ? esc_html($current_prescription['available_to_order']) . ' grams' : 'NA'; ?></p>
+						<?php echo !empty($current_prescription['available_to_order_future']) ? array_key_first($current_prescription['available_to_order_future']) : 'Future'; ?>: <?php echo !empty($current_prescription['available_to_order']) ? esc_html($current_prescription['available_to_order']) . ' grams' : 'NA'; ?>
 					</li>
 				</ul>
-				<p><strong>Prescription Available Until</strong> <?php echo $current_prescription['script_end'] ? esc_html($current_prescription['script_end']) : 'NA'; ?></p>
+				<p><strong>Prescription Available Until:</strong> <?php echo !empty($current_prescription['script_end']) ? esc_html($current_prescription['script_end']) : 'NA'; ?></p>
 			</div>
 			
 			<h6>SHIPPING ADDRESS</h6>
-
-				<!-- <p style="margin-top: 5px" class="address"><strong>Shipping Address:</strong><br> -->
-					<?php
-					if (function_exists('wc_get_account_formatted_address')) {
-							echo wc_get_account_formatted_address('shipping');
-					} else {
-							echo esc_html($shipping_address); // fallback
-					}
-					?>
-			</p>
+			<?php
+			if (function_exists('wc_get_account_formatted_address')) {
+					echo wc_get_account_formatted_address('shipping');
+			} else {
+					echo esc_html($shipping_address); // fallback
+			}
+			?>
 
 		</div>
 	</div>
@@ -158,7 +171,7 @@ $status = Ample_Session_Cache::get('status', false);
 										<span><i class="verified"></i><?php echo $pres['verified'] ? 'Verified' : 'Not Verified'; ?></span>
 									</div>
 									<div class="card-col-right">
-										<span class="badge-inactive">ACTIVE</span>
+										<span class="badge-inactive">INACTIVE</span>
 									</div>
 								</div>
 					<?php 	endif;

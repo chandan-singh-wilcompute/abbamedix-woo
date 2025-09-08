@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 
 // Webhook for Order Details Update Notification from Ample
 add_action('rest_api_init', function() {
-    register_rest_route('webhooks/v1/', 'orders', array(
+    register_rest_route('webhooks/v1', 'orders', array(
         'methods' => 'POST',
         'callback' => 'handle_orders_webhook',
         'permission_callback' => '__return_true'

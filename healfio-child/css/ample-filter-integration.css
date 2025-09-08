@@ -1,0 +1,244 @@
+/**
+ * Ample Filter Integration Styles
+ * 
+ * Styles for filter integration and feedback
+ * Part of Step 4 implementation for ABBA Issue #8
+ * 
+ * @package AmpleFilter
+ * @version 1.0.0
+ * @since 2025-08-30
+ */
+
+/* Hide filtered products */
+.ample-filter-hidden {
+    display: none !important;
+}
+
+/* Loading states */
+.ample-filter-loading {
+    position: relative;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.ample-filter-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    margin: -15px 0 0 -15px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #059669;
+    border-radius: 50%;
+    animation: ample-spin 1s linear infinite;
+}
+
+@keyframes ample-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Apply button feedback */
+.ample-dual-range-apply.ample-filter-applied {
+    background-color: #10b981 !important;
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+}
+
+.ample-dual-range-apply.ample-filter-applied::after {
+    content: '✓';
+    margin-left: 5px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Toast notifications - bottom center of screen */
+.ample-filter-toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    padding: 16px 24px;
+    background: #333;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    z-index: 10000;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 400px;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.ample-filter-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+}
+
+.ample-filter-toast-success {
+    background: #10b981;
+}
+
+.ample-filter-toast-error {
+    background: #ef4444;
+}
+
+.ample-filter-toast-info {
+    background: #3b82f6;
+}
+
+/* Product count styling */
+.ample-filter-count {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.ample-filter-count strong {
+    color: #059669;
+    font-weight: 600;
+}
+
+/* Error messages */
+.ample-filter-error {
+    background: #fee;
+    color: #c33;
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    border-left: 4px solid #c33;
+}
+
+/* DEBUG PANEL STYLING - COMMENTED OUT FOR PRODUCTION */
+/* Uncomment if debug overlay is needed in the future */
+
+/*
+#ample-debug {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.85);
+    color: white;
+    padding: 12px;
+    font-size: 12px;
+    font-family: monospace;
+    z-index: 9999;
+    border-radius: 4px;
+    min-width: 180px;
+}
+
+#ample-debug div {
+    margin: 4px 0;
+}
+
+#ample-debug span {
+    color: #10b981;
+    font-weight: bold;
+}
+*/
+
+/* Filter button indicators - keep original button size, add tag below */
+.filterDropdown .toggleBtn {
+    min-width: 60px;
+    padding: 8px 12px;
+    font-size: 13px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+/* When filter is applied - add active color styling to make it stand out */
+.filterDropdown .toggleBtn.has-filter {
+    /* Use the same active color as other active buttons */
+    background-color: #6EB0BE !important; /* Correct teal active color */
+    color: black !important; /* Black text like when dialog is open */
+}
+
+/* Two-line layout for filtered buttons - keep title exactly the same */
+.filterDropdown .toggleBtn.has-filter .filter-button-label {
+    display: block;
+    /* Inherit original button text styling */
+}
+
+.filterDropdown .toggleBtn.has-filter .filter-button-range {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.9;
+    margin-top: 15px;
+    line-height: 1;
+    margin-bottom: 10px;
+    text-align: center;
+    width: 100%;
+    /* Prevent layout jumping with ellipsis for long text */
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Clear filter icon */
+.filterDropdown .toggleBtn.has-filter .filter-clear-icon {
+    position: absolute;
+    top: 44px;
+    right: 18px;
+    width: 15px;
+    height: 15px;
+    font-size: 9px;
+    line-height: 15px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.25);
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.filterDropdown .toggleBtn.has-filter .filter-clear-icon:hover {
+    background: rgba(0, 0, 0, 0.5);
+    transform: scale(1.1);
+}
+
+/* Remove all color and styling overrides - let buttons keep their original appearance */
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .ample-filter-toast {
+        max-width: 90%;
+        font-size: 14px;
+        padding: 14px 20px;
+    }
+    
+    /* Debug panel mobile styles - commented out
+    #ample-debug {
+        top: auto;
+        bottom: 10px;
+        right: 10px;
+        font-size: 11px;
+    }
+    */
+    
+    /* Smaller buttons on mobile */
+    .filterDropdown .toggleBtn {
+        font-size: 12px;
+        padding: 6px 10px;
+        min-width: 50px;
+    }
+}

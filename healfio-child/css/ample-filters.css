@@ -1,0 +1,1626 @@
+/**
+ * Ample Filter System - Main Stylesheet
+ * 
+ * Modern, responsive styles for THC/CBD range sliders and product filtering
+ * Part of Phase 1 implementation for ABBA Issue #8
+ * 
+ * @package AmpleFilter
+ * @version 1.0.0
+ * @since 2025-08-29
+ */
+
+/* ==========================================================================
+   SLIDER COMPONENTS
+   ========================================================================== */
+
+/* Enhanced styling for existing HTML structure */
+#ample-thc-slider,
+#ample-cbd-slider {
+    position: relative;
+    padding: 1rem 0;
+}
+
+#ample-thc-slider,
+#ample-cbd-slider {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    margin: 1rem 0;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+#ample-thc-slider .progress {
+    position: absolute;
+    height: 100%;
+    background: linear-gradient(90deg, #059669, #10b981);
+    border-radius: 3px;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(5, 150, 105, 0.3);
+}
+
+#ample-cbd-slider .progress {
+    position: absolute;
+    height: 100%;
+    background: linear-gradient(90deg, #7c3aed, #a855f7);
+    border-radius: 3px;
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(124, 58, 237, 0.3);
+}
+
+/* Range inputs styling - overlay on slider track */
+.range-input {
+    position: relative;
+    height: 6px;
+    margin: -6px 0 1rem 0; /* Negative margin to overlay on slider */
+    pointer-events: none; /* Allow clicks to pass through to inputs */
+}
+
+.range-input input[type="range"] {
+    position: absolute;
+    width: 100%;
+    height: 20px; /* Increased height to make thumbs more accessible */
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+    pointer-events: auto;
+    top: -7px; /* Adjust position to center on track */
+}
+
+/* Stacking order for dual range */
+.range-input input[type="range"].range-min {
+    z-index: 1;
+}
+
+.range-input input[type="range"].range-max {
+    z-index: 2;
+}
+
+.range-input input[type="range"]::-webkit-slider-track {
+    width: 100%;
+    height: 6px;
+    background: transparent;
+}
+
+.range-input input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 4px solid #059669;
+    cursor: grab;
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+    margin-top: -9px; /* Center on track */
+}
+
+.range-input input[type="range"]::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.1);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+}
+
+#ample-cbd-slider input[type="range"]::-webkit-slider-thumb {
+    border-color: #7c3aed;
+}
+
+.range-input input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+
+.range-input input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(0.95);
+}
+
+/* Firefox */
+.range-input input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: 6px;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.range-input input[type="range"]::-moz-range-thumb {
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 4px solid #059669;
+    cursor: grab;
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+    -moz-appearance: none;
+}
+
+.range-input input[type="range"]::-moz-range-thumb:active {
+    cursor: grabbing;
+    transform: scale(1.1);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+}
+
+#ample-cbd-slider input[type="range"]::-moz-range-thumb {
+    border-color: #7c3aed;
+}
+
+/* Number inputs styling */
+.price-input {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1rem 0;
+    justify-content: space-between;
+}
+
+.price-input .field {
+    flex: 1;
+}
+
+.price-input input[type="number"] {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: 'Monaco', 'Menlo', monospace;
+    transition: border-color 0.2s ease;
+    background: #ffffff;
+}
+
+.price-input input[type="number"]:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+#ample-cbd-slider .price-input input[type="number"]:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.price-input .separator {
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+/* Apply button styling */
+.btnApply.ample-thc-apply,
+.btnApply.ample-cbd-apply {
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 1rem;
+    width: 100%;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btnApply.ample-cbd-apply {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+}
+
+.btnApply.ample-thc-apply:hover {
+    background: linear-gradient(135deg, #047857, #059669);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.btnApply.ample-cbd-apply:hover {
+    background: linear-gradient(135deg, #6d28d9, #7c3aed);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.btnApply.ample-thc-apply:active,
+.btnApply.ample-cbd-apply:active {
+    transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .price-input {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .price-input .separator {
+        display: none;
+    }
+    
+    .range-input input[type="range"]::-webkit-slider-thumb {
+        height: 24px;
+        width: 24px;
+    }
+    
+    .range-input input[type="range"]::-moz-range-thumb {
+        height: 24px;
+        width: 24px;
+    }
+}
+
+.ample-slider-container {
+    margin: 1.5rem 0;
+    padding: 1.25rem;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e1e5e9;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
+}
+
+.ample-slider-container:hover {
+    border-color: #007cba;
+    box-shadow: 0 4px 12px rgba(0, 124, 186, 0.1);
+}
+
+.ample-slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.ample-slider-label {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #1e293b;
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+.ample-slider-values {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+    font-family: 'Monaco', 'Menlo', monospace;
+    background: #f8fafc;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.ample-slider-separator {
+    margin: 0 0.25rem;
+    color: #94a3b8;
+}
+
+/* ==========================================================================
+   TRACK AND RANGE STYLES
+   ========================================================================== */
+
+.ample-slider-track-container {
+    position: relative;
+    height: 3rem;
+    margin: 1.5rem 0;
+    padding: 0 0.625rem; /* Account for thumb width */
+}
+
+.ample-slider-track {
+    position: absolute;
+    top: 50%;
+    left: 0.625rem;
+    right: 0.625rem;
+    height: 6px;
+    background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 100%);
+    border-radius: 3px;
+    transform: translateY(-50%);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.ample-slider-range {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #007cba 0%, #0ea5e9 100%);
+    border-radius: 3px;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 8px rgba(0, 124, 186, 0.3);
+}
+
+/* ==========================================================================
+   RANGE INPUT STYLES
+   ========================================================================== */
+
+.ample-slider-input {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 3rem;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 2;
+}
+
+.ample-slider-input:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Webkit Thumb Styles */
+.ample-slider-input::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 3px solid #007cba;
+    border-radius: 50%;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+    cursor: grab;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.ample-slider-input::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 124, 186, 0.25), 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-color: #0ea5e9;
+}
+
+.ample-slider-input::-webkit-slider-thumb:active {
+    cursor: grabbing;
+    transform: scale(0.95);
+    box-shadow: 0 2px 6px rgba(0, 124, 186, 0.35);
+}
+
+/* Firefox Thumb Styles */
+.ample-slider-input::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 3px solid #007cba;
+    border-radius: 50%;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    cursor: grab;
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ample-slider-input::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 124, 186, 0.25);
+    border-color: #0ea5e9;
+}
+
+.ample-slider-input::-moz-range-thumb:active {
+    cursor: grabbing;
+    transform: scale(0.95);
+}
+
+/* Firefox Track Styles */
+.ample-slider-input::-moz-range-track {
+    background: transparent;
+    border: none;
+    height: 6px;
+}
+
+/* ==========================================================================
+   NUMBER INPUTS
+   ========================================================================== */
+
+.ample-slider-inputs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.ample-slider-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f8fafc;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.15s ease;
+}
+
+.ample-slider-input-group:focus-within {
+    border-color: #007cba;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(0, 124, 186, 0.1);
+}
+
+.ample-slider-number-input {
+    width: 3.5rem;
+    padding: 0.25rem 0.375rem;
+    border: none;
+    background: transparent;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+    color: #1e293b;
+    font-family: 'Monaco', 'Menlo', monospace;
+    transition: all 0.15s ease;
+}
+
+.ample-slider-number-input:focus {
+    outline: none;
+    background: #ffffff;
+    box-shadow: 0 0 0 2px rgba(0, 124, 186, 0.2);
+}
+
+.ample-slider-unit {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #64748b;
+    min-width: 1rem;
+    text-align: left;
+}
+
+.ample-slider-to {
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0 0.5rem;
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   FILTER INTEGRATION
+   ========================================================================== */
+
+.ample-thc-filter,
+.ample-cbd-filter {
+    position: relative;
+}
+
+.ample-thc-filter .ample-slider-range {
+    background: linear-gradient(90deg, #059669 0%, #10b981 100%);
+    box-shadow: 0 0 8px rgba(5, 150, 105, 0.3);
+}
+
+.ample-thc-filter .ample-slider-input::-webkit-slider-thumb,
+.ample-thc-filter .ample-slider-input::-moz-range-thumb {
+    border-color: #059669;
+}
+
+.ample-cbd-filter .ample-slider-range {
+    background: linear-gradient(90deg, #7c3aed 0%, #8b5cf6 100%);
+    box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+}
+
+.ample-cbd-filter .ample-slider-input::-webkit-slider-thumb,
+.ample-cbd-filter .ample-slider-input::-moz-range-thumb {
+    border-color: #7c3aed;
+}
+
+/* ==========================================================================
+   PRODUCT GRID FILTERING
+   ========================================================================== */
+
+.ample-product-grid {
+    transition: opacity 0.2s ease;
+}
+
+.ample-filter-loading .ample-product-grid {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.ample-filter-hidden {
+    display: none !important;
+}
+
+.ample-filter-count {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 1rem 0;
+    text-align: center;
+    font-weight: 500;
+}
+
+.ample-filter-count strong {
+    color: #1e293b;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   LOADING STATES
+   ========================================================================== */
+
+.ample-slider-loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.ample-slider-loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    z-index: 10;
+}
+
+.ample-slider-loading::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 2px solid #e2e8f0;
+    border-top-color: #007cba;
+    border-radius: 50%;
+    animation: ample-spin 0.8s linear infinite;
+    z-index: 11;
+}
+
+@keyframes ample-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .ample-slider-container {
+        margin: 1rem 0;
+        padding: 1rem;
+    }
+    
+    .ample-slider-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .ample-slider-values {
+        align-self: flex-end;
+    }
+    
+    .ample-slider-inputs {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .ample-slider-input-group {
+        justify-content: center;
+    }
+    
+    .ample-slider-to {
+        display: none;
+    }
+    
+    .ample-slider-track-container {
+        height: 2.5rem;
+        margin: 1.25rem 0;
+    }
+    
+    .ample-slider-input::-webkit-slider-thumb,
+    .ample-slider-input::-moz-range-thumb {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ample-slider-container {
+        padding: 0.75rem;
+    }
+    
+    .ample-slider-number-input {
+        width: 4rem;
+    }
+}
+
+/* ==========================================================================
+   SIZE & DOMINANCE FILTER STYLING - MATCH THC/CBD EXACTLY
+   ========================================================================== */
+
+/* Size Options Container */
+.ample-size-options {
+    margin: 1rem 0;
+}
+
+/* Filter Options Styling - Match THC/CBD checkbox style */
+.filter-option {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: #374151;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-radius: 4px;
+}
+
+.filter-option:hover {
+    background: #f9fafb;
+    padding-left: 0.5rem;
+    margin-left: -0.5rem;
+}
+
+.filter-option input[type="checkbox"] {
+    margin-right: 0.75rem;
+    accent-color: #007866;
+    transform: scale(1.1);
+}
+
+.filter-option span {
+    font-weight: 500;
+    flex: 1;
+}
+
+/* Size filter now uses ample-dual-range-container, so existing styles will apply */
+/* This ensures the white background, padding, and styling match THC/CBD exactly */
+
+/* ==========================================================================
+   ACCESSIBILITY
+   ========================================================================== */
+
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ample-slider-container,
+    .ample-slider-range,
+    .ample-slider-input::-webkit-slider-thumb,
+    .ample-slider-input::-moz-range-thumb,
+    .ample-slider-input-group,
+    .ample-slider-number-input,
+    .ample-product-grid {
+        transition: none;
+    }
+    
+    @keyframes ample-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    .ample-slider-container {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    
+    .ample-slider-label {
+        color: #f1f5f9;
+    }
+    
+    .ample-slider-values {
+        background: #334155;
+        border-color: #475569;
+        color: #cbd5e1;
+    }
+    
+    .ample-slider-track {
+        background: linear-gradient(90deg, #475569 0%, #64748b 100%);
+    }
+    
+    .ample-slider-input-group {
+        background: #334155;
+        border-color: #475569;
+    }
+    
+    .ample-slider-input-group:focus-within {
+        background: #1e293b;
+    }
+    
+    .ample-slider-number-input {
+        color: #f1f5f9;
+    }
+    
+    .ample-filter-count {
+        color: #cbd5e1;
+    }
+    
+    .ample-filter-count strong {
+        color: #f1f5f9;
+    }
+}
+
+/* ==========================================================================
+   SIZE FILTER STYLES - DISTINCT CLASSES BUT SAME VISUAL APPEARANCE
+   ========================================================================== */
+
+/* Z-index management - moved to consolidated section below */
+
+/* CRITICAL: Category filter forms must be HIGHEST z-index */
+.productCategoryFilterForm,
+.featuredCategoryFilterForm {
+    z-index: 1000 !important;
+    position: relative !important;
+}
+
+/* Filter dropdowns should be below category forms */
+.productFilter .filterDropdown {
+    position: relative !important;
+    z-index: 999 !important;
+}
+
+.productFilter .filterDropdown .dropdown {
+    z-index: 999 !important;
+    position: absolute !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(2px) !important;
+    min-width: 280px !important;
+    width: auto !important;
+}
+
+.productFilter .filterDropdown .dropdown.show {
+    z-index: 999 !important;
+    position: absolute !important;
+}
+
+.productFilter .filterDropdown .dropdown .ample-size-filter-container,
+.productFilter .filterDropdown .dropdown .ample-dominance-filter-container {
+    z-index: 999 !important;
+    position: relative !important;
+    background: #ffffff !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Ensure footer content stays below */
+footer, .footer {
+    z-index: 1 !important;
+}
+
+footer * {
+    z-index: 1 !important;
+}
+
+/* Size filter container - EXACT copy of dual-range styling */
+.ample-size-filter-container {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e1e5e9;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    position: relative;
+    z-index: inherit;
+}
+
+.ample-size-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.ample-size-filter-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #374151;
+    margin: 0;
+}
+
+.ample-size-filter-actions {
+    margin-top: 1rem;
+}
+
+/* EXACT copy of dual-range apply button styling */
+.ample-size-apply-button {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    background: #059669;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ample-size-apply-button:hover {
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.ample-size-apply-button:active {
+    transform: translateY(0);
+}
+
+/* Applied state animation */
+.ample-size-apply-button.ample-filter-applied {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    animation: ample-pulse 0.6s ease-out;
+}
+
+@keyframes ample-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Size filter options styling - tighter spacing, better checkbox margin */
+.ample-size-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 1rem 0;
+    line-height: 1em;
+}
+
+.ample-size-options .filter-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    line-height: 1em;
+}
+
+.ample-size-options .filter-option:hover {
+    background-color: #f9fafb;
+}
+
+.ample-size-options input[type="checkbox"] {
+    margin: 0 0.5rem 0 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #059669;
+    cursor: pointer;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.ample-size-options input[type="checkbox"]:checked + span {
+    color: #059669;
+    font-weight: 600;
+}
+
+.ample-size-options span {
+    font-size: 0.9rem;
+    color: #374151;
+    font-weight: 500;
+    user-select: none;
+    line-height: 1em;
+    align-self: center;
+}
+
+/* Dark mode support for size filter */
+@media (prefers-color-scheme: dark) {
+    .ample-size-filter-container {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    
+    .ample-size-filter-label {
+        color: #f1f5f9;
+    }
+    
+    .ample-size-options .filter-option {
+        border-color: transparent;
+    }
+    
+    .ample-size-options .filter-option:hover {
+        background-color: rgba(0, 120, 102, 0.15);
+        border-color: rgba(0, 120, 102, 0.3);
+    }
+    
+    .ample-size-options span {
+        color: #cbd5e1;
+    }
+    
+    .ample-size-options input[type="checkbox"]:checked + span {
+        color: #34d399;
+    }
+}
+
+/* ==========================================================================
+   DOMINANCE FILTER STYLES - Phase 2 Implementation
+   ========================================================================== */
+
+/* Additional specificity for dominance filter container */
+.productFilter .filterDropdown .dropdown .ample-dominance-filter-container {
+    z-index: 2147483647 !important;
+    position: relative !important;
+    background: #ffffff !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Dominance filter container - EXACT copy of size filter styling */
+.ample-dominance-filter-container {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e1e5e9;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    position: relative;
+    z-index: inherit;
+}
+
+.ample-dominance-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.ample-dominance-filter-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #374151;
+    margin: 0;
+}
+
+.ample-dominance-filter-actions {
+    margin-top: 1rem;
+}
+
+/* EXACT copy of dual-range apply button styling */
+.ample-dominance-apply-button {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    background: #059669;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ample-dominance-apply-button:hover {
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.ample-dominance-apply-button:active {
+    transform: translateY(0);
+}
+
+/* Applied state animation */
+.ample-dominance-apply-button.ample-filter-applied {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    animation: ample-pulse 0.6s ease-out;
+}
+
+/* Dominance filter options styling - tighter spacing, better checkbox margin */
+.ample-dominance-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 1rem 0;
+    line-height: 1em;
+}
+
+.ample-dominance-options .filter-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    line-height: 1em;
+}
+
+.ample-dominance-options .filter-option:hover {
+    background-color: #f9fafb;
+}
+
+.ample-dominance-options input[type="checkbox"] {
+    margin: 0 0.5rem 0 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #059669;
+    cursor: pointer;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.ample-dominance-options input[type="checkbox"]:checked + label {
+    color: #059669;
+    font-weight: 600;
+}
+
+.ample-dominance-options label {
+    font-size: 0.9rem;
+    color: #374151;
+    font-weight: 500;
+    user-select: none;
+    cursor: pointer;
+    flex: 1;
+    line-height: 1em;
+    align-self: center;
+}
+
+/* Dark mode support for dominance filter */
+@media (prefers-color-scheme: dark) {
+    .ample-dominance-filter-container {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    
+    .ample-dominance-filter-label {
+        color: #f1f5f9;
+    }
+    
+    .ample-dominance-options .filter-option {
+        border-color: transparent;
+    }
+    
+    .ample-dominance-options .filter-option:hover {
+        background-color: rgba(0, 120, 102, 0.15);
+        border-color: rgba(0, 120, 102, 0.3);
+    }
+    
+    .ample-dominance-options label {
+        color: #cbd5e1;
+    }
+    
+    .ample-dominance-options input[type="checkbox"]:checked + label {
+        color: #34d399;
+    }
+}
+
+/* ==========================================================================
+   TERPENES FILTER STYLES - ABBA ISSUE #11 PHASE 1
+   ========================================================================== */
+
+/* Terpenes filter container - EXACT copy of size/dominance styling */
+.ample-terpenes-filter-container {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e1e5e9;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    position: relative;
+}
+
+/* Terpenes filter header - EXACT copy of size/dominance */
+.ample-terpenes-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.ample-terpenes-filter-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #374151;
+    margin: 0;
+}
+
+/* Terpenes filter actions */
+.ample-terpenes-filter-actions {
+    margin-top: 1rem;
+}
+
+.ample-terpenes-apply-button {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    background: #059669;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ample-terpenes-apply-button:hover {
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.ample-terpenes-apply-button:active {
+    transform: translateY(0);
+}
+
+/* Applied state animation */
+.ample-terpenes-apply-button.ample-filter-applied {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    animation: ample-pulse 0.6s ease-out;
+}
+
+/* Terpenes filter options - with scrolling for large lists */
+.ample-terpenes-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 1rem 0;
+    max-height: 280px; /* Show ~8-9 options before scrolling */
+    overflow-y: auto;
+    padding-right: 8px; /* Space for scrollbar */
+    padding-left: 10px; /* Prevent checkbox cutoff */
+}
+
+.ample-terpenes-options .filter-option {
+    padding: 0;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.ample-terpenes-options .filter-option input[type="checkbox"] {
+    margin: 0;
+    margin-right: 0.75rem;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #059669;
+}
+
+.ample-terpenes-options .filter-option label {
+    color: rgb(55, 65, 81);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14.4px;
+    font-weight: 500;
+    line-height: 14.4px;
+    letter-spacing: -0.176px;
+    text-transform: uppercase;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+    cursor: pointer;
+    margin: 0;
+    flex: 1;
+}
+
+/* Selected state */
+.ample-terpenes-options .filter-option input[type="checkbox"]:checked + label {
+    font-weight: 600;
+    color: #059669;
+}
+
+/* Dark mode support for terpenes filter */
+@media (prefers-color-scheme: dark) {
+    .ample-terpenes-filter-container {
+        background: #1f2937;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .ample-terpenes-options .filter-option {
+        color: #e5e7eb;
+    }
+    
+    .ample-terpenes-options .filter-option:hover {
+        background-color: #374151;
+    }
+    
+    .ample-terpenes-options label {
+        color: #cbd5e1;
+    }
+    
+    .ample-terpenes-options input[type="checkbox"]:checked + label {
+        color: #34d399;
+    }
+}
+
+/* ==========================================================================
+   BRAND FILTER STYLES - Phase 2 Implementation (ABBA Issue #12)
+   ========================================================================== */
+
+/* Additional specificity for brand filter container */
+.productFilter .filterDropdown .dropdown .ample-brand-filter-container {
+    z-index: 2147483647 !important;
+    position: relative !important;
+    background: #ffffff !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Brand filter container - EXACT copy of dominance filter styling */
+.ample-brand-filter-container {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e1e5e9;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    position: relative;
+    z-index: inherit;
+}
+
+.ample-brand-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.ample-brand-filter-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #374151;
+    margin: 0;
+}
+
+.ample-brand-filter-actions {
+    margin-top: 1rem;
+}
+
+/* EXACT copy of dominance apply button styling */
+.ample-brand-apply-button {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    background: #059669;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ample-brand-apply-button:hover {
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.ample-brand-apply-button:active {
+    transform: translateY(0);
+}
+
+/* Applied state animation */
+.ample-brand-apply-button.ample-filter-applied {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    animation: ample-pulse 0.6s ease-out;
+}
+
+/* Brand filter options styling - with scrolling for large lists */
+.ample-brand-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin: 1rem 0;
+    line-height: 1em;
+    max-height: 300px; /* Show ~10-12 options before scrolling */
+    overflow-y: auto;
+    padding-right: 8px; /* Space for scrollbar */
+    padding-left: 5px; /* Prevent hover shift */
+}
+
+.ample-brand-options .filter-option {
+    padding: 0.25rem 0.5rem;
+    margin-bottom: 0px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.15s ease;
+}
+
+.ample-brand-options .filter-option:hover {
+    background-color: #f9fafb;
+}
+
+.ample-brand-options input[type="checkbox"] {
+    margin: 0;
+    margin-right: 0.75rem;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #059669;
+}
+
+.ample-brand-options input[type="checkbox"]:checked + label {
+    color: #059669;
+    font-weight: 600;
+}
+
+.ample-brand-options label {
+    color: rgb(55, 65, 81);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14.4px;
+    font-weight: 500;
+    line-height: 14.4px;
+    letter-spacing: -0.176px;
+    text-transform: uppercase;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+    cursor: pointer;
+    margin: 0;
+    flex: 1; /* Make label expand to fill available width */
+}
+
+/* Dark mode support for brand filter */
+@media (prefers-color-scheme: dark) {
+    .ample-brand-filter-container {
+        background: #1e293b;
+        border-color: #334155;
+    }
+    
+    .ample-brand-filter-label {
+        color: #f1f5f9;
+    }
+    
+    .ample-brand-options .filter-option {
+        border-color: transparent;
+    }
+    
+    .ample-brand-options .filter-option:hover {
+        background-color: rgba(0, 120, 102, 0.15);
+        border-color: rgba(0, 120, 102, 0.3);
+    }
+    
+    .ample-brand-options label {
+        color: #cbd5e1;
+    }
+    
+    .ample-brand-options input[type="checkbox"]:checked + label {
+        color: #34d399;
+    }
+}
+
+/* ==========================================================================
+   CATEGORY FILTER STYLES - Phase 3 Implementation (ABBA Issue #12)
+   ========================================================================== */
+
+/* Additional specificity for category filter container */
+.productFilter .filterDropdown .dropdown .ample-category-filter-container {
+    z-index: 2147483647 !important;
+    position: relative !important;
+    background: #ffffff !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Category filter container - EXACT copy of terpenes filter styling with min-width */
+.ample-category-filter-container {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e1e5e9;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    position: relative;
+    z-index: inherit;
+    min-width: 375px; /* Prevent text wrapping on long category names */
+}
+
+.ample-category-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.ample-category-filter-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #374151;
+    margin: 0;
+}
+
+.ample-category-filter-actions {
+    margin-top: 1rem;
+}
+
+/* EXACT copy of terpenes apply button styling */
+.ample-category-apply-button {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    background: #059669;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ample-category-apply-button:hover {
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.ample-category-apply-button:active {
+    transform: translateY(0);
+}
+
+/* Applied state animation */
+.ample-category-apply-button.ample-filter-applied {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    animation: ample-pulse 0.6s ease-out;
+}
+
+/* Category filter options styling - with scrolling for large lists */
+.ample-category-options {
+    margin: 1rem 0;
+    max-height: 320px; /* Show ~12-14 options before scrolling */
+    overflow-y: auto;
+    padding-right: 8px; /* Space for scrollbar */
+    padding-left: 5px; /* Prevent hover shift */
+}
+
+.ample-category-options .filter-option {
+    padding: 0.25rem 0.5rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.15s ease;
+}
+
+.ample-category-options .filter-option:hover {
+    background-color: #f9fafb;
+}
+
+.ample-category-options input[type="checkbox"] {
+    margin: 0;
+    margin-right: 0.75rem;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #059669;
+}
+
+.ample-category-options input[type="checkbox"]:checked + label {
+    color: #059669;
+    font-weight: 600;
+}
+
+.ample-category-options label {
+    color: rgb(55, 65, 81);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 14.4px;
+    font-weight: 500;
+    line-height: 14.4px;
+    letter-spacing: -0.176px;
+    text-transform: uppercase;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+    cursor: pointer;
+    margin: 0;
+    flex: 1; /* Make label expand to fill available width */
+}
+
+/* Style for hierarchical category labels (Parent > Child) */
+.ample-category-options label .category-parent {
+    color: #9ca3af; /* Lighter grey for parent part */
+    font-weight: 400;
+}
+
+.ample-category-options label .category-separator {
+    color: #9ca3af; /* Lighter grey for > separator */
+    font-weight: 400;
+    margin: 0 0.25rem;
+}
+
+.ample-category-options label .category-child {
+    color: rgb(55, 65, 81); /* Normal color for child part */
+    font-weight: 500;
+}
+
+/* Dark mode support for category filter */
+@media (prefers-color-scheme: dark) {
+    .ample-category-filter-container {
+        background: #1f2937;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .ample-category-options .filter-option {
+        color: #e5e7eb;
+    }
+    
+    .ample-category-options .filter-option:hover {
+        background-color: #374151;
+    }
+    
+    .ample-category-options label {
+        color: #cbd5e1;
+    }
+    
+    .ample-category-options input[type="checkbox"]:checked + label {
+        color: #34d399;
+    }
+}
+
+/* Custom scrollbar styling for filter lists */
+.ample-terpenes-options::-webkit-scrollbar,
+.ample-brand-options::-webkit-scrollbar,
+.ample-category-options::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ample-terpenes-options::-webkit-scrollbar-track,
+.ample-brand-options::-webkit-scrollbar-track,
+.ample-category-options::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.ample-terpenes-options::-webkit-scrollbar-thumb,
+.ample-brand-options::-webkit-scrollbar-thumb,
+.ample-category-options::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.ample-terpenes-options::-webkit-scrollbar-thumb:hover,
+.ample-brand-options::-webkit-scrollbar-thumb:hover,
+.ample-category-options::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Firefox scrollbar styling */
+.ample-terpenes-options,
+.ample-brand-options,
+.ample-category-options {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+}

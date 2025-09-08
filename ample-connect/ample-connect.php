@@ -70,6 +70,8 @@ define('AMPLE_CONNECT_WOO_ORDER_URL', AMPLE_CONNECT_API_BASE_URL . '/integration
 
 // Include the main plugin class. 
 require_once plugin_dir_path(__FILE__) . 'includes/utility.php';
+require_once plugin_dir_path(__FILE__) . 'includes/debug-helper.php';
+require_once plugin_dir_path(__FILE__) . 'includes/shop-debug-hook.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-ample-session.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-ample-connect.php';
 require_once plugin_dir_path(__FILE__) . 'includes/class-ample-token-manager.php';

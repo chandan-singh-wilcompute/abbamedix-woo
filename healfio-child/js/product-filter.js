@@ -1,22 +1,4 @@
- document.querySelectorAll('.filterDropdown .toggleBtn').forEach(button => {
-    button.addEventListener('click', () => {
-      const dropdown = button.nextElementSibling;
-      const parent = button.closest('.filterDropdown');
-      const isOpen = dropdown.style.display === 'block';
-
-      // Close all dropdowns, remove active and selected classes
-      document.querySelectorAll('.filterDropdown .dropdown').forEach(d => d.style.display = 'none');
-      document.querySelectorAll('.filterDropdown .toggleBtn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.filterDropdown').forEach(fd => fd.classList.remove('selected'));
-
-      // If this one was closed, open it and add classes
-      if (!isOpen) {
-        dropdown.style.display = 'block';
-        button.classList.add('active');
-        parent.classList.add('selected');
-      }
-    });
-  });
+// Dropdown functionality moved to product-filter-dropdown.js to avoid conflicts
 
   const rangeInput = document.querySelectorAll(".range-input input"),
   priceInput = document.querySelectorAll(".price-input input"),

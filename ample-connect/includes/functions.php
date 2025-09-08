@@ -24,7 +24,6 @@ function is_login_page() {
     return in_array($GLOBALS['pagenow'], ['wp-login.php', 'wp-register.php']);
 }
 
-
 function setup_session_for_user_once() {
     // Avoid admin, login pages, or AJAX calls
     if (is_admin() || is_login_page() || wp_doing_ajax()) {
@@ -40,12 +39,13 @@ function setup_session_for_user_once() {
 add_action('template_redirect', 'setup_session_for_user_once');
 
 function setup_session_for_user() {
-    ample_connect_log("Setup session for user called");
+    
     // User must be logged in
     if (!is_user_logged_in()) {
         return;
     }
 
+    ample_connect_log("Setup session for user called");
     $user = wp_get_current_user();
 
     // Check if session is initialized and has required data
@@ -141,6 +141,14 @@ function custom_update_user_billing_address($user_id, $load_address)
         return;
     }
 
+    // Don't update during checkout/order placement to avoid unnecessary API calls
+    // Check if we're in checkout context or processing an order
+    if (is_admin() || wp_doing_ajax() || 
+        (function_exists('is_checkout') && is_checkout()) ||
+        (isset($_POST['woocommerce_checkout_place_order']) || isset($_POST['_wpnonce']))) {
+        return;
+    }
+
     // Check if the updated address is billing address
     if ($load_address !== 'billing') {
         return;
@@ -172,6 +180,14 @@ function custom_update_user_shipping_address($user_id, $load_address)
 
     global $ample_connect_settings;
     if (!$ample_connect_settings['client_profile_update_enabled']) {
+        return;
+    }
+
+    // Don't update during checkout/order placement to avoid unnecessary API calls
+    // Check if we're in checkout context or processing an order
+    if (is_admin() || wp_doing_ajax() || 
+        (function_exists('is_checkout') && is_checkout()) ||
+        (isset($_POST['woocommerce_checkout_place_order']) || isset($_POST['_wpnonce']))) {
         return;
     }
 
@@ -230,7 +246,10 @@ function save_api_products_to_temp_file() {
         wp_send_json_error( 'Failed to write file' );
     }
 
-    wp_send_json_success( 'Product data saved to file' );
+    wp_send_json_success( array(
+        'message' => 'Product data saved to file',
+        'total_products' => count( $products )
+    ) );
 
 }
 
@@ -246,7 +265,12 @@ function process_product_batch_from_file( $batch_size = 50 ) {
 
     if ( empty( $all_products ) ) {
         unlink( $file_path );
-        return 'Done. File deleted.';
+        return array(
+            'processed' => 0,
+            'remaining' => 0,
+            'message' => 'Done. File deleted.',
+            'completed' => true
+        );
     }
 
     // Get the first N products
@@ -261,10 +285,11 @@ function process_product_batch_from_file( $batch_size = 50 ) {
     // Save the remaining data back to file
     file_put_contents( $file_path, json_encode( $all_products ) );
 
-    return 'Processed batch of ' . count( $batch ) . ' and ' .
-    
-    
-    count($all_products) . ' products remaining!';
+    return array(
+        'processed' => count( $batch ),
+        'remaining' => count( $all_products ),
+        'message' => 'Processed batch of ' . count( $batch ) . ' and ' . count( $all_products ) . ' products remaining!'
+    );
 }
 
 add_action( 'wp_ajax_run_product_batch_processing', 'handle_ajax_product_batch' );
@@ -1574,26 +1599,6 @@ function custom_discount_ajax_script() {
             });
         }
     });
-
-
-    // jQuery(function($) {
-    //     function applyCustomDiscounts() {
-    //         console.log("Apply custom discount is called");
-    //         var discountId = $('.apply-discount:checked').val() || '';
-    //         var policyPercent = $('.apply-policy-discount:checked').data('percentage') || '';
-    //         var policyId = $('.apply-policy-discount:checked').val() || '';
-
-    //         $('#applied_custom_discount').val(discountId);
-    //         $('#applied_policy_discount').val(policyPercent);
-    //         $('#applied_policy_id').val(policyId);
-
-    //         $('body').trigger('update_checkout');
-    //     }
-
-    //     $('.apply-discount, .apply-policy-discount').on('change', function () {
-    //         applyCustomDiscounts();
-    //     });
-    // });
     </script>
     <?php
 }
@@ -1645,22 +1650,6 @@ function handle_update_discounts() {
 
     // 🔹 API calls for policies
     if (!empty($to_apply_policies)) {
-        // $policy_events = Ample_Session_Cache::get('policy_events', $policy_events);
-        // foreach ($to_apply_policies as $policy_id => $policy) {
-        //     $flag = 1;
-        //     if(isset($policy_events) && is_array($policy_events)) {
-        //         foreach($policy_events as $p_e) {
-        //             if ($p_e['policy_id'] == $policy_id) {
-        //                 $flag = 0;
-        //                 break;
-        //             }
-                        
-        //         }
-        //     }
-        //     if($flag) { 
-        //         $policy_data = add_policy_to_order($policy_id);
-        //     }
-        // }
         foreach ($to_apply_policies as $policy_id => $policy) {
             $return_data[] = add_policy_to_order($policy_id);
         }
@@ -1692,19 +1681,6 @@ function get_applied_discounts() {
 }
 
 
-// add_action('woocommerce_checkout_update_order_review', 'save_custom_discounts_to_session');
-// function save_custom_discounts_to_session($post_data) {
-//     parse_str($post_data, $parsed_data);
-
-//     $custom_discount = sanitize_text_field($parsed_data['applied_custom_discount'] ?? '');
-//     $policy_discount = floatval($parsed_data['applied_policy_discount'] ?? 0);
-//     $policy_id = floatval($parsed_data['applied_policy_id'] ?? 0);
-
-//     Ample_Session_Cache::set('applied_custom_discount', $custom_discount);
-//     Ample_Session_Cache::set('applied_policy_discount', $policy_discount);
-//     Ample_Session_Cache::set('applied_policy_id', $policy_id);
-// }
-
 add_filter( 'woocommerce_add_to_cart_fragments', 'healfio_update_cart_total_fragment' );
 function healfio_update_cart_total_fragment( $fragments ) {
     ob_start();
@@ -1725,7 +1701,6 @@ function healfio_update_cart_total_fragment( $fragments ) {
     $fragments['.order-total'] = ob_get_clean();
     return $fragments;
 }
-
 
 // OPTIMIZED: This functionality moved to ample_optimized_cart_totals_calculation
 add_action('woocommerce_cart_calculate_fees', 'apply_selected_custom_discount', 20, 1);
@@ -1781,64 +1756,6 @@ function apply_selected_custom_discount($cart) {
             $cart->add_fee($p['desc'], -$discount_amount, false);
         }
     }
-
-    
-
-    // $discount_id = WC()->session->get('applied_custom_discount', '');
-    // $policy_percent = floatval(WC()->session->get('applied_policy_discount', 0));
-    // $policy_id = WC()->session->get('applied_policy_id', '');
-
-    // // Apply discount code amount
-    // $discount_codes = Ample_Session_Cache::get('applicable_discounts', []);
-    // $applied_discounts = Ample_Session_Cache::get('applied_discounts', []);
-    // foreach($applied_discounts as $dis) {
-    //     remove_discount_from_order($dis['id']);
-    // }
-    // foreach ($discount_codes as $discount) {
-    //     if ($discount['id'] === $discount_id) {
-    //         add_discount_to_order($discount_id);
-    //         $amount = floatval($discount['amount']) / 100;
-    //         $desc = esc_html($discount['description'] ?? $discount['code']);
-    //         $cart->add_fee($desc, -$amount);
-    //         break;
-    //     }
-    // }
-
-    // $policies = Ample_Session_Cache::get('applicable_policies', []);
-    // $policy_events = Ample_Session_Cache::get('policy_events', $policy_events);
-    // // Apply percentage discount from policy
-    // foreach ($policies as $policy) {
-    //     if ($policy['id'] == $policy_id) {
-    //         $flag = 1;
-    //         if(isset($policy_events) && is_array($policy_events)) {
-    //             foreach($policy_events as $p_e) {
-    //                 if ($p_e['policy_id'] == $policy_id) {
-    //                     $flag = 0;
-    //                     break;
-    //                 }
-                        
-    //             }
-    //         }
-    //         if($flag) { 
-    //             $policy_data = add_policy_to_order($policy_id);
-    //         }
-
-    //         $policy_percent = $policy['percent'];
-    //         $cart_total = 0;
-    //         foreach ( $cart->get_cart() as $item ) {
-    //             $cart_total += $item['line_total'] + $item['line_tax'];
-    //         }
-    //         $cart_total += $cart->get_shipping_total() + $cart->get_shipping_tax();
-    //         $fee_total = 0;
-    //         foreach ( $cart->get_fees() as $fee ) {
-    //             $fee_total += $fee->amount;
-    //         }
-    //         $cart_total += $fee_total;
-    //         $policy_discount = $cart_total * ($policy_percent / 100);
-    //         $cart->add_fee("{$policy['name']} ({$policy_percent}%)", -$policy_discount);
-    //         break;
-    //     }
-    // }
 }
 
 function clear_custom_discount_session() {
@@ -1946,18 +1863,6 @@ function get_gram_quota_data() {
         $prescription_available_grams = 0;
     }
 
-    // $used_grams = 0;
-
-    // foreach (WC()->cart->get_cart() as $cart_item) {
-    //     $product = $cart_item['data'];
-    //     $grams = $product->get_meta('RX Reduction');
-    //     // $package_size_raw = $product->get_attribute('pa_package-sizes'); // "3.5 g"
-    //     // $grams = floatval($package_size_raw);
-    //     if ($grams) {
-    //         $used_grams += floatval($grams) * $cart_item['quantity'];
-    //     }
-    // }
-
     wp_send_json([
         'policy_grams' => $policy_available_grams,
         'prescription_grams' => $prescription_available_grams
@@ -1985,46 +1890,6 @@ add_action('template_redirect', function() {
     if (get_query_var('debug_custom') == 1) {
         // Load WordPress environment
         get_header(); // Output theme header
-
-        // echo '<main id="debug-page" style="padding: 2rem;">';
-        // echo '<h2>Debug Output</h2>';
-        // echo '<pre>';
-
-        // echo "User Id: ";
-        // $user_id = get_current_user_id();
-        // print_r($user_id);
-        
-        // echo "\nOrder items\n";
-        // $cached_order_data = Ample_Session_Cache::get('order_items');
-        // print_r($cached_order_data);
-
-        // echo "custom tax data\n";
-        // $cached_order_data = Ample_Session_Cache::get('custom_tax_data');
-        // print_r($cached_order_data);
-
-        // echo "applicable discounts\n";
-        // $cached_order_data = Ample_Session_Cache::get('applicable_discounts');
-        // print_r($cached_order_data);
-
-        // echo "policy details \n";
-        // $cached_order_data = Ample_Session_Cache::get('policy_details');
-        // print_r($cached_order_data);
-
-        // echo "purchasable products\n";
-        // $p_p = Ample_Session_Cache::get('purchasable_products');
-        // print_r($p_p);
-
-        // echo "order id: ";
-        // $order_id_2 = Ample_Session_Cache::get('order_id');
-        // print_r($order_id_2);
-
-        // echo "\nshipping rates: ";
-        // $shipping_options = Ample_Session_Cache::get('custom_shipping_rates');
-        // print_r($shipping_options);
-
-        // echo '</pre>';
-        // echo '</main>';
-
 
         echo '<div style="background: #f0f0f0; padding: 10px; margin: 10px; border: 1px solid #ccc;">';
         echo '<h3>Ample Connect Session Debug</h3>';
@@ -2063,7 +1928,6 @@ add_action('template_redirect', function() {
         }
         
         echo '</div>';
-
 
         get_footer(); // Output theme footer
         exit;
@@ -2244,6 +2108,16 @@ add_action('wp_ajax_woocommerce_ajax_add_to_cart', 'handle_ajax_add_to_cart');
 add_action('wp_ajax_nopriv_woocommerce_ajax_add_to_cart', 'handle_ajax_add_to_cart');
 
 function handle_ajax_add_to_cart() {
+    // Check if user is logged in
+    if (!is_user_logged_in()) {
+        wp_send_json_error(array(
+            'message' => 'Please log in to add products to cart.',
+            'login_required' => true,
+            'login_url' => wc_get_page_permalink('myaccount')
+        ));
+        return;
+    }
+    
     $product_id = absint($_POST['product_id']);
     $quantity = absint($_POST['quantity']) ?: 1;
     $variation_id = absint($_POST['variation_id']) ?: 0;
@@ -2290,3 +2164,42 @@ function show_manual_discount_note($item_data, $cart_item) {
     return $item_data;
 }
 
+// Handle reset-password
+add_action( 'template_redirect', function() {
+    if ( isset( $_POST['custom_reset_submit'], $_GET['key'], $_GET['login'] ) ) {
+        $user = check_password_reset_key( sanitize_text_field( $_GET['key'] ), sanitize_text_field( $_GET['login'] ) );
+
+        if ( is_wp_error( $user ) ) {
+            wp_safe_redirect( add_query_arg( 'reset-error', 'invalid_link', wp_get_referer() ) );
+            exit;
+        }
+
+        $client_id = get_user_meta($user->ID, "client_id", true);
+
+        $status = Client_Information::fetch_patient_status($client_id);
+
+        if (!$status) {
+            wp_safe_redirect( add_query_arg( 'reset-error', 'no_user', wp_get_referer() ) );
+            exit;
+        }
+
+        if ($status == "Pending Registration") {
+            wp_safe_redirect( add_query_arg( 'reset-error', 'pending_reg', wp_get_referer() ) );
+            exit;
+        }
+
+        $pass1 = sanitize_text_field( $_POST['pass1'] );
+        $pass2 = sanitize_text_field( $_POST['pass2'] );
+
+        if ( empty( $pass1 ) || $pass1 !== $pass2 ) {
+            wp_safe_redirect( add_query_arg( 'reset-error', 'password_mismatch', wp_get_referer() ) );
+            exit;
+        }
+
+        reset_password( $user, $_POST['pass1'] );
+
+        // Redirect after success
+        wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) . '?password-reset=success' );
+        exit;
+    }
+});

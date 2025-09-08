@@ -41,7 +41,7 @@ p:empty {
 }
 a,
 button {
-  transition: all 0.3;
+  transition: all 0.3s;
 }
 button.button {
   border-radius: 0 !important;
@@ -405,13 +405,7 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
   display: inline-block;
   position: relative;
   margin-right: 10px;
-  padding-right: 10px;
-}
-.myProfile p strong:after {
-  position: absolute;
-  right: 0;
-  content: ':';
-  top: 0;
+  padding-right: 5px;
 }
 .myProfile .group2 {
   margin-top: 60px;
@@ -1409,7 +1403,7 @@ a.button.thankyou-button {
   right: 0;
   top: 0;
   content: '+';
-  line-height: 46px;
+  line-height: 40px;
 }
 .productFilter .filterDropdown .toggleBtn.active {
   background: #6EB0BE;
@@ -1435,7 +1429,7 @@ a.button.thankyou-button {
 .productFilter .filterDropdown .dropdown label {
   display: block;
   text-transform: uppercase;
-  margin-bottom: 10px;
+  margin-bottom: 0px;
 }
 .productFilter .btnApply {
   background: #1b5d72;
@@ -2123,14 +2117,16 @@ input[type=number] {
 .productDetails .iconWrapper .icon span {
   width: 48px;
   height: 48px;
-  border-radius: 100%;
+  border-radius: 0; /* Square icons, no rounding (ABBA Issue #49) */
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 0 auto; /* Center the icon above the text (ABBA Issue #49) */
   font-size: 10px;
   color: #ffffff;
   font-family: "Comfortaa", sans-serif;
 }
+/* Terpene icon classes for fallback - kept for unmatched terpenes (ABBA Issue #49) */
 .productDetails .iconWrapper .icon span.myRecene {
   background: url(../healfio-child/img/myrecene.png) center center no-repeat;
 }
@@ -3358,9 +3354,73 @@ li.category-concentrates .swatch-item.selected {
   padding: 5px 10px;
   font-weight: bold;
   line-height: 24px;
+  min-height: 82px; /* Space for 3 lines: title + 2 lines of terpene names */
+  justify-content: center; /* Center content vertically within available space */
+}
+
+/* Fix SELECT SIZE button alignment by constraining THC/CBD section height */
+.prodcard-attributes {
+  min-height: 50px; /* Fixed height for THC/CBD section */
+  max-height: 50px; /* Prevent expansion */
+  overflow: hidden; /* Hide text overflow */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .prodcard-tags p {
   margin-bottom: 0;
+}
+
+/* Rating display in top-right corner - positioned on product image */
+li.product .ratingIcon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 15;
+    /* Only show if it has content */
+    min-width: auto;
+    /* Ensure it's positioned relative to the product item, not the group div */
+    pointer-events: none;
+}
+
+li .ratingIcon .bi-star-fill {
+    color: #ffc107;
+    font-size: 12px;
+}
+
+/* Ensure product card has relative positioning for rating icon overlay */
+li .group {
+    position: relative;
+}
+
+/* Ensure the entire product list item is positioned for the rating overlay */
+ul.products li.product {
+    position: relative;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    li.product .ratingIcon {
+        font-size: 10px;
+        padding: 3px 6px;
+        top: 6px;
+        right: 6px;
+    }
+    
+    li.product .ratingIcon .bi-star-fill {
+        font-size: 11px;
+    }
 }
 .woocommerce ul.products li.product .woocommerce-loop-product__title {
   font-size: 20px;

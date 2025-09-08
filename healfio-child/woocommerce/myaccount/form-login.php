@@ -42,7 +42,7 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
             <div class="container">
                 <?php    if ( isset($_GET['registration']) && $_GET['registration'] === 'success' ) : ?>
                     <div class="woocommerce-message" role="alert">
-                        Registration successful! Please log in.
+                        Registration successful! You will notified after account Approval.
                     </div>
                 <?php endif; ?>
                 <form class="woocommerce-form woocommerce-form-login login" method="post">
