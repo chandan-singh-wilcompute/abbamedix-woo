@@ -1,13 +1,18 @@
- document.querySelectorAll('.filterDropdown .toggleBtn').forEach(button => {
+function closeAllDropdowns() {
+  document.querySelectorAll('.filterDropdown .dropdown').forEach(d => d.style.display = 'none');
+  document.querySelectorAll('.filterDropdown .toggle-btn, .filterDropdown .toggleBtn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.filterDropdown').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.filterDropdown').forEach(fd => fd.classList.remove('selected'));
+}
+
+document.querySelectorAll('.filterDropdown .toggleBtn').forEach(button => {
     button.addEventListener('click', () => {
       const dropdown = button.nextElementSibling;
       const parent = button.closest('.filterDropdown');
       const isOpen = dropdown.style.display === 'block';
 
       // Close all dropdowns, remove active and selected classes
-      document.querySelectorAll('.filterDropdown .dropdown').forEach(d => d.style.display = 'none');
-      document.querySelectorAll('.filterDropdown .toggleBtn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.filterDropdown').forEach(fd => fd.classList.remove('selected'));
+      closeAllDropdowns();
 
       // If this one was closed, open it and add classes
       if (!isOpen) {
@@ -16,15 +21,14 @@
         parent.classList.add('selected');
       }
     });
+});
 
-    // Close all dropdowns on any click outside a filterDropdown
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.filterDropdown')) {
-        closeAllDropdowns();
-      }
-    });
-
-  });
+// Close all dropdowns on any click outside a filterDropdown (only add once!)
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.filterDropdown')) {
+    closeAllDropdowns();
+  }
+});
 
 
   const buttons = document.querySelectorAll('.filterDropdown .toggle-btn');
@@ -48,18 +52,8 @@
       });
     });
 
-    // Close dropdowns on outside click
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.filterDropdown')) {
-        closeAllDropdowns();
-      }
-    });
+    // (Click-outside listener moved to avoid duplicates)
 
-    function closeAllDropdowns() {
-      document.querySelectorAll('.filterDropdown .dropdown').forEach(d => d.style.display = 'none');
-      document.querySelectorAll('.filterDropdown .toggle-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.filterDropdown').forEach(fd => fd.classList.remove('selected'));
-    }
 
 
 

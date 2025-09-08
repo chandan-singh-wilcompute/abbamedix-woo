@@ -91,30 +91,38 @@ if (post_password_required()) {
                 </div>
 
                 <div class="iconWrapper">
+                    <?php 
+                    // Get actual product strain data instead of hardcoded values
+                    global $product;
+                    if ($product) {
+                        $strain = $product->get_attribute('strain');
+                        if ($strain) : ?>
                     <div class="icon">
-                        <span class="sativa">Sativa</span>
-                        <p>25% <br>Sativa</p>
+                        <span class="strain <?php echo sanitize_html_class(strtolower($strain)); ?>">
+                            Dominance
+                        </span>
+                        <p><?php echo esc_html($strain); ?></p>
                     </div>
-
+                        <?php endif; 
+                        
+                        // Get actual terpenes for this product - show up to 5 terpenes (ABBA Issue #49)
+                        $terpenes_list = get_single_product_terpenes_array($product);
+                        if (!empty($terpenes_list)) :
+                            foreach (array_slice($terpenes_list, 0, 5) as $terpene) :
+                                // Get icon data with proper fallback handling
+                                $icon_data = get_terpene_icon_data($terpene);
+                                ?>
                     <div class="icon">
-                        <span class="indica">Indica</span>
-                        <p>75% <br>Indica</p>
+                        <?php if ($icon_data['type'] === 'url') : ?>
+                            <span style="background-image: url('<?php echo esc_url($icon_data['value']); ?>'); background-size: cover; background-position: center;"></span>
+                        <?php else : ?>
+                            <span class="<?php echo esc_attr($icon_data['value']); ?>"></span>
+                        <?php endif; ?>
+                        <p><?php echo esc_html($terpene); ?></p>
                     </div>
-
-                    <div class="icon">
-                        <span class="myRecene"></span>
-                        <p>Myrecene</p>
-                    </div>
-
-                    <div class="icon">
-                        <span class="limonene"></span>
-                        <p>Limonene</p>
-                    </div>
-
-                    <div class="icon">
-                        <span class="linalool"></span>
-                        <p>Linalool</p>
-                    </div>
+                            <?php endforeach;
+                        endif;
+                    } ?>
                 </div>
 
                 <!-- <?php //echo do_shortcode('[show_product_attributes]') ?> -->
@@ -152,6 +160,24 @@ if (post_password_required()) {
         ?>
      
 </div>
+
+<script>
+jQuery(document).ready(function($) {
+    // Handle back button click
+    $('#goback').on('click', function(e) {
+        e.preventDefault();
+        
+        // Check if there's a previous page in history
+        if (document.referrer && document.referrer !== '') {
+            // Go back to the previous page
+            window.history.back();
+        } else {
+            // If no history, go to shop page
+            window.location.href = '<?php echo esc_url(get_permalink(wc_get_page_id("shop"))); ?>';
+        }
+    });
+});
+</script>
 
 <?php do_action('woocommerce_after_single_product'); ?>
 

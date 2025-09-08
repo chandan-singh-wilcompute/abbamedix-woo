@@ -29,6 +29,11 @@ class  Client_Information {
             return false;
         }
 
+        // Safety check: ensure $client is an array and has prescriptions key
+        if (!is_array($client) || !isset($client['prescriptions'])) {
+            return false;
+        }
+
         $prescriptions = $client['prescriptions'];
         Ample_Session_Cache::set('prescriptions', $prescriptions);
         $available_to_order = 0;
@@ -51,7 +56,37 @@ class  Client_Information {
         $needs_renewal = $client['needs_renewal'];
         Ample_Session_Cache::set('status', $status);
         Ample_Session_Cache::set('needs_renewal', $needs_renewal);
+        
+        // Extract and store date of birth if available
+        if (isset($client['birthday']) && !empty($client['birthday'])) {
+            update_user_meta($user_id, 'date_of_birth', $client['birthday']);
+        }
+        
+        // Extract and store the formatted client ID (registration ID)
+        if (isset($client['registration']['id']) && !empty($client['registration']['id'])) {
+            update_user_meta($user_id, 'client_display_id', $client['registration']['id']);
+        }
+        
         return true;
+    }
+
+    public static function fetch_patient_status($client_id) {
+
+        if (!$client_id) {
+            return false;
+        }
+
+        $client_url = AMPLE_CONNECT_WOO_CLIENT_URL . $client_id;
+        $client = ample_request($client_url);
+
+        if (empty($client)) {
+            return false;
+        }
+
+        $registration = $client['registration'];
+        $status = $registration['status'];
+        
+        return $status;
     }
 
 }

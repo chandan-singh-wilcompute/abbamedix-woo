@@ -58,6 +58,18 @@ class WC_Product_Sync {
         <div class="wrap">
             <h1>Ample Product Sync</h1>
             <button id="product_fetch_and_sync" class="button-primary">Sync Products</button>
+            
+            <!-- Progress Indicator -->
+            <div id="sync-progress" style="margin-top: 15px; display: none;">
+                <div style="background: #f0f8ff; border: 1px solid #0073aa; border-radius: 4px; padding: 10px;">
+                    <h4 style="margin-top: 0;">🔄 Sync Progress</h4>
+                    <div id="sync-status" style="margin-bottom: 8px;">Initializing...</div>
+                    <div style="background: #ddd; border-radius: 10px; height: 20px; overflow: hidden;">
+                        <div id="sync-progress-bar" style="background: #0073aa; height: 100%; width: 0%; transition: width 0.3s ease; border-radius: 10px;"></div>
+                    </div>
+                    <div id="sync-details" style="font-size: 12px; color: #666; margin-top: 5px;"></div>
+                </div>
+            </div>
 
             <br/> <br/>
 

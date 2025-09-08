@@ -43,15 +43,20 @@
     </div>
 
     <div class="iconWrapper">
+      <?php 
+      // Get actual product strain data instead of hardcoded values
+      global $product;
+      if ($product) {
+          $strain = $product->get_attribute('strain');
+          if ($strain) : ?>
       <div class="icon">
-        <span class="sativa">Sativa</span>
-        <p>25% <br>Sativa</p>
+        <span class="strain <?php echo sanitize_html_class(strtolower($strain)); ?>">
+          <?php echo esc_html($strain); ?>
+        </span>
+        <p><?php echo esc_html($strain); ?></p>
       </div>
-
-      <div class="icon">
-        <span class="indica">Indica</span>
-        <p>75% <br>Indica</p>
-      </div>
+          <?php endif; 
+      } ?>
 
       <div class="icon">
         <span class="myRecene"></span>

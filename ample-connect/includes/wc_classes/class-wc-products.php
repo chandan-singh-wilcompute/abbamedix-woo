@@ -208,8 +208,11 @@ class WC_Products {
         
         $product->set_description($productData['description'] ?? '');
         $product->set_sku($sku);
-        // $product->set_manage_stock(true);
-        // $product->set_stock_status('instock');
+        
+        // Set stock management for parent variable product
+        $product->set_manage_stock(false); // Variable products don't manage stock at parent level
+        $product->set_stock_status('instock'); // Will be updated after processing variations
+        
         // $product->set_category_ids($category_ids);
         $product->set_attributes($attributes);
 
@@ -223,41 +226,46 @@ class WC_Products {
         }
         
         // Add product image if available
-        // $image_url = $productData['product_image'];
-        // // ample_connect_log($image_url);
-        // if (!empty($image_url)) {
-        //     $attachment_id = $this->download_image_to_media_library($image_url);
-        //     if ($attachment_id) {
-        //         $this->attach_image_to_product($attachment_id, $product_id, true);
-        //         // ample_connect_log("Product attached to the product");
-        //     }
-        // } else {
+        $feature_image_url = $productData['product_image'];
+        $attachment_id = false;
+        // ample_connect_log($image_url);
+        if (!empty($feature_image_url)) {
+            $attachment_id = $this->download_image_to_media_library($feature_image_url);
+        } 
+        // else {
         //     ample_connect_log("product image url not found : " . $productData['id'] . "\n");
         // }
 
         $image_ids = [];
         $prod_images = $productData['product_images'];
-        foreach ($prod_images as $prod_image) {
-            // Download image and add to Media Library
-            $image_id = $this->download_image_to_media_library($prod_image['display_url']);
-            if (!is_wp_error($image_id)) {
-                if ($prod_image['order_index'] == 1)
-                    array_unshift($image_ids, $image_id);
-                else
-                    $image_ids[] = $image_id;
+        if ($prod_images) {
+            foreach ($prod_images as $prod_image) {
+                // Download image and add to Media Library
+                $image_id = $this->download_image_to_media_library($prod_image['display_url']);
+                if (!is_wp_error($image_id)) {
+                    if ($prod_image['order_index'] == 1 && !$attachment_id)
+                        $attachment_id = $image_id;
+                    else
+                        $image_ids[] = $image_id;
+                }
             }
+        }
+        
+        if ($attachment_id) {
+            // featured image
+            $this->attach_image_to_product($attachment_id, $product_id, true);
+            // ample_connect_log("Product attached to the product");
         }
 
         if (!empty($image_ids)) {
-            // First image → Featured image
-            $this->attach_image_to_product($image_ids[0], $product_id, true);
-            // Remaining images → Product gallery
-            if (count($image_ids) > 1) {
-                $this->attach_image_to_product($image_ids[0], $product_id, false);
+            // Product gallery
+            foreach($image_ids as $image_id) {
+                $this->attach_image_to_product($image_id, $product_id, false);
             }
-        } else {
-            ample_connect_log("product image url not found : " . $productData['id'] . "\n");
-        }
+        } 
+        // else {
+        //     ample_connect_log("product image url not found : " . $productData['id'] . "\n");
+        // }
 
         $attributes = [];
 
@@ -295,7 +303,7 @@ class WC_Products {
 
             // Create term if it doesn't exist
             $term = term_exists( $brand_name, 'pa_brand' );
-            if ( ! $term ) {
+            if ( ! $term ) { 
                 $term = wp_insert_term( $brand_name, 'pa_brand' );
             }
             // Assign to product
@@ -345,6 +353,9 @@ class WC_Products {
         $product->set_attributes($attributes);
         $product->save();
 
+        // Track if any variation is in stock
+        $has_stock = false;
+
         // Create variations
         foreach ($productData['skus'] as $sku_data) {
 
@@ -363,7 +374,7 @@ class WC_Products {
             if (in_array($parent_category, ["Extracts", "Beverages", "Topicals"])) {
                 if (is_null($sku_data['net_volume'])) {
                     $net_weight = is_null($sku_data['net_weight']) ? 0 : floatval($sku_data['net_weight']);
-                    $$pack_size = "{$net_weight} g";
+                    $pack_size = "{$net_weight} g";
                 } else {
                     $net_weight = floatval($sku_data['net_volume']);
                     $pack_size = "{$net_weight} ml";
@@ -382,6 +393,7 @@ class WC_Products {
             $variation->set_regular_price($sku_data['unit_price'] ? $sku_data['unit_price'] / 100 : '0');
             // $variation->set_sku($sku_data['product_id'] . '-' . $sku_data['id']);
             $variation->set_manage_stock(true);
+            $variation->save();
 
             // Add cannabinoid meta fields to variation
             $cannabinoid_profile = $sku_data['cannabinoid_profile'] ?? [];
@@ -439,14 +451,11 @@ class WC_Products {
                     $variation->update_meta_data( $meta_key, $value );
                 }
             }
-
-            if ( ! $variation->managing_stock() ) {
-                $variation->set_manage_stock( true );
-            }
             
             if ($sku_data['in_stock']) {
                 $variation->set_stock_quantity( 10 );
                 $variation->set_stock_status( 'instock' );
+                $has_stock = true;
             } else {
                 $variation->set_stock_quantity(0);
                 $variation->set_stock_status('outofstock');
@@ -454,7 +463,28 @@ class WC_Products {
         
             $variation->set_low_stock_amount(5); // set threshold to 5
             $variation->save();
+            
+            // Force clear variation caches
+            wc_delete_product_transients($variation->get_id());
         }
+
+        // Update parent product stock status based on variations
+        if ($has_stock) {
+            $product->set_stock_status('instock');
+            // Also ensure catalog visibility
+            $product->set_catalog_visibility('visible');
+
+        } else {
+            $product->set_stock_status('outofstock');
+        }
+        
+        // Save and sync variation stock with parent
+        $product->save();
+
+        
+        // Debug logging
+        ample_connect_log("Product ID: {$product_id}, Has Stock: " . ($has_stock ? 'true' : 'false') . ", Final Status: " . ($has_stock ? 'instock' : 'outofstock'));
+        
     
         $this->assign_product_to_dynamic_category($product_id, $parent_category, $child_category);
         return $product_id;

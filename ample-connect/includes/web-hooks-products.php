@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) {
     exit;
 }
-require_once dirname(plugin_dir_path(__FILE__)) . '/wc_classes/class-wc-products.php';
+require_once plugin_dir_path(__FILE__) . '/class-wc-products.php';
 
 
 // Webhook for Product Update Notification from Ample
@@ -10,7 +10,6 @@ add_action('rest_api_init', function() {
     register_rest_route('webhooks/v1', '/products', array(
         'methods' => 'POST',
         'callback' => 'handle_products_webhook',
-        'permission_callback' => '__return_true'
     ));
 });
 
@@ -20,7 +19,7 @@ function handle_products_webhook(WP_REST_Request $request) {
 
     $data = $request->get_json_params();
 
-    if (!validate_webhook_request_params($data)) {
+    if (!array_key_exists("webhook_signature", $data) || !array_key_exists("entity_type", $data) || !array_key_exists("event_type", $data) || !array_key_exists("entity_id", $data) || !array_key_exists("refetch_url", $data)) {
         return new WP_REST_Response(array("message" => "Missing Required Data!"), 200);
     }
     
@@ -29,25 +28,25 @@ function handle_products_webhook(WP_REST_Request $request) {
         return $verification;
     }
 
-    if ($data["event_type"] == "update") { 
+    $token = Ample_Connect_API::get_token();
+    if (is_wp_error($token)) {
+        return new WP_REST_Response(array("message" => "Woo Token Error "), 200);
+    }
 
-        /* Sample Request
-        {
-            "entity_id": 20,
-            "entity_type": "Product",
-            "event_type": "update",
-            "changed_on": "2024-10-29T09:34:28.169-04:00",
-            "refetch_url": "/integrations/woocommerce/products/20",
-            "webhook_signature": "secret" -- configurable
-        }
-        */
+    if ($data["event_type"] == "update") {
 
         if ($data['entity_type'] == 'Product') {
             $product_id =  sanitize_text_field($data['entity_id']);
             
-            $product_url = AMPLE_CONNECT_API_BASE_URL . sanitize_text_field($data['refetch_url']);
+            $product_url = AMPLE_CONNECT_API_BASE_URL . sanitize_text_field($data['refetch_url']). '?token=' . $token;
 
-            $product_data = ample_request($product_url);
+            $response = wp_remote_get($product_url, ['timeout' => 300]);
+            if (is_wp_error($response)) {
+                error_log('Error fetching data from API: ' . $response->get_error_message());
+                return;
+            }
+            
+            $product_data = json_decode(wp_remote_retrieve_body($response), true);
             // return new WP_REST_Response(array("message" => $product_data[0]), 200);
             $woo_client = new WC_Products();
             
@@ -63,9 +62,15 @@ function handle_products_webhook(WP_REST_Request $request) {
             $ref_url_parts = explode("/", $refetch_url);
             $product_id = array_pop($ref_url_parts);
 
-            $product_url = AMPLE_CONNECT_API_BASE_URL . sanitize_text_field($data['refetch_url']);
+            $product_url = AMPLE_CONNECT_API_BASE_URL . sanitize_text_field($data['refetch_url']). '?token=' . $token;
 
-            $product_data = ample_request($product_url)[0];
+            $response = wp_remote_get($product_url, ['timeout' => 300]);
+            if (is_wp_error($response)) {
+                error_log('Error fetching data from API: ' . $response->get_error_message());
+                return;
+            }
+            
+            $product_data = json_decode(wp_remote_retrieve_body($response), true)[0];
             $skuData = null;
 
             foreach ($product_data['skus'] as $index => $sku) {
@@ -88,19 +93,7 @@ function handle_products_webhook(WP_REST_Request $request) {
                 return new WP_REST_Response(array("message" => "SKU Doesn't Exist!"), 200);
             }
         }
-
     } else if ($data["event_type"] == "create") { 
-        /* Sample Request
-        {
-            "entity_id": 25,
-            "entity_type": "Sku",
-            "event_type": "create",
-            "changed_on": "2024-10-29T09:34:28.169-04:00",
-            "refetch_url": "/integrations/woocommerce/products/14",
-            "webhook_signature": "secret" -- configurable
-        }
-        */
-        
         if ($data['entity_type'] == 'Product' || $data['entity_type'] == 'Sku') {
 
             if ($data['entity_type'] == 'Product') 
@@ -109,9 +102,16 @@ function handle_products_webhook(WP_REST_Request $request) {
                 $sku_id = sanitize_text_field($data['entity_id']);
 
             
-            $product_url = AMPLE_CONNECT_API_BASE_URL . sanitize_text_field($data['refetch_url']);
+            $product_url = AMPLE_CONNECT_API_BASE_URL . sanitize_text_field($data['refetch_url']). '?token=' . $token;
 
-            $product_data = ample_request($product_url);
+            $response = wp_remote_get($product_url, ['timeout' => 300]);
+
+            if (is_wp_error($response)) {
+                error_log('Error fetching data from API: ' . $response->get_error_message());
+                return;
+            }
+    
+            $product_data = json_decode(wp_remote_retrieve_body($response), true);
             
             $woo_client = new WC_Products();
             
@@ -123,3 +123,4 @@ function handle_products_webhook(WP_REST_Request $request) {
         } 
     }
 }
+

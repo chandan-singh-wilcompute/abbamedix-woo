@@ -5,9 +5,40 @@ if (!defined('ABSPATH')) {
 require_once plugin_dir_path(__FILE__) . '/customer-functions.php';
 
 add_filter('woocommerce_add_to_cart_validation', 'custom_add_to_cart_validation', 10, 5);
-function custom_add_to_cart_validation($passed, $product_id, $quantity, $variation_id = 0, $variations = array()) {
+function custom_add_to_cart_validation($passed, $product_id, $quantity, $variation_id, $variations) {
     
-    if (!is_user_logged_in()) {
+    if (is_user_logged_in()) {
+        // $allowed_skus = get_purchasable_products();
+        $allowed_skus = Ample_Session_Cache::get('purchasable_products');
+        
+        if (!empty($allowed_skus)) {
+            // Extract SKU strings from the complex session structure
+            $sku_strings = array();
+            foreach ($allowed_skus as $product_data) {
+                if (isset($product_data['id'])) {
+                    $sku_strings[] = 'sku-' . $product_data['id'];
+                }
+                // Also extract SKU IDs from nested skus array
+                if (isset($product_data['skus']) && is_array($product_data['skus'])) {
+                    foreach ($product_data['skus'] as $sku_data) {
+                        if (isset($sku_data['id'])) {
+                            $sku_strings[] = $product_data['id'] . '-' . $sku_data['id'];
+                        }
+                    }
+                }
+            }
+            
+            $allowed_ids = get_product_ids_by_skus($sku_strings);
+            
+            if (!in_array($product_id, $allowed_ids)) {
+                wc_add_notice('This product cannot be added to the cart.', 'error');
+                return false;
+            }
+        } else {
+            wc_add_notice('This product cannot be added to the cart.', 'error');
+            return false;
+        }
+    } else {
         wc_add_notice('You need to be logged in to add this product to the cart.', 'error');
         return false;
     }
@@ -42,6 +73,7 @@ function custom_add_to_cart_validation($passed, $product_id, $quantity, $variati
     if ($order_id) {
         // $get_available_to_order = Client_Information::get_available_to_order();
         $get_available_to_order  = Ample_Session_Cache::get('available_to_order');
+        
         if ($get_available_to_order < $total_package_size) {
             wc_add_notice('Insufficient available quantity to order. Only ' . $get_available_to_order . ' grams are available to order.', 'error');
             return false;
@@ -399,6 +431,7 @@ function ample_conditional_login_status_filtering() {
         add_action('woocommerce_product_query', 'filter_products_based_on_login_status', 10);
     }
 }
+// TEMPORARILY DISABLED FOR DEBUG - add_action('woocommerce_product_query', 'filter_products_based_on_login_status');
 function filter_products_based_on_login_status($query) {
     if (is_user_logged_in()) {
         // $allowed_skus = get_purchasable_products();

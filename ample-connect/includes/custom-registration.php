@@ -8,14 +8,7 @@ require_once plugin_dir_path(__FILE__) . '/customer-functions.php';
 
 function custom_registration_enqueue_scripts() {
     // Enqueue script
-    wp_enqueue_script('custom-registration', plugin_dir_url(__FILE__) . '../assets/js/custom-registration.js', array('jquery'), null, true);
     wp_enqueue_script( 'custom-address-validation', plugin_dir_url(__FILE__) . '../assets/js/custom-address-validation.js', array( 'jquery' ), null, true );
-    
-    // Localize the script with ajax_url
-    wp_localize_script('custom-registration', 'custom_registration', array(
-        'ajax_url' => admin_url('admin-ajax.php')
-    ));
-
 
     global $ample_connect_settings;
     if ($ample_connect_settings['account_not_approved_message']){
@@ -218,9 +211,11 @@ function handle_elementor_form($record, $handler) {
         $has_caregiver = isset($form_fields['field_1c2a8a5']) ? 'Yes' : 'No';
         $is_consent = isset($form_fields['field_e365754']) ? 'Yes' : 'No';
 
-        $password = sanitize_text_field($form_fields['password']);
         $billing_phone = sanitize_text_field($form_fields['field_b3f82c6']);
         $alternate_phone = sanitize_text_field($form_fields['field_7134d38']);
+
+        // Random password generation
+        $password = wp_generate_password( 12, true, true );
         
         // Validate form data (add your own validation as needed)
 
@@ -318,6 +313,7 @@ function handle_elementor_form($record, $handler) {
             'mailing_city' => $mailing_city,
             'mailing_province' => $mailing_province,
             'mailing_postal_code' => $mailing_postal_code,
+            'status' => "Pending Registration"
         );
 
         $update_response = update_registration_details_on_ample($client_id, $active_registration_id, $reg_data);

@@ -317,27 +317,18 @@
             container.data('base-price', base);
             }
 
-            // fetch variations via AJAX (server side endpoint you already have)
-            $.ajax({
-            url: wc_add_to_cart_params.ajax_url,
-            method: 'POST',
-            data: { action: 'get_variations_for_product', product_id: productId }
-            }).done(function(res){
-            variations = (res && res.success && res.data) ? res.data : [];
+            // Read variations from data attribute (no AJAX needed!)
+            const variationsData = container.data('variations');
+            variations = variationsData || [];
             loaded = true;
             container.data('variations', variations);
-            // process queued clicks
+            
+            // process queued clicks immediately since data is available
             while (queued.length) {
                 const sw = queued.shift();
                 processSwatchClick(sw);
             }
             container.trigger('variations_loaded');
-            }).fail(function(){
-            variations = [];
-            loaded = true;
-            container.data('variations', variations);
-            container.trigger('variations_loaded');
-            });
 
             // delegated click handler attached to container
             container.on('click', '.swatch-item', function(e){
@@ -688,6 +679,29 @@
                 .done(function(response) {
                     console.log('Single product AJAX response:', response);
                     
+                    // Check if login is required
+                    if (response && !response.success && response.data && response.data.login_required) {
+                        console.log('Login required for single product add to cart');
+                        
+                        // Show login required toast
+                        showToast('Please log in to add products to cart.', 'error');
+                        
+                        // Reset button
+                        $button.prop('disabled', false).text(originalButtonText);
+                        
+                        // Redirect to login page after a short delay
+                        setTimeout(function() {
+                            if (response.data.login_url) {
+                                window.location.href = response.data.login_url;
+                            } else {
+                                // Fallback to WordPress login
+                                window.location.href = '/wp-login.php?redirect_to=' + encodeURIComponent(window.location.href);
+                            }
+                        }, 2000);
+                        
+                        return;
+                    }
+                    
                     if (response && response.fragments) {
                         // Update cart fragments
                         $.each(response.fragments, function(key, value) {
@@ -736,12 +750,49 @@
                 .fail(function(xhr, status, error) {
                     console.error('Single product AJAX failed:', status, error, xhr.responseText);
                     
+                    // Try to parse response to check for login requirement
+                    let response = null;
+                    try {
+                        response = JSON.parse(xhr.responseText);
+                    } catch (e) {
+                        console.log('Could not parse single product error response');
+                    }
+                    
+                    // Check if login is required in error response
+                    if (response && response.data && response.data.login_required) {
+                        console.log('Login required (from single product error handler)');
+                        
+                        // Show login required toast
+                        showToast('Please log in to add products to cart.', 'error');
+                        
+                        // Reset button
+                        $button.prop('disabled', false).text(originalButtonText);
+                        singleProductProcessing = false;
+                        
+                        // Redirect to login page after a short delay
+                        setTimeout(function() {
+                            if (response.data.login_url) {
+                                window.location.href = response.data.login_url;
+                            } else {
+                                // Fallback to WordPress login
+                                window.location.href = '/wp-login.php?redirect_to=' + encodeURIComponent(window.location.href);
+                            }
+                        }, 2000);
+                        
+                        return;
+                    }
+                    
                     // Show error feedback
                     $button.text('Error - Try Again');
                     
-                    // Show error toast
+                    // Use server error message if available, otherwise generic message
                     const productName = $('.product_title, .entry-title, h1.product_title, h1.entry-title, .product-title, .single-product h1, .single-product .product_title, .singleProductContainer .product-title').first().text().trim() || 'Product';
-                    showToast(`Failed to add ${productName} to cart. Please try again.`, 'error');
+                    const errorMessage = response && response.data && response.data.message 
+                        ? response.data.message 
+                        : `Failed to add ${productName} to cart. Please try again.`;
+                    
+                    // Show error toast
+                    showToast(errorMessage, 'error');
                 })
                 .always(function() {
                     // Always reset after delay regardless of success/failure
@@ -923,7 +974,38 @@
                 success: function(response) {
                     console.log('Add to cart success:', response);
                     
-                    // Handle WooCommerce response
+                    // Check if login is required
+                    if (response && !response.success && response.data && response.data.login_required) {
+                        console.log('Login required for add to cart');
+                        
+                        // Get product name for login toast
+                        const productName = $card.find('.woocommerce-loop-product__title, .product-title, h3 a, h2 a').first().text().trim() || 'Product';
+                        
+                        // Show login required toast
+                        showToast('Please log in to add products to cart.', 'error');
+                        
+                        // Reset button
+                        $button.prop('disabled', false).text(originalText);
+                        $card.removeClass('adding-to-cart');
+                        
+                        // Remove global overlay and re-enable all buttons
+                        hideGlobalOverlay();
+                        $('.single_add_to_cart_button').prop('disabled', false);
+                        
+                        // Redirect to login page after a short delay
+                        setTimeout(function() {
+                            if (response.data.login_url) {
+                                window.location.href = response.data.login_url;
+                            } else {
+                                // Fallback to WordPress login
+                                window.location.href = '/wp-login.php?redirect_to=' + encodeURIComponent(window.location.href);
+                            }
+                        }, 2000);
+                        
+                        return;
+                    }
+                    
+                    // Handle WooCommerce response for successful add to cart
                     if (response.success && response.data) {
                         // Update cart fragments if available
                         if (response.data.fragments) {
@@ -938,36 +1020,96 @@
                         
                         // Refresh gram quota information
                         refreshGramQuota();
-                    }
-                    
-                    // Get product name for toast
-                    const productName = $card.find('.woocommerce-loop-product__title, .product-title, h3 a, h2 a').first().text().trim() || 'Product';
-                    
-                    // Show toast notification
-                    showToast(`${productName} added to cart!`, 'success');
-                    
-                    // Show success feedback on button
-                    $button.text('Added!');
-                    $card.addClass('added-to-cart');
-                    
-                    // Reset button after delay
-                    setTimeout(function() {
+                        
+                        // Get product name for toast
+                        const productName = $card.find('.woocommerce-loop-product__title, .product-title, h3 a, h2 a').first().text().trim() || 'Product';
+                        
+                        // Show success toast notification
+                        showToast(`${productName} added to cart!`, 'success');
+                        
+                        // Show success feedback on button
+                        $button.text('Added!');
+                        $card.addClass('added-to-cart');
+                        
+                        // Reset button after delay
+                        setTimeout(function() {
+                            $button.prop('disabled', false).text(originalText);
+                            $card.removeClass('adding-to-cart added-to-cart');
+                            
+                            // Remove global overlay and re-enable all buttons
+                            hideGlobalOverlay();
+                            $('.single_add_to_cart_button').prop('disabled', false);
+                        }, 2000);
+                    } else {
+                        // Handle case where response indicates failure but not login required
+                        console.error('Add to cart failed:', response);
+                        
+                        const productName = $card.find('.woocommerce-loop-product__title, .product-title, h3 a, h2 a').first().text().trim() || 'Product';
+                        const errorMessage = response && response.data && response.data.message 
+                            ? response.data.message 
+                            : `Failed to add ${productName} to cart. Please try again.`;
+                        
+                        // Show error toast
+                        showToast(errorMessage, 'error');
+                        
+                        // Reset button
                         $button.prop('disabled', false).text(originalText);
-                        $card.removeClass('adding-to-cart added-to-cart');
+                        $card.removeClass('adding-to-cart');
                         
                         // Remove global overlay and re-enable all buttons
                         hideGlobalOverlay();
                         $('.single_add_to_cart_button').prop('disabled', false);
-                    }, 2000);
+                    }
                 },
                 error: function(xhr, status, error) {
                     console.error('Add to cart failed:', status, error, xhr.responseText);
                     
+                    // Try to parse response to check for login requirement
+                    let response = null;
+                    try {
+                        response = JSON.parse(xhr.responseText);
+                    } catch (e) {
+                        console.log('Could not parse error response');
+                    }
+                    
+                    // Check if login is required in error response
+                    if (response && response.data && response.data.login_required) {
+                        console.log('Login required (from error handler)');
+                        
+                        // Show login required toast
+                        showToast('Please log in to add products to cart.', 'error');
+                        
+                        // Reset button
+                        $button.prop('disabled', false).text(originalText);
+                        $card.removeClass('adding-to-cart');
+                        
+                        // Remove global overlay and re-enable all buttons
+                        hideGlobalOverlay();
+                        $('.single_add_to_cart_button').prop('disabled', false);
+                        
+                        // Redirect to login page after a short delay
+                        setTimeout(function() {
+                            if (response.data.login_url) {
+                                window.location.href = response.data.login_url;
+                            } else {
+                                // Fallback to WordPress login
+                                window.location.href = '/wp-login.php?redirect_to=' + encodeURIComponent(window.location.href);
+                            }
+                        }, 2000);
+                        
+                        return;
+                    }
+                    
                     // Get product name for error toast
                     const productName = $card.find('.woocommerce-loop-product__title, .product-title, h3 a, h2 a').first().text().trim() || 'Product';
                     
+                    // Use server error message if available, otherwise generic message
+                    const errorMessage = response && response.data && response.data.message 
+                        ? response.data.message 
+                        : `Failed to add ${productName} to cart. Please try again.`;
+                    
                     // Show error toast
-                    showToast(`Failed to add ${productName} to cart. Please try again.`, 'error');
+                    showToast(errorMessage, 'error');
                     
                     // Show error feedback on button
                     $button.text('Try Again');

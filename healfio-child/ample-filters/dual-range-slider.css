@@ -1,0 +1,341 @@
+/**
+ * Ample Dual Range Slider - CSS
+ * 
+ * Modern, responsive dual-range slider component
+ * Provides proper draggable handles like OCS.ca reference
+ * 
+ * @package AmpleFilter
+ * @version 1.0.0
+ * @since 2025-08-29
+ * @author Claude Code
+ */
+
+/* ==========================================================================
+   DUAL RANGE SLIDER CONTAINER
+   ========================================================================== */
+
+.ample-dual-range-container {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e1e5e9;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ample-dual-range-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.ample-dual-range-label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #374151;
+    margin: 0;
+}
+
+.ample-dual-range-values {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: #6b7280;
+    font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.ample-dual-range-separator {
+    color: #9ca3af;
+}
+
+/* ==========================================================================
+   SLIDER TRACK AND COMPONENTS
+   ========================================================================== */
+
+.ample-dual-range-slider {
+    position: relative;
+    height: 40px;
+    margin: 1rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.ample-dual-range-track {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    transform: translateY(-50%);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.ample-dual-range-highlight {
+    position: absolute;
+    top: 50%;
+    height: 6px;
+    background: #059669;
+    border-radius: 3px;
+    transform: translateY(-50%);
+    transition: all 0.15s ease;
+    box-shadow: 0 1px 3px rgba(5, 150, 105, 0.3);
+}
+
+/* ==========================================================================
+   RANGE INPUTS (INVISIBLE BUT FUNCTIONAL)
+   ========================================================================== */
+
+.ample-dual-range-input {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 30px; /* Increased height for better interaction */
+    opacity: 0;
+    cursor: default;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    outline: none;
+    z-index: 1; /* Lower z-index - visual thumbs handle interaction now */
+    transform: translateY(-50%);
+    pointer-events: none; /* Disable for direct thumb interaction */
+}
+
+.ample-dual-range-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.01); /* Nearly transparent but still clickable */
+    cursor: grab !important;
+    border: none;
+    position: relative;
+    z-index: 100;
+    margin-top: -5px; /* Center better on track */
+}
+
+.ample-dual-range-input::-moz-range-thumb {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.01); /* Nearly transparent but still clickable */
+    cursor: grab !important;
+    border: none;
+    -moz-appearance: none;
+    position: relative;
+    z-index: 100;
+}
+
+.ample-dual-range-input:active::-webkit-slider-thumb {
+    cursor: grabbing;
+}
+
+.ample-dual-range-input:active::-moz-range-thumb {
+    cursor: grabbing;
+}
+
+/* Ensure proper stacking */
+.ample-dual-range-min {
+    z-index: 1;
+}
+
+.ample-dual-range-max {
+    z-index: 2;
+}
+
+/* ==========================================================================
+   CUSTOM THUMB HANDLES (VISIBLE)
+   ========================================================================== */
+
+.ample-dual-range-thumb {
+    position: absolute;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    background: #ffffff;
+    border: 3px solid #059669;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: grab; /* Show grab cursor - will be set by JavaScript */
+    z-index: 100; /* Higher than range inputs for direct interaction */
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    pointer-events: auto; /* Make interactive - will be set by JavaScript */
+}
+
+.ample-dual-range-thumb:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+}
+
+.ample-dual-range-container:active .ample-dual-range-thumb {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
+/* Different colors for min/max thumbs for better UX */
+.ample-dual-range-thumb-min {
+    border-color: inherit;
+}
+
+.ample-dual-range-thumb-max {
+    border-color: inherit;
+    background: #f9fafb;
+}
+
+/* ==========================================================================
+   NUMBER INPUTS
+   ========================================================================== */
+
+.ample-dual-range-inputs {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.ample-dual-range-input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.ample-dual-range-input-group label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ample-dual-range-number-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: 'Monaco', 'Menlo', monospace;
+    background: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.ample-dual-range-number-input:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.cbd-slider .ample-dual-range-number-input:focus {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+/* ==========================================================================
+   APPLY BUTTON
+   ========================================================================== */
+
+.ample-dual-range-actions {
+    margin-top: 1rem;
+}
+
+.ample-dual-range-apply {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    background: #059669;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ample-dual-range-apply:hover {
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.ample-dual-range-apply:active {
+    transform: translateY(0);
+}
+
+/* CBD slider button color */
+.cbd-slider .ample-dual-range-apply {
+    background: #7c3aed;
+}
+
+.cbd-slider .ample-dual-range-apply:hover {
+    background: #6d28d9;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    .ample-dual-range-container {
+        padding: 0.75rem;
+        margin: 0.75rem 0;
+    }
+    
+    .ample-dual-range-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .ample-dual-range-slider {
+        height: 44px; /* Larger touch target */
+    }
+    
+    .ample-dual-range-thumb {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .ample-dual-range-inputs {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
+
+/* ==========================================================================
+   ACCESSIBILITY
+   ========================================================================== */
+
+.ample-dual-range-input:focus + .ample-dual-range-thumb {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .ample-dual-range-track {
+        background: #000000;
+    }
+    
+    .ample-dual-range-thumb {
+        border-width: 4px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .ample-dual-range-thumb,
+    .ample-dual-range-highlight,
+    .ample-dual-range-apply,
+    .ample-dual-range-number-input {
+        transition: none;
+    }
+}

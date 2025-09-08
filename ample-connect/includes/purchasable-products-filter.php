@@ -186,6 +186,11 @@ add_filter('woocommerce_available_variation', 'ample_filter_available_variation'
  * Override product stock status based on purchasable data
  */
 function ample_override_stock_status($status, $product) {
+    // Don't override stock status in admin area
+    if (is_admin()) {
+        return $status;
+    }
+    
     // Only filter for logged-in users
     if (!is_user_logged_in()) {
         return $status;
@@ -241,6 +246,11 @@ add_filter('woocommerce_product_variation_get_stock_status', 'ample_override_sto
  * Override product stock quantity based on purchasable data
  */
 function ample_override_stock_quantity($quantity, $product) {
+    // Don't override stock quantity in admin area
+    if (is_admin()) {
+        return $quantity;
+    }
+    
     // Only filter for logged-in users
     if (!is_user_logged_in()) {
         return $quantity;
@@ -296,6 +306,11 @@ add_filter('woocommerce_product_variation_get_stock_quantity', 'ample_override_s
  * Ensure product manages stock when we have API inventory data
  */
 function ample_manage_stock($manages_stock, $product) {
+    // Don't override stock management in admin area
+    if (is_admin()) {
+        return $manages_stock;
+    }
+    
     // Only filter for logged-in users
     if (!is_user_logged_in()) {
         return $manages_stock;
