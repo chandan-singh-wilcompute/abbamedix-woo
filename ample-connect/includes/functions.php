@@ -26,49 +26,48 @@ function is_login_page() {
 
 function setup_session_for_user_once() {
     // Avoid admin, login pages, or AJAX calls
-    if (is_admin() || is_login_page() || wp_doing_ajax()) {
+    if ( is_admin() || is_login_page() || wp_doing_ajax() ) {
         return;
     }
 
-    static $already_run = false;
-    if ($already_run) return;
-    $already_run = true;
+    if ( ! is_user_logged_in() ) {
+        return;
+    }
 
-    setup_session_for_user();
+    $session_initialized = Ample_Session_Cache::get('session_initialized', false);
+
+    if ( !$session_initialized ) {
+        setup_session_for_user();
+    }
 }
 add_action('template_redirect', 'setup_session_for_user_once');
 
 function setup_session_for_user() {
     
-    // User must be logged in
-    if (!is_user_logged_in()) {
-        return;
-    }
-
     ample_connect_log("Setup session for user called");
     $user = wp_get_current_user();
 
     // Check if session is initialized and has required data
-    $session_initialized = Ample_Session_Cache::get('session_initialized');
     $purchasable_products = Ample_Session_Cache::get('purchasable_products');
 
     // Re-initialize if session is missing or incomplete
-    if (!$session_initialized || !$purchasable_products) {
+    if (!$purchasable_products) {
+        
         ample_connect_log("Re-initializing session data for user: " . $user->ID);
         
         Client_Information::fetch_information();
         
         get_purchasable_products_and_store_in_session($user->ID);
-        // get_order_from_api_and_update_session($user->ID);
+        get_order_from_api_and_update_session($user->ID);
         // get_shipping_rates_and_store_in_session($user->ID);
         Ample_Session_Cache::set('session_initialized', true);
     }
 
-    $order_id = Ample_Session_Cache::get('order_id', false);
-    $status = Ample_Session_Cache::get('status', 'Lead');
-    if ($status == "Approved" && !$order_id) {
-        get_order_from_api_and_update_session($user->ID);
-    }
+    // $order_id = Ample_Session_Cache::get('order_id', false);
+    // $status = Ample_Session_Cache::get('status', 'Lead');
+    // if ($status == "Approved" && !$order_id) {
+    //     get_order_from_api_and_update_session($user->ID);
+    // }
 }
 
 // Custom Fields add to User Profile Page
