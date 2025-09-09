@@ -1221,18 +1221,18 @@ button.notify-me-button {
     position: absolute !important;
     background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(2px) !important;
-    min-width: 280px !important; /* Base minimum width */
-    width: max-content !important; /* Expand to fit content */
-    max-width: 500px !important; /* Prevent excessive expansion */
+    min-width: 280px ; /* Base minimum width */
+    width: max-content ; /* Expand to fit content */
+    max-width: 500px ; /* Prevent excessive expansion */
 }
 
 /* Specific minimum widths for filters with longer option names */
 .productFilter .filterDropdown#terpenes .dropdown {
-    min-width: 340px !important; /* Terpenes need more space for scientific names */
+    min-width: 340px ; /* Terpenes need more space for scientific names */
 }
 
 .productFilter .filterDropdown#brands .dropdown {
-    min-width: 430px !important; /* Brands need space for company names */
+    min-width: 430px ; /* Brands need space for company names */
 }
 
 /* Ensure labels don't wrap and have proper spacing */

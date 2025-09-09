@@ -97,6 +97,9 @@
         handleCheckboxChange: function() {
             // Update UI feedback (like button text)
             this.updateButtonText();
+            
+            // Auto-apply filter on checkbox change
+            this.applyFilter();
         },
         
         /**

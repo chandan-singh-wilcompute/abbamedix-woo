@@ -4,35 +4,35 @@
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/comfortaa/v46/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4TbMPrQ.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/comfortaa/v47/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4TbMPrQ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/comfortaa/v46/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4WjMPrQ.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/comfortaa/v47/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4WjMPrQ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/comfortaa/v46/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4VrMPrQ.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/comfortaa/v47/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4VrMPrQ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/comfortaa/v46/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4bbLPrQ.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/comfortaa/v47/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4bbLPrQ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/comfortaa/v46/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4Y_LPrQ.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/comfortaa/v47/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4Y_LPrQ.ttf) format('truetype');
 }
 /* Variables */
 /* Variables */
@@ -1379,7 +1379,7 @@ a.button.thankyou-button {
   justify-content: flex-start;
   align-items: flex-start;
   position: relative;
-  z-index: 1;
+  z-index: 3;
 }
 .productFilter .elementor-widget-container {
   display: flex;
@@ -1387,7 +1387,7 @@ a.button.thankyou-button {
   align-items: center;
 }
 .productFilter .filterDropdown.selected {
-  z-index: 1;
+  z-index: 2;
 }
 .productFilter .filterDropdown .toggleBtn {
   box-shadow: none;
@@ -1437,7 +1437,7 @@ a.button.thankyou-button {
 .productFilter .filterDropdown .dropdown label {
   display: block;
   text-transform: uppercase;
-  margin-bottom: 10px;
+  margin-bottom: 0;
 }
 .productFilter .btnApply {
   background: #1b5d72;
@@ -3366,7 +3366,6 @@ li.category-concentrates .swatch-item.selected {
   padding: 5px 10px;
   font-weight: bold;
   line-height: 24px;
-  min-height: 82px;
 }
 .prodcard-tags p {
   margin-bottom: 0;

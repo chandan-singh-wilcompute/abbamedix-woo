@@ -672,7 +672,6 @@
 .filter-option:hover {
     background: #f9fafb;
     padding-left: 0.5rem;
-    margin-left: -0.5rem;
 }
 
 .filter-option input[type="checkbox"] {
@@ -778,19 +777,13 @@
     position: relative !important;
 }
 
-/* Filter dropdowns should be below category forms */
-.productFilter .filterDropdown {
-    position: relative !important;
-    z-index: 999 !important;
-}
-
 .productFilter .filterDropdown .dropdown {
     z-index: 999 !important;
     position: absolute !important;
     background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(2px) !important;
-    min-width: 280px !important;
-    width: auto !important;
+    min-width: 280px;
+    width: auto;
 }
 
 .productFilter .filterDropdown .dropdown.show {

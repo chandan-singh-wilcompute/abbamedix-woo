@@ -90,6 +90,9 @@
     max-width: 650px;
     margin: 100px auto 100px !important;
   }
+  .prodcard-tags {
+    min-height: 82px;
+  }
 }
 @media screen and (max-width: 1199px) {
   :root #main-header {
@@ -305,6 +308,7 @@
   }
   .productFilter .filterDropdown .dropdown {
     max-width: 94.6%;
+    min-width: auto;
   }
   .featuredWrapper .woocommerce-ordering {
     width: 100%;
