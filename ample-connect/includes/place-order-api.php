@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 require_once plugin_dir_path(__FILE__) . '/customer-functions.php';
 
 add_filter('woocommerce_add_to_cart_validation', 'custom_add_to_cart_validation', 10, 5);
-function custom_add_to_cart_validation($passed, $product_id, $quantity, $variation_id, $variations) {
+function custom_add_to_cart_validation($passed, $product_id, $quantity, $variation_id = 0, $variations = array()) {
     
     if (is_user_logged_in()) {
         // $allowed_skus = get_purchasable_products();
@@ -59,23 +59,43 @@ function custom_add_to_cart_validation($passed, $product_id, $quantity, $variati
 
     // OPTIMIZED: Get package size efficiently
     $current_product = wc_get_product($variation_id ?: $product_id);
-    $attribute_package_size = ((float)$current_product->get_attribute('package-size')) * $quantity;
+    $current_item_gram = ((float)$current_product->get_meta('RX Reduction')) * $quantity;
+
+    ample_connect_log("current item gram - " . $current_item_gram);
 
     // OPTIMIZED: Calculate cart total package size more efficiently
-    $total_package_size = $attribute_package_size;
-    foreach (WC()->cart->get_cart() as $cart_item) {
-        $package_size = floatval($cart_item['data']->get_attribute('package-size'));
-        $total_package_size += $package_size * $cart_item['quantity'];
+    $current_on_cart = Ample_Session_Cache::get('current_on_cart', 0);
+    if ($current_on_cart == 0) {
+
+        $total = 0;
+        if ( WC()->cart ) {
+            foreach ( WC()->cart->get_cart() as $cart_item ) {
+                $product = $cart_item['data']; // WC_Product object
+                $quantity = $cart_item['quantity'];
+
+                // Make sure 'rx_reduction' meta exists
+                $rx_reduction = floatval( $product->get_meta('RX Reduction') );
+
+                $total += $rx_reduction * $quantity;
+            }
+        }
+
+        $current_on_cart = $total;
     }
+    
+    ample_connect_log("current available - " . $current_on_cart);
+    $total_grams = $current_item_gram + $current_on_cart;
+    ample_connect_log("total - " . $total_grams);
     // $order = get_order_id_from_api();
     $order_id = Ample_Session_Cache::get('order_id');
 
     if ($order_id) {
         // $get_available_to_order = Client_Information::get_available_to_order();
-        $get_available_to_order  = Ample_Session_Cache::get('available_to_order');
+        $available_to_order  = Ample_Session_Cache::get('available_to_order');
+        ample_connect_log("availablee to order - " . $available_to_order);
         
-        if ($get_available_to_order < $total_package_size) {
-            wc_add_notice('Insufficient available quantity to order. Only ' . $get_available_to_order . ' grams are available to order.', 'error');
+        if ($available_to_order < $total_grams) {
+            wc_add_notice('There is not enough room on the prescription to cover your purchase quantity.', 'error');
             return false;
         }
     } else {
@@ -304,6 +324,7 @@ add_action('woocommerce_after_cart_item_quantity_update', 'cart_item_quantity_up
 function cart_item_quantity_update_ample_after($cart_item_key, $quantity, $old_quantity, $cart) {
     error_log('Ample Connect: Alternative hook fired - cart_item_key: ' . $cart_item_key . ', quantity: ' . $quantity . ', old_quantity: ' . $old_quantity);
     
+    ample_connect_log("cart_item_quantity_update_ample_after");
     // Skip if quantity didn't actually change
     if ($quantity === $old_quantity) {
         return;
@@ -360,6 +381,7 @@ function cart_item_quantity_update_ample_after($cart_item_key, $quantity, $old_q
     error_log('Ample Connect: Alternative hook - Attempting to update quantity for SKU ' . $sku_id . ' from ' . $old_quantity . ' to ' . $quantity);
     error_log('Ample Connect: Alternative hook - Order ID: ' . $order_id . ', Order Item ID: ' . $order_item_id);
     $response = change_item_quantity($order_id, $order_item_id, $quantity);
+    // ample_connect_log($response);
     
     if (is_wp_error($response)) {
         error_log('Ample Connect: Alternative hook - API call failed: ' . $response->get_error_message());

@@ -36,12 +36,26 @@
         .then(res => res.json())
         .then(data => {
             console.log("data: ", data);
+            if (data && data.success === false) {
+                // Handle server-side errors
+                console.error('Server error fetching quota:', data.data?.message || 'Unknown error');
+                
+                if (data.data?.session_error) {
+                    console.warn('Session error - user may need to refresh page');
+                } else if (data.data?.login_required) {
+                    console.warn('Login required for quota data');
+                }
+                return;
+            }
+            
             if (data && typeof data.policy_grams === 'number' && typeof data.prescription_grams === 'number') {
                 updateBar(data.policy_grams, data.prescription_grams);
+            } else {
+                console.warn('Invalid quota data structure:', data);
             }
         })
         .catch(err => {
-            console.error('Error fetching quota.');
+            console.error('Error fetching quota:', err);
         });
     }
 

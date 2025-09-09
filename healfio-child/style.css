@@ -430,7 +430,7 @@ td.product-remove a {
 
 .prodcard-attributes {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: space-around;
     align-items: center;
     min-height: 30px;
 }
@@ -1306,4 +1306,12 @@ button.notify-me-button {
 
 form[name="checkout"] a[aria-label="Change: My contact"], form[name="checkout"] a[aria-label="Change: Shipping to"], form[name="checkout"] a[aria-label="Change: Billing to"]  {
     display: none !important;
+}
+
+.disabled-link {
+    color: gray;
+    background-color: #979797 !important;
+    pointer-events: none;
+    text-decoration: none;
+    cursor: default;
 }

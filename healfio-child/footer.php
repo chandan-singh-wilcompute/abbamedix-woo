@@ -666,14 +666,23 @@
             }
             
             singleProductProcessing = true;
-            const formData = $form.serialize();
             const originalText = $button.text();
             
             // Show loading state
             $button.prop('disabled', true).text('Adding...');
             
-            // Add nonce for security
-            const postData = formData + '&action=woocommerce_add_to_cart&_wpnonce=' + wc_add_to_cart_params.nonce;
+            // Get form data and convert it for our custom handler
+            const formDataArray = $form.serializeArray();
+            let postData = 'action=woocommerce_ajax_add_to_cart';
+            
+            // Convert add-to-cart to product_id and include other form data
+            formDataArray.forEach(function(field) {
+                if (field.name === 'add-to-cart') {
+                    postData += '&product_id=' + encodeURIComponent(field.value);
+                } else {
+                    postData += '&' + encodeURIComponent(field.name) + '=' + encodeURIComponent(field.value);
+                }
+            });
             
             $.post(wc_add_to_cart_params.ajax_url, postData)
                 .done(function(response) {
@@ -702,9 +711,28 @@
                         return;
                     }
                     
-                    if (response && response.fragments) {
+                    // Check for validation errors (prescription limit, etc.)
+                    if (response && response.success === false) {
+                        console.error('Single product add to cart failed:', response);
+                        
+                        // Get the error message from the response
+                        const errorMessage = response && response.data 
+                            ? (typeof response.data === 'string' ? response.data : response.data.message || response.data)
+                            : 'Failed to add product to cart. Please try again.';
+                        
+                        // Show error toast
+                        showToast(errorMessage, 'error');
+                        
+                        // Reset button
+                        $button.prop('disabled', false).text(originalText);
+                        singleProductProcessing = false;
+                        
+                        return;
+                    }
+                    
+                    if (response && response.success && response.data && response.data.fragments) {
                         // Update cart fragments
-                        $.each(response.fragments, function(key, value) {
+                        $.each(response.data.fragments, function(key, value) {
                             $(key).replaceWith(value);
                         });
                         
@@ -1045,8 +1073,8 @@
                         console.error('Add to cart failed:', response);
                         
                         const productName = $card.find('.woocommerce-loop-product__title, .product-title, h3 a, h2 a').first().text().trim() || 'Product';
-                        const errorMessage = response && response.data && response.data.message 
-                            ? response.data.message 
+                        const errorMessage = response && response.data 
+                            ? (typeof response.data === 'string' ? response.data : response.data.message || response.data)
                             : `Failed to add ${productName} to cart. Please try again.`;
                         
                         // Show error toast
