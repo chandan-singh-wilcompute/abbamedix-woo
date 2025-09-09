@@ -272,7 +272,7 @@ function store_current_order_to_session($data, $user_id) {
                 $applicable_discounts[] = [
                     'id'           => $discount['id'],
                     'code'        => $code,
-                    'description' => $description,
+                    'description' => "Discount - " . $description,
                     'amount' => $discount['dollar']
                 ];
             }
@@ -309,7 +309,8 @@ function store_current_order_to_session($data, $user_id) {
         foreach ($data['applicable_policies'] as $policy) {
             if (isset($policy['enabled']) && $policy['enabled'] == true) {
                 $name = trim($policy['name']);
-                
+                $name = "Policy - " . $name;
+
                 $applicable_policies[] = [
                     'id'           => $policy['id'],
                     'name' => $name,
@@ -326,7 +327,7 @@ function store_current_order_to_session($data, $user_id) {
                             'amount' => 0,
                             'percentage' => $policy['percentage_discount'],
                             'type' => 'policy',
-                            'desc' => $name . " (" . $policy['percentage_discount'] . "% off)"
+                            'desc' => $name
                         ];
                         Ample_Session_Cache::set('applied_policies', $applied_pol);
                     }
@@ -346,26 +347,47 @@ function store_current_order_to_session($data, $user_id) {
     }
 
     // Retrieve policy breakdown
-    if (isset($data['policy_breakdown']) && is_array($data['policy_breakdown'])) {
-        $policy_data = [];
-        $breakdown = $data['policy_breakdown'];
+    // if (isset($data['policy_breakdown']) && is_array($data['policy_breakdown'])) {
+    //     $policy_data = [];
+    //     $breakdown = $data['policy_breakdown'];
 
-        $fields_to_extract = [
-            'name',
-            'max_amount',
-            'percentage_discount',
-            'covers_shipping',
-            'per_gram_limit',
-            'enabled',
-            'unlimited',
-            'remaining_amount_for_current_period'
-        ];
+    //     $fields_to_extract = [
+    //         'name',
+    //         'max_amount',
+    //         'percentage_discount',
+    //         'covers_shipping',
+    //         'per_gram_limit',
+    //         'enabled',
+    //         'unlimited',
+    //         'remaining_amount_for_current_period'
+    //     ];
 
-        foreach ($fields_to_extract as $field) {
-            if (isset($breakdown[$field])) {
-                $policy_data[$field] = $breakdown[$field];
-            }
-        }
+    //     foreach ($fields_to_extract as $field) {
+    //         if (isset($breakdown[$field])) {
+    //             $policy_data[$field] = $breakdown[$field];
+    //         }
+    //     }
+
+    //     // Store policy details in wc session
+    //     Ample_Session_Cache::set('policy_details', $policy_data);
+    // }
+
+    // Retrieve policy coverage
+    if (isset($data['policy_coverage']) && is_array($data['policy_coverage'])) {
+        
+        /*
+            Available keys 
+            1. current_order_coverage - Potential coverage amount, or applied coverage amount for the current order only
+            2. policy_remaining - Remaining policy budget after this order, can be negative for over-limit scenarios
+            3. policy_used_other_orders - Historical usage on other completed orders
+            4. policy_max_amount - Total policy budget/limit
+            5. unlimited - Boolean indicating if policy has spending limits or not
+            6. max_is_cents - Units indicator (true=cents, false=grams) for all amount fields
+            7. policy_id - Database reference to the active policy used (edited) 
+
+        */
+
+        $policy_data = $data['policy_coverage'];
 
         // Store policy details in wc session
         Ample_Session_Cache::set('policy_details', $policy_data);
@@ -427,13 +449,13 @@ function store_current_order_to_session($data, $user_id) {
 function add_to_order($order_id, $sku_id, $quantity) {
 
     // Who called me?
-    $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2); 
-    // [0] = this function, [1] = caller
-    if (isset($trace[1])) {
-        $caller = $trace[1];
-        $caller_info = (isset($caller['class']) ? $caller['class'] . '::' : '') . $caller['function'] . '()';
-        ample_connect_log("Add to order was called by: " . $caller_info);
-    }
+    // $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2); 
+    // // [0] = this function, [1] = caller
+    // if (isset($trace[1])) {
+    //     $caller = $trace[1];
+    //     $caller_info = (isset($caller['class']) ? $caller['class'] . '::' : '') . $caller['function'] . '()';
+    //     ample_connect_log("Add to order was called by: " . $caller_info);
+    // }
 
     $user_id = get_current_user_id();
     // Get the client id of the customer
@@ -490,11 +512,11 @@ function change_item_quantity($order_id, $order_item_id, $updated_quantity) {
 
     $data = ample_request($url, 'PUT', $body);
 
-    // if (is_array($data) && array_key_exists('id', $data)) {
-    //     Client_Information::fetch_information();
-    //     store_current_order_to_session($data, $user_id);
-    //     // get_shipping_rates_and_store_in_session();
-    // }
+    if (is_array($data) && array_key_exists('id', $data)) {
+        // Client_Information::fetch_information();
+        store_current_order_to_session($data, $user_id);
+        // get_shipping_rates_and_store_in_session();
+    }
     
     return $data;
 }

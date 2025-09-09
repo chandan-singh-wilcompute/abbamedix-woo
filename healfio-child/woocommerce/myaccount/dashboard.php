@@ -71,7 +71,7 @@ $status = Ample_Session_Cache::get('status', false);
 					<?php if($needs_renewal) : ?>
 						<a id="renewalFormBtn" class="renewalFormBtn" href="<?php bloginfo('url'); ?>/my-account/renewal"><i class="bi bi-repeat"></i> &nbsp; Renewal Form</a>
 					<?php else : ?>
-						<a id="renewalFormBtn" class="renewalFormBtn" href="<?php bloginfo('url'); ?>/my-account/renewal"><i class="bi bi-repeat"></i> &nbsp; Renewal Form</a>
+						<a id="renewalFormBtn" class="renewalFormBtn disabled-link" href="#" aria-disabled="true"><i class="bi bi-repeat"></i> &nbsp; Renewal Form</a>
 					<?php endif; ?>
 				</p>
 			</div>
