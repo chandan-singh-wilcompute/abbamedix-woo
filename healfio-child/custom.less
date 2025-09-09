@@ -1740,6 +1740,9 @@ a.button.thankyou-button {
   justify-content: flex-start;
   align-items: flex-start;
 
+  position: relative;
+  z-index: 3;
+
   .elementor-widget-container {
     display: flex;
     justify-content: flex-start;
@@ -1748,7 +1751,7 @@ a.button.thankyou-button {
 
   .filterDropdown {
     &.selected {
-      z-index: 1;
+      z-index: 2;
     }
 
     .toggleBtn {
@@ -1806,7 +1809,7 @@ a.button.thankyou-button {
       label {
         display: block;
         text-transform: uppercase;
-        margin-bottom: 10px;
+        margin-bottom: 0;
       }
     }
   }
@@ -3563,6 +3566,13 @@ li {
       strong {
         margin-right: 5px;
       }
+
+      span {
+        max-width: 100px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
   }
 
@@ -3917,7 +3927,7 @@ li {
   line-height: 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   flex-direction: column;
   padding: 5px 10px;
   font-weight: bold;
@@ -4771,7 +4781,6 @@ li {
   }
 }
 
-
 .woocommerce-info{
   &.ample-approval-notice {
     position: absolute !important;
@@ -4782,12 +4791,6 @@ li {
     right: 0;
     margin: 0 auto;
   }
-}
-
-.page-id-52620,
-.elementor-kit-971 {
-  background-color: transparent;
-  background-image: linear-gradient(271deg, #4D732A 0%, #939F31 85%) !important;
 }
 
 .custom-reset-form {

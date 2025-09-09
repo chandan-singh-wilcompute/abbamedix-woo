@@ -29,7 +29,7 @@
             dominance: [],
             search: '',
             price: [0, 10000],
-            inStock: true
+            inStock: null
         },
         
         // System configuration
@@ -37,7 +37,6 @@
         
         // Performance tracking
         stats: {
-            lastFilterTime: 0,
             totalFilters: 0,
             cacheHits: 0
         },
@@ -117,7 +116,6 @@
          * Load products from API with caching
          */
         loadProducts: async function() {
-            const startTime = performance.now();
             
             try {
                 this.showLoadingState(true);
@@ -151,8 +149,7 @@
                 
                 // Trigger loaded event
                 this.trigger('products-loaded', {
-                    count: this.products.length,
-                    loadTime: performance.now() - startTime
+                    count: this.products.length
                 });
                 
             } catch (error) {
@@ -167,7 +164,6 @@
          * Apply all active filters to products
          */
         applyFilters: function() {
-            const startTime = performance.now();
             
             if (!this.originalProducts.length) {
                 console.warn('No products loaded yet');
@@ -291,7 +287,6 @@
             }
             
             // Update statistics
-            this.stats.lastFilterTime = performance.now() - startTime;
             this.stats.totalFilters++;
             visibleCount = filteredProducts.length;
             
@@ -299,7 +294,6 @@
             this.trigger('products-filtered', {
                 total: this.originalProducts.length,
                 visible: visibleCount,
-                filterTime: this.stats.lastFilterTime,
                 filters: { ...this.activeFilters }
             });
             
@@ -315,7 +309,6 @@
          * @param {string} sortBy - The sort option from dropdown
          */
         sortProducts: function(sortBy) {
-            const startTime = performance.now();
             
             // CRITICAL: Use filteredProducts if filters are active
             // This ensures we sort only the filtered subset, not all products
@@ -395,11 +388,7 @@
                 this.filteredProducts = sorted;
             }
             
-            // Log performance if debug mode
-            if (this.debug || this.config.debug) {
-                const sortTime = performance.now() - startTime;
-                console.log(`Products sorted by ${sortBy} in ${sortTime.toFixed(2)}ms`);
-            }
+            // Performance tracking available in debug mode if needed
         },
 
         /**
@@ -413,7 +402,6 @@
                 // Completely disable all form submissions for woocommerce-ordering
                 $('.woocommerce-ordering').each(function() {
                     this.onsubmit = function(e) {
-                        console.log('❌ BLOCKED: Form submission prevented!');
                         e.preventDefault();
                         e.stopImmediatePropagation();
                         return false;
@@ -430,7 +418,6 @@
                 // Block any form submission via keypress (Enter key)
                 $('.woocommerce-ordering select').off('keypress').on('keypress', function(e) {
                     if (e.which === 13) {
-                        console.log('❌ BLOCKED: Enter key prevented');
                         e.preventDefault();
                         return false;
                     }
@@ -544,10 +531,6 @@
             const countElement = $('.ample-filter-count, .product-count, .woocommerce-result-count');
             
             if (countElement.length) {
-                const text = visible === total 
-                    ? `Showing all ${total} products`
-                    : `Showing ${visible} of ${total} products`;
-                    
                 countElement.html(`<strong>${visible}</strong> of <strong>${total}</strong> products`);
             }
         },
@@ -556,19 +539,16 @@
          * Reorder DOM elements to match sorted product array
          */
         sortProductElements: function(sortedProducts) {
-            const startTime = performance.now();
             
             // Find the products container (use FIRST match to avoid duplicates)
             const $container = $('.products, ul.products').first();
             if (!$container.length) {
-                console.warn('⚠️  No products container found for sorting');
                 return;
             }
             
             // Get all product elements
             const $productElements = $container.find('li.product, .type-product');
             if (!$productElements.length) {
-                console.warn('⚠️  No product elements found for sorting');
                 return;
             }
             
@@ -648,7 +628,7 @@
             
             // Update visual feedback
             this.updateSliderVisual(sliderId, minValue, maxValue);
-            this.updateSliderValues(sliderId, minValue, maxValue, sliderType);
+            this.updateSliderValues(sliderId, minValue, maxValue);
             
             // Apply filters
             this.applyFilters();
@@ -699,7 +679,7 @@
         /**
          * Update slider value display
          */
-        updateSliderValues: function(sliderId, minValue, maxValue, sliderType) {
+        updateSliderValues: function(sliderId, minValue, maxValue) {
             const $values = $(`#${sliderId}-values`);
             const $container = $(`#${sliderId}`);
             const unit = $container.closest('.ample-slider-container').data('unit') || '';

@@ -4,35 +4,35 @@
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/comfortaa/v46/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4TbMPrQ.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/comfortaa/v47/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4TbMPrQ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/comfortaa/v46/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4WjMPrQ.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/comfortaa/v47/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4WjMPrQ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/comfortaa/v46/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4VrMPrQ.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/comfortaa/v47/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4VrMPrQ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/comfortaa/v46/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4bbLPrQ.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/comfortaa/v47/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4bbLPrQ.ttf) format('truetype');
 }
 @font-face {
   font-family: 'Comfortaa';
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url(https://fonts.gstatic.com/s/comfortaa/v46/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4Y_LPrQ.ttf) format('truetype');
+  src: url(https://fonts.gstatic.com/s/comfortaa/v47/1Pt_g8LJRfWJmhDAuUsSQamb1W0lwk4S4Y_LPrQ.ttf) format('truetype');
 }
 /* Variables */
 /* Variables */
@@ -41,7 +41,7 @@ p:empty {
 }
 a,
 button {
-  transition: all 0.3s;
+  transition: all 0.3;
 }
 button.button {
   border-radius: 0 !important;
@@ -405,7 +405,13 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
   display: inline-block;
   position: relative;
   margin-right: 10px;
-  padding-right: 5px;
+  padding-right: 10px;
+}
+.myProfile p strong:after {
+  position: absolute;
+  right: 0;
+  content: ':';
+  top: 0;
 }
 .myProfile .group2 {
   margin-top: 60px;
@@ -1372,6 +1378,8 @@ a.button.thankyou-button {
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
+  position: relative;
+  z-index: 3;
 }
 .productFilter .elementor-widget-container {
   display: flex;
@@ -1379,7 +1387,7 @@ a.button.thankyou-button {
   align-items: center;
 }
 .productFilter .filterDropdown.selected {
-  z-index: 1;
+  z-index: 2;
 }
 .productFilter .filterDropdown .toggleBtn {
   box-shadow: none;
@@ -1429,7 +1437,7 @@ a.button.thankyou-button {
 .productFilter .filterDropdown .dropdown label {
   display: block;
   text-transform: uppercase;
-  margin-bottom: 0px;
+  margin-bottom: 0;
 }
 .productFilter .btnApply {
   background: #1b5d72;
@@ -2117,16 +2125,14 @@ input[type=number] {
 .productDetails .iconWrapper .icon span {
   width: 48px;
   height: 48px;
-  border-radius: 0; /* Square icons, no rounding (ABBA Issue #49) */
+  border-radius: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto; /* Center the icon above the text (ABBA Issue #49) */
   font-size: 10px;
   color: #ffffff;
   font-family: "Comfortaa", sans-serif;
 }
-/* Terpene icon classes for fallback - kept for unmatched terpenes (ABBA Issue #49) */
 .productDetails .iconWrapper .icon span.myRecene {
   background: url(../healfio-child/img/myrecene.png) center center no-repeat;
 }
@@ -2925,6 +2931,12 @@ li .prodcard-attributes .product-list-attribute {
 li .prodcard-attributes .product-list-attribute strong {
   margin-right: 5px;
 }
+li .prodcard-attributes .product-list-attribute span {
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 li .price {
   background-color: #A1D9E6;
   color: #000000;
@@ -3349,78 +3361,14 @@ li.category-concentrates .swatch-item.selected {
   line-height: 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   flex-direction: column;
   padding: 5px 10px;
   font-weight: bold;
   line-height: 24px;
-  min-height: 82px; /* Space for 3 lines: title + 2 lines of terpene names */
-  justify-content: center; /* Center content vertically within available space */
-}
-
-/* Fix SELECT SIZE button alignment by constraining THC/CBD section height */
-.prodcard-attributes {
-  min-height: 50px; /* Fixed height for THC/CBD section */
-  max-height: 50px; /* Prevent expansion */
-  overflow: hidden; /* Hide text overflow */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 .prodcard-tags p {
   margin-bottom: 0;
-}
-
-/* Rating display in top-right corner - positioned on product image */
-li.product .ratingIcon {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(4px);
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #333;
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    z-index: 15;
-    /* Only show if it has content */
-    min-width: auto;
-    /* Ensure it's positioned relative to the product item, not the group div */
-    pointer-events: none;
-}
-
-li .ratingIcon .bi-star-fill {
-    color: #ffc107;
-    font-size: 12px;
-}
-
-/* Ensure product card has relative positioning for rating icon overlay */
-li .group {
-    position: relative;
-}
-
-/* Ensure the entire product list item is positioned for the rating overlay */
-ul.products li.product {
-    position: relative;
-}
-
-/* Mobile responsive adjustments */
-@media (max-width: 768px) {
-    li.product .ratingIcon {
-        font-size: 10px;
-        padding: 3px 6px;
-        top: 6px;
-        right: 6px;
-    }
-    
-    li.product .ratingIcon .bi-star-fill {
-        font-size: 11px;
-    }
 }
 .woocommerce ul.products li.product .woocommerce-loop-product__title {
   font-size: 20px;
@@ -4256,12 +4204,6 @@ ul.products li.product {
   left: 0;
   right: 0;
   margin: 0 auto;
-}
-.page-id-52620,
-.elementor-kit-971 {
-  background-color: #0A1106;
-  /* background-color: transparent; */
-  /* background-image: linear-gradient(271deg, #4D732A 0%, #939F31 85%) !important; */
 }
 .custom-reset-form {
   max-width: 650px;

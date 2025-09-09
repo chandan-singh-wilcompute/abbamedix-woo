@@ -320,8 +320,6 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
 
     // Define your custom function
     function my_custom_template_loop_product_title() {
-        // Debug - reduced logging
-        // error_log("CUSTOM FUNCTION CALLED: my_custom_template_loop_product_title");
         
         // Get the product object
         global $product;
@@ -1697,17 +1695,26 @@ function enqueue_ajax_filter_script() {
 add_action('wp_head', 'enqueue_ajax_filter_script');
 
 
-// Helper function to get all unique terpenes from product data (ABBA Issue #11)
+/**
+ * Retrieves all unique terpenes from published product variations with counts.
+ * 
+ * Queries product variations for terpene metadata, filtering by category scope if provided.
+ * Returns unique terpenes with counts based on distinct parent products to avoid duplicates.
+ *
+ * @global wpdb $wpdb WordPress database abstraction object
+ * @return array Array of terpene objects with name, slug, and count properties
+ * @since 1.0.0
+ */
 function get_product_terpenes() {
     global $wpdb;
     
-    // ABBA Issue #51: Scope to base categories from URL
+    // Scope to base categories from URL parameters if provided
     $base_categories = abba_get_base_categories();
     $scoped_variation_ids = [];
     
     if (!empty($base_categories)) {
         // Get products in base categories, then their variations
-        $scoped_query = new WP_Query([
+        $query_args = [
             'post_type' => 'product',
             'post_status' => 'publish',
             'posts_per_page' => -1,
@@ -1720,7 +1727,20 @@ function get_product_terpenes() {
                     'operator' => 'IN'
                 ]
             ]
-        ]);
+        ];
+        
+        // Apply purchasable product filter for logged-in users to match API endpoint
+        if (is_user_logged_in() && function_exists('ample_get_cached_purchasable_product_ids')) {
+            $purchasable_ids = ample_get_cached_purchasable_product_ids();
+            if (!empty($purchasable_ids)) {
+                $query_args['post__in'] = $purchasable_ids;
+            } else {
+                // No purchasable products - return empty array
+                return [];
+            }
+        }
+        
+        $scoped_query = new WP_Query($query_args);
         
         if (empty($scoped_query->posts)) {
             return []; // No products in base categories
@@ -1746,20 +1766,25 @@ function get_product_terpenes() {
     $where_clause = "";
     if (!empty($scoped_variation_ids)) {
         $ids_list = implode(',', array_map('intval', $scoped_variation_ids));
-        $where_clause = "AND post_id IN ({$ids_list})";
+        $where_clause = "AND pm.post_id IN ({$ids_list})";
     }
     
+    // Query terpene metadata from variations, counting unique parent products to avoid duplicates
     $terpene_data = $wpdb->get_results("
         SELECT 
-            REPLACE(meta_key, 'terpene_', '') as terpene_name,
-            COUNT(*) as product_count 
-        FROM {$wpdb->postmeta} 
-        WHERE meta_key LIKE 'terpene_%' 
-        AND meta_key != 'terpene_total-terpenes'
+            REPLACE(pm.meta_key, 'terpene_', '') as terpene_name,
+            COUNT(DISTINCT p.post_parent) as product_count 
+        FROM {$wpdb->postmeta} pm
+        JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+        WHERE pm.meta_key LIKE 'terpene_%' 
+        AND pm.meta_key != 'terpene_total-terpenes'
+        AND pm.meta_value != '0' 
+        AND pm.meta_value != ''
         {$where_clause}
-        GROUP BY meta_key 
+        GROUP BY pm.meta_key 
         ORDER BY terpene_name ASC
     ");
+    
     
     $terpenes = [];
     foreach ($terpene_data as $terpene) {
@@ -1808,9 +1833,7 @@ function dynamic_product_terpenes_multiselect_shortcode() {
     
     echo '</div>'; // .ample-terpenes-options
     
-    echo '<div class="ample-terpenes-filter-actions">';
-    echo '<button type="button" class="ample-terpenes-apply-button">Apply</button>';
-    echo '</div>';
+    // Auto-apply on checkbox change - no Apply button needed
     
     echo '</div>'; // .ample-terpenes-filter-container
     
@@ -1825,17 +1848,26 @@ add_shortcode('terpene_checkboxes', 'render_terpene_checkboxes_shortcode');
 add_shortcode('product_terpenes_multiselect', 'dynamic_product_terpenes_multiselect_shortcode');
 
 
-// Helper function to get all unique brands from product attributes (ABBA Issue #12 Phase 2)
+/**
+ * Retrieves all unique product brands from WooCommerce product attributes with counts.
+ * 
+ * Searches the _product_attributes meta field for brand information, filtering by
+ * category scope if provided. Only uses structured brand attribute data, not title parsing.
+ *
+ * @global wpdb $wpdb WordPress database abstraction object
+ * @return array Array of brand objects with name, slug, and count properties
+ * @since 1.0.0
+ */
 function get_product_brands() {
     global $wpdb;
     
-    // ABBA Issue #51: Scope to base categories from URL
+    // Scope to base categories from URL parameters if provided
     $base_categories = abba_get_base_categories();
     $scoped_product_ids = [];
     
     if (!empty($base_categories)) {
         // Get products only in base categories
-        $scoped_query = new WP_Query([
+        $query_args = [
             'post_type' => 'product',
             'post_status' => 'publish',
             'posts_per_page' => -1,
@@ -1847,8 +1879,21 @@ function get_product_brands() {
                     'terms' => $base_categories,
                     'operator' => 'IN'
                 ]
-            ]
-        ]);
+            ],
+        ];
+        
+        // Apply purchasable product filter for logged-in users to match API endpoint
+        if (is_user_logged_in() && function_exists('ample_get_cached_purchasable_product_ids')) {
+            $purchasable_ids = ample_get_cached_purchasable_product_ids();
+            if (!empty($purchasable_ids)) {
+                $query_args['post__in'] = $purchasable_ids;
+            } else {
+                // No purchasable products - return empty array
+                return [];
+            }
+        }
+        
+        $scoped_query = new WP_Query($query_args);
         $scoped_product_ids = $scoped_query->posts;
         
         if (empty($scoped_product_ids)) {
@@ -1863,6 +1908,7 @@ function get_product_brands() {
         $where_clause = "AND post_id IN ({$ids_list})";
     }
     
+    // Query products with brand attributes in _product_attributes meta field
     $products_with_brands = $wpdb->get_results("
         SELECT post_id, meta_value 
         FROM {$wpdb->postmeta} 
@@ -1902,38 +1948,7 @@ function get_product_brands() {
         }
     }
     
-    // Also check product titles for additional brands (fallback)
-    $title_brands = $wpdb->get_results("
-        SELECT post_title, ID
-        FROM {$wpdb->posts} 
-        WHERE post_type = 'product' 
-        AND post_status = 'publish'
-        {$where_clause}
-        AND (
-            post_title LIKE '%Wildflower%' OR
-            post_title LIKE '%Wana%' OR  
-            post_title LIKE '%Simply Bare%' OR
-            post_title LIKE '%1964%' OR
-            post_title LIKE '%Proofly%' OR
-            post_title LIKE '%MTL%' OR
-            post_title LIKE '%Rubicon%' OR
-            post_title LIKE '%Carmel%'
-        )
-    ");
-    
-    foreach ($title_brands as $product) {
-        $title = $product->post_title;
-        $brand_matches = [];
-        
-        // Extract known brand names from titles
-        if (preg_match('/\b(Wildflower|Wana|Simply Bare|1964|Proofly|MTL|Rubicon|Carmel)\b/i', $title, $brand_matches)) {
-            $brand_name = $brand_matches[1];
-            if (!isset($brand_counts[$brand_name])) {
-                $brand_counts[$brand_name] = 0;
-            }
-            $brand_counts[$brand_name]++;
-        }
-    }
+    // Only use structured brand attributes for consistency
     
     // Convert to format matching terpenes structure
     $brands = [];
@@ -1984,9 +1999,7 @@ function dynamic_product_brands_multiselect_shortcode() {
     
     echo '</div>'; // .ample-brand-options
     
-    echo '<div class="ample-brand-filter-actions">';
-    echo '<button type="button" class="ample-brand-apply-button">Apply</button>';
-    echo '</div>';
+    // Auto-apply on checkbox change - no Apply button needed
     
     echo '</div>'; // .ample-brand-filter-container
     
@@ -2095,9 +2108,7 @@ function dynamic_product_categories_multiselect_shortcode() {
     
     echo '</div>'; // .ample-category-options
     
-    echo '<div class="ample-category-filter-actions">';
-    echo '<button type="button" class="ample-category-apply-button">Apply</button>';
-    echo '</div>';
+    // Auto-apply on checkbox change - no Apply button needed
     
     echo '</div>'; // .ample-category-filter-container
     
@@ -2200,10 +2211,22 @@ function dynamic_product_sizes_multiselect_shortcode() {
     $query_args = [
         'limit' => -1,
         'status' => 'publish'
+        // Include all products for NOTIFY ME functionality
     ];
     
     if (!empty($base_categories)) {
         $query_args['category'] = $base_categories;
+    }
+    
+    // Apply purchasable product filter for logged-in users to match API endpoint
+    if (is_user_logged_in() && function_exists('ample_get_cached_purchasable_product_ids')) {
+        $purchasable_ids = ample_get_cached_purchasable_product_ids();
+        if (!empty($purchasable_ids)) {
+            $query_args['include'] = $purchasable_ids;
+        } else {
+            // No purchasable products - return empty array
+            return '<p>No sizes available</p>';
+        }
     }
     
     // Get sizes directly from WooCommerce database instead of API call
@@ -2211,6 +2234,7 @@ function dynamic_product_sizes_multiselect_shortcode() {
     
     // Count products per size for display with counts
     $size_counts = [];
+    
     foreach ($products as $product) {
         // Get package-sizes attribute
         $package_sizes = $product->get_attribute('package-sizes');
@@ -2227,6 +2251,7 @@ function dynamic_product_sizes_multiselect_shortcode() {
             }
         }
     }
+    
     
     if (empty($size_counts)) {
         return '<p>No sizes found.</p>';
@@ -2262,10 +2287,7 @@ function dynamic_product_sizes_multiselect_shortcode() {
     }
     $html .= '</div>';
     
-    // Apply button in actions container (distinct from dual-range)
-    $html .= '<div class="ample-size-filter-actions">';
-    $html .= '<button type="button" class="ample-size-apply-button" data-filter="size" style="background-color: #007866;">Apply Filter</button>';
-    $html .= '</div>';
+    // Auto-apply on checkbox change - no Apply button needed
     
     $html .= '</div>';
     
@@ -2308,10 +2330,7 @@ function get_product_dominance_shortcode() {
     
     $html .= '</div>';
     
-    // Apply button with same styling as size filter
-    $html .= '<div class="ample-dominance-filter-actions">';
-    $html .= '<button type="button" class="ample-dominance-apply-button" data-filter="dominance" style="background-color: #007866;">Apply Filter</button>';
-    $html .= '</div>';
+    // Auto-apply on checkbox change - no Apply button needed
     
     $html .= '</div>';
     
@@ -2325,10 +2344,22 @@ function get_product_strains() {
     $query_args = array(
         'status' => 'publish',
         'limit' => -1
+        // Include all products for NOTIFY ME functionality
     );
     
     if (!empty($base_categories)) {
         $query_args['category'] = $base_categories;
+    }
+    
+    // Apply purchasable product filter for logged-in users to match API endpoint
+    if (is_user_logged_in() && function_exists('ample_get_cached_purchasable_product_ids')) {
+        $purchasable_ids = ample_get_cached_purchasable_product_ids();
+        if (!empty($purchasable_ids)) {
+            $query_args['include'] = $purchasable_ids;
+        } else {
+            // No purchasable products - return empty array
+            return [];
+        }
     }
     
     // Use direct WooCommerce database query (same approach as size filter)
@@ -2346,6 +2377,7 @@ function get_product_strains() {
             $strain_counts[$strain]++;
         }
     }
+    
     
     // Sort strains alphabetically by name
     ksort($strain_counts);
@@ -2423,12 +2455,12 @@ function display_variation_swatches() {
     $variation_data = [];
     foreach ($available_variations as $variation) {
         $variation_data[] = [
-            'variation_id' => $variation['variation_id'],
-            'display_price' => $variation['display_price'],
-            'price' => $variation['price'], 
-            'regular_price' => $variation['regular_price'],
-            'attributes' => $variation['attributes'],
-            'is_in_stock' => $variation['is_in_stock']
+            'variation_id' => $variation['variation_id'] ?? 0,
+            'display_price' => $variation['display_price'] ?? '',
+            'price' => $variation['price'] ?? '', 
+            'regular_price' => $variation['regular_price'] ?? '',
+            'attributes' => $variation['attributes'] ?? [],
+            'is_in_stock' => $variation['is_in_stock'] ?? false
         ];
     }
     
@@ -2955,13 +2987,24 @@ add_shortcode('show_subcats', function ($atts) {
     return ob_get_clean();
 });
 
-// Helper function to get brand for a specific product (ABBA Issue #12)
+/**
+ * Retrieves the brand for a specific WooCommerce product.
+ * 
+ * Attempts to extract brand information from product attributes in order of priority:
+ * 1. WooCommerce attribute 'brand' 
+ * 2. _product_attributes meta field brand data
+ * Returns fallback 'Brand' if no brand information found.
+ *
+ * @param WC_Product|null $product WooCommerce product object
+ * @return string Brand name or 'Brand' if not found
+ * @since 1.0.0
+ */
 function get_product_brand($product) {
     if (!$product) {
         return 'Brand';
     }
     
-    // Try to get brand from product attributes first
+    // Try to get brand from WooCommerce attributes first
     $brand = $product->get_attribute('brand');
     
     if (!empty($brand)) {
@@ -2979,7 +3022,7 @@ function get_product_brand($product) {
         }
     }
     
-    return 'Brand'; // Default fallback
+    return 'Brand'; // Default fallback - only use actual brand attributes
 }
 
 // Helper function to get terpene total percentage for a product (ABBA Issue #12)
@@ -3011,7 +3054,6 @@ function get_product_terpene_total($product) {
 // Helper function to get terpenes for a specific product (ABBA Issue #12)
 function get_single_product_terpenes($product) {
     if (!$product) {
-        // error_log("TERPENE DEBUG: No product provided");
         return 'Terpenes';
     }
     
@@ -3062,7 +3104,18 @@ function get_single_product_terpenes($product) {
     return implode(' - ', $terpene_names);
 }
 
-// Helper function to get terpenes array for a specific product (ABBA Issue #12)
+/**
+ * Retrieves terpenes array for a specific WooCommerce product.
+ * 
+ * Queries terpene metadata from product variations (for variable products) or the product itself
+ * (for simple products). Returns all terpenes with non-zero values, sorted by concentration.
+ * Previously limited to top 3 terpenes, now returns all for accurate filtering.
+ *
+ * @param WC_Product|null $product WooCommerce product object
+ * @global wpdb $wpdb WordPress database abstraction object
+ * @return array Array of terpene names formatted for display
+ * @since 1.0.0
+ */
 function get_single_product_terpenes_array($product) {
     if (!$product) {
         return [];
@@ -3092,7 +3145,6 @@ function get_single_product_terpenes_array($product) {
         AND CAST(meta_value AS DECIMAL(5,2)) > 0
         GROUP BY meta_key
         ORDER BY max_value DESC
-        LIMIT 3
     ");
     
     if (empty($terpenes)) {
@@ -3425,9 +3477,6 @@ function custom_logos_grid_shortcode() {
     }
     $output .= '</div>';
 
-    // echo '<pre>';
-    // print_r( $brand_names );
-    // echo '</pre>';
 
     return $output;
 }

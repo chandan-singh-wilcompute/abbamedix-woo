@@ -372,10 +372,7 @@
                 params.set('dominance', urlSafeDominance.join(','));
             }
             
-            // Add stock filter if changed from default
-            if (!filters.inStock) {
-                params.set('out_of_stock', '1');
-            }
+            // Stock filter is internal behavior only - not tracked in URL
             
             // Build new URL
             const newURL = this.buildURL(params);
@@ -568,7 +565,7 @@
         hasFilterParams: function() {
             const params = this.parseURLParams();
             return Object.keys(params).some(key => 
-                ['thc', 'cbd', 'categories', 'brands', 'search', 'price', 'out_of_stock'].includes(key)
+                ['thc', 'cbd', 'categories', 'brands', 'search', 'price', 'terpenes', 'sizes', 'dominance'].includes(key)
             );
         }
     };

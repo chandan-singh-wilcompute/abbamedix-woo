@@ -25,49 +25,52 @@ function is_login_page() {
 }
 
 function setup_session_for_user_once() {
+
+    if (!is_user_logged_in()) {
+        return;
+    }
+
     // Avoid admin, login pages, or AJAX calls
-    if ( is_admin() || is_login_page() || wp_doing_ajax() ) {
+    if (current_user_can( 'manage_options' ) || is_login_page() || wp_doing_ajax()) {
         return;
     }
 
-    if ( ! is_user_logged_in() ) {
-        return;
-    }
+    static $already_run = false;
+    if ($already_run) return;
+    $already_run = true;
 
-    $session_initialized = Ample_Session_Cache::get('session_initialized', false);
-
-    if ( !$session_initialized ) {
-        setup_session_for_user();
-    }
+    setup_session_for_user();
 }
-add_action('template_redirect', 'setup_session_for_user_once');
+// add_action('template_redirect', 'setup_session_for_user_once');
+add_action('wp', 'setup_session_for_user_once');
 
 function setup_session_for_user() {
-    
     ample_connect_log("Setup session for user called");
+    // User must be logged in
+    
     $user = wp_get_current_user();
 
     // Check if session is initialized and has required data
+    $session_initialized = Ample_Session_Cache::get('session_initialized');
     $purchasable_products = Ample_Session_Cache::get('purchasable_products');
 
     // Re-initialize if session is missing or incomplete
-    if (!$purchasable_products) {
-        
+    if (!$session_initialized || !$purchasable_products) {
         ample_connect_log("Re-initializing session data for user: " . $user->ID);
         
         Client_Information::fetch_information();
         
         get_purchasable_products_and_store_in_session($user->ID);
-        get_order_from_api_and_update_session($user->ID);
+        // get_order_from_api_and_update_session($user->ID);
         // get_shipping_rates_and_store_in_session($user->ID);
         Ample_Session_Cache::set('session_initialized', true);
     }
 
-    // $order_id = Ample_Session_Cache::get('order_id', false);
-    // $status = Ample_Session_Cache::get('status', 'Lead');
-    // if ($status == "Approved" && !$order_id) {
-    //     get_order_from_api_and_update_session($user->ID);
-    // }
+    $order_id = Ample_Session_Cache::get('order_id', false);
+    $status = Ample_Session_Cache::get('status', 'Lead');
+    if ($status == "Approved" && !$order_id) {
+        get_order_from_api_and_update_session($user->ID);
+    }
 }
 
 // Custom Fields add to User Profile Page
@@ -1501,7 +1504,7 @@ function show_selectable_discounts_on_checkout() {
         $code   = esc_attr($discount['code']);
         $id     = $discount['id'];
         $amount = number_format($discount['amount'] / 100, 2);
-        echo "<li><label><input type='checkbox' class='apply-discount discount_checkbox' value='{$id}' data-amount='{$discount['amount']}' data-desc='{$desc} (-\${$amount})'> {$desc} (-\${$amount})</label></li>";
+        echo "<li><label><input type='checkbox' class='apply-discount discount_checkbox' value='{$id}' data-amount='{$discount['amount']}' data-desc='{$desc}'> {$desc}</label></li>";
     }
 
     // Policy discount checkbox
@@ -1510,7 +1513,7 @@ function show_selectable_discounts_on_checkout() {
         $covers_shipping   = esc_attr($policy['covers_shipping']);
         $id     = $policy['id'];
         $percent = esc_html($policy['percent']);
-        echo "<li><label><input type='checkbox' class='apply-policy-discount discount_checkbox' data-shipping='{$covers_shipping}' value='{$id}' data-percentage='{$percent}' data-desc='{$label} ({$percent}% off)'> {$label} ({$percent}% off)</label></li>";
+        echo "<li><label><input type='checkbox' class='apply-policy-discount discount_checkbox' data-shipping='{$covers_shipping}' value='{$id}' data-percentage='{$percent}' data-desc='{$label}'> {$label}</label></li>";
     }
 
     echo '</ul>';
@@ -1831,36 +1834,77 @@ add_action('wp_ajax_get_gram_quota_data', 'get_gram_quota_data');
 add_action('wp_ajax_nopriv_get_gram_quota_data', 'get_gram_quota_data');
 
 function get_gram_quota_data() {
-    $details = Ample_Session_Cache::get('policy_details');
-    $availble_to_order = Ample_Session_Cache::get('available_to_order', 0);
-    
-    $current_prescription = Ample_Session_Cache::get('current_prescription');
-
-    if ($details) {
-        $policy_available_grams = floatval($details['remaining_amount_for_current_period']);
-    } else {
-        $policy_available_grams = 0;
+    // Check if session is available for AJAX requests
+    if (!Ample_Session_Cache::is_session_available()) {
+        ample_connect_log("Session not available during AJAX request for get_gram_quota_data");
+        
+        // Try to initialize session for logged-in users
+        if (is_user_logged_in()) {
+            // Ensure session is initialized
+            if (function_exists('WC') && WC() && !WC()->session) {
+                WC()->session = new WC_Session_Handler();
+                WC()->session->init();
+            }
+            
+            // If still no session, try to setup session for user
+            if (!Ample_Session_Cache::is_session_available()) {
+                wp_send_json_error([
+                    'message' => 'Session not available. Please refresh the page.',
+                    'session_error' => true
+                ]);
+                return;
+            }
+        } else {
+            wp_send_json_error([
+                'message' => 'Please log in to view quota information.',
+                'login_required' => true
+            ]);
+            return;
+        }
     }
 
+    $details = Ample_Session_Cache::get('policy_details');
+    $availble_to_order = Ample_Session_Cache::get('available_to_order', 0);
+
+    if ($details) {
+        $policy_available_grams = floatval($details['policy_remaining']);
+        $current_gram_used = floatval($details['current_order_coverage']);
+    } else {
+        $policy_available_grams = 0;
+        $current_gram_used = 0;
+        ample_connect_log("Policy details not found in session for get_gram_quota_data");
+    }
+
+    // if ($availble_to_order > 0) {
+    //     $total = 0;
+    //     if ( WC()->cart ) {
+    //         foreach ( WC()->cart->get_cart() as $cart_item ) {
+    //             $product = $cart_item['data']; // WC_Product object
+    //             $quantity = $cart_item['quantity'];
+
+    //             // Make sure 'rx_reduction' meta exists
+    //             $rx_reduction = floatval( $product->get_meta('RX Reduction') );
+
+    //             $total += $rx_reduction * $quantity;
+    //         }
+    //     }
+
+    //     ample_connect_log('current gram - ' . $current_gram_used . ' Total - ' . $total);
+    //     $prescription_available_grams = $availble_to_order - $total;
+    //     Ample_Session_Cache::set('current_on_cart', $total);
+
+    // } else {
+    //     $prescription_available_grams = 0;
+    //     ample_connect_log("Available to order is 0 or not set in session for get_gram_quota_data");
+    // }
+
     if ($availble_to_order > 0) {
-        $total = 0;
-        if ( WC()->cart ) {
-            foreach ( WC()->cart->get_cart() as $cart_item ) {
-                $product = $cart_item['data']; // WC_Product object
-                $quantity = $cart_item['quantity'];
-
-                // Make sure 'rx_reduction' meta exists
-                $rx_reduction = floatval( $product->get_meta('RX Reduction') );
-
-                $total += $rx_reduction * $quantity;
-            }
-        }
-
-        $prescription_available_grams = $availble_to_order - $total;
-
+        $prescription_available_grams = $availble_to_order - $current_gram_used;
+        Ample_Session_Cache::set('current_on_cart', $current_gram_used);
     } else {
         $prescription_available_grams = 0;
     }
+
 
     wp_send_json([
         'policy_grams' => $policy_available_grams,
@@ -2126,13 +2170,30 @@ function handle_ajax_add_to_cart() {
         return;
     }
     
+    ample_connect_log("AJAX Add to Cart - product_id: $product_id, quantity: $quantity, variation_id: $variation_id");
+    
     $passed_validation = apply_filters('woocommerce_add_to_cart_validation', true, $product_id, $quantity, $variation_id, array());
     
-    if ($passed_validation && WC()->cart->add_to_cart($product_id, $quantity, $variation_id)) {
+    // Check for validation errors BEFORE attempting to add to cart
+    $error_notices = wc_get_notices('error');
+    if (!$passed_validation || !empty($error_notices)) {
+        // Get the error message from notices
+        $error_message = !empty($error_notices) ? strip_tags($error_notices[0]['notice']) : 'Failed to add product to cart';
+        ample_connect_log("AJAX Add to Cart validation failed: " . $error_message);
+        wc_clear_notices(); // Clear notices
+        
+        wp_send_json_error($error_message);
+        return;
+    }
+    
+    // Only proceed if validation passed and no error notices
+    $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity, $variation_id);
+    if ($cart_item_key) {
         do_action('woocommerce_ajax_added_to_cart', $product_id);
         
         // Clear any WooCommerce notices to prevent them showing on reload
         wc_clear_notices();
+        ample_connect_log("AJAX Add to Cart success - cleared all notices");
         
         // Get cart fragments like WooCommerce does
         $data = array(
@@ -2143,7 +2204,7 @@ function handle_ajax_add_to_cart() {
         
         wp_send_json_success($data);
     } else {
-        // Get WooCommerce error notices
+        // Check for any new error notices that might have been added during add_to_cart
         $error_notices = wc_get_notices('error');
         $error_message = !empty($error_notices) ? strip_tags($error_notices[0]['notice']) : 'Failed to add product to cart';
         wc_clear_notices(); // Clear notices
