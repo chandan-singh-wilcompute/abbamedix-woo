@@ -441,8 +441,6 @@
   .productFilter {
     padding-bottom: 0;
     flex-direction: column;
-    padding-left: 10px;
-    padding-right: 10px;
 
     .elementor-widget-container {
       flex-direction: column;
@@ -466,14 +464,34 @@
 
   .featuredWrapper {
 
+    .clearFilter {
+      font-size: 14px;
+      left: auto;
+      right: 0;
+    }
+
     .woocommerce-ordering {
       width: 100%;
       margin-right: 0;
     }
 
     .woocommerce-result-count {
-      top: -440px;
+      top: -360px;
+      width: auto;
     }
+
+    .productFilter {
+      .filterDropdown {
+        .dropdown {
+          max-width: 100%;
+        }
+      }
+    }
+
+    .viewAllBtn {
+      width: 100%;
+    }
+
   }
 
   .single-product {
@@ -644,6 +662,8 @@
     
     .productFilter {
       padding-bottom: 20px;
+      padding-left: 10px;
+      padding-right: 10px;
     }
 
     .product-count {
@@ -657,6 +677,13 @@
     .viewAllBtn {
       text-align: left;
       margin: 0 0 -25px;
+    }
+  }
+
+  .viewAllProducts {
+    .productFilter {
+      padding-left: 0;
+      padding-right: 0;
     }
   }
 
@@ -710,6 +737,14 @@
     
     .productTopbar {
       flex-direction: column;
+    }
+  }
+
+  .viewAllProducts {
+    .titleWrapper {
+      h5 {
+        color: #ffffff;
+      }
     }
   }
 

@@ -216,6 +216,7 @@ function handle_elementor_form($record, $handler) {
 
         // Random password generation
         $password = wp_generate_password( 12, true, true );
+        $K_number = 'K' . (string) random_int(100000, 999999);
         
         // Validate form data (add your own validation as needed)
 
@@ -279,7 +280,8 @@ function handle_elementor_form($record, $handler) {
             'date_of_birth' => "$dob_year-$dob_month-$dob_day",
             'telephone_1' => $billing_phone,
             'email' => $email,
-            'password' => $password
+            'password' => $password,
+            'knumber' => $K_number
         );
 
         $ample_client_response = register_patient_on_ample($patient_data);
@@ -300,6 +302,10 @@ function handle_elementor_form($record, $handler) {
         $client_login_id = $ample_client_response['client_id'];
 
         $reg_data = array(
+            'first_name' => $first_name,
+            'middle_name' => $middle_name,
+            'last_name' => $last_name,
+            'date_of_birth' => "$dob_year-$dob_month-$dob_day",
             'gender' => $gender,
             'telephone_1' => $billing_phone,
             'telephone_2' => $alternate_phone,

@@ -151,9 +151,6 @@
                       ?>
                   </li>
                   -->
-                  <?php if (Ample_Session_Cache::has('order_id')): ?>
-                    <li><a href="#"><?php echo Ample_Session_Cache::get('order_id'); ?></a></li>
-                  <?php endif; ?>
                   <li><a href="<?php echo esc_url(wp_logout_url(home_url())); ?>">Logout</a></li>
               <?php else : ?>
                   <li><a href="<?php echo esc_url(home_url('/my-account/')); ?>">Login</a></li>

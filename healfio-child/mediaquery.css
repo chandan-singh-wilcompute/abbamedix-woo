@@ -291,8 +291,6 @@
   .productFilter {
     padding-bottom: 0;
     flex-direction: column;
-    padding-left: 10px;
-    padding-right: 10px;
   }
   .productFilter .elementor-widget-container {
     flex-direction: column;
@@ -310,12 +308,24 @@
     max-width: 94.6%;
     min-width: auto;
   }
+  .featuredWrapper .clearFilter {
+    font-size: 14px;
+    left: auto;
+    right: 0;
+  }
   .featuredWrapper .woocommerce-ordering {
     width: 100%;
     margin-right: 0;
   }
   .featuredWrapper .woocommerce-result-count {
-    top: -440px;
+    top: -360px;
+    width: auto;
+  }
+  .featuredWrapper .productFilter .filterDropdown .dropdown {
+    max-width: 100%;
+  }
+  .featuredWrapper .viewAllBtn {
+    width: 100%;
   }
   .single-product .backBtn .elementor-button-text {
     padding-right: 15px;
@@ -427,6 +437,8 @@
   .productFilterResultWrapper .productFilter,
   .viewAllProducts .productFilter {
     padding-bottom: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
   .featuredFilterResultWrapper .product-count,
   .productFilterResultWrapper .product-count,
@@ -443,6 +455,10 @@
   .viewAllProducts .viewAllBtn {
     text-align: left;
     margin: 0 0 -25px;
+  }
+  .viewAllProducts .productFilter {
+    padding-left: 0;
+    padding-right: 0;
   }
   .single-product .product_title {
     height: 68px;
@@ -484,6 +500,9 @@
   .productFilterResultWrapper .productTopbar,
   .viewAllProducts .productTopbar {
     flex-direction: column;
+  }
+  .viewAllProducts .titleWrapper h5 {
+    color: #ffffff;
   }
   .singleProductContainer {
     padding: 30px 0;

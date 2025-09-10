@@ -298,6 +298,8 @@
     
     .ample-dual-range-slider {
         height: 44px; /* Larger touch target */
+        max-width: 94%;
+        margin: 0 auto;
     }
     
     .ample-dual-range-thumb {

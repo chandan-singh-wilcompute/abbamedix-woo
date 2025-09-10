@@ -15,7 +15,8 @@ function register_patient_on_ample($patient_data) {
             "telephone_1" => $patient_data['telephone_1'],
             "date_of_birth" => $patient_data['date_of_birth'],
             "email" => $patient_data['email'],
-            "status" => 'Lead'
+            "status" => 'Lead',
+            "knumber" => $patient_data['knumber']
         ],
         "password" => $patient_data['password'],
         "password_confirmation" => $patient_data['password']
@@ -40,6 +41,13 @@ function update_registration_details_on_ample($client_id, $active_reg_id, $reg_d
 // Function to get purchasable products for a patient/customer/client
 function get_purchasable_products_and_store_in_session($user_id = "") {
 
+    // Prevent multiple simultaneous calls to this function
+    static $fetch_in_progress = false;
+    if ($fetch_in_progress) {
+        ample_connect_log("Purchasable products fetch already in progress, skipping");
+        return false;
+    }
+
     // Get the currently logged-in user's ID
     if ($user_id == "")
         $user_id = get_current_user_id();
@@ -54,6 +62,9 @@ function get_purchasable_products_and_store_in_session($user_id = "") {
     if (Ample_Session_Cache::has('purchasable_products')) {
         return true;
     }
+
+    // Set the lock
+    $fetch_in_progress = true;
 
     // $purchasable_products_url = AMPLE_CONNECT_WOO_CLIENT_URL . $client_id . '/purchasable_products';
     $purchasable_products_url = AMPLE_CONNECT_WOO_CLIENT_URL . $client_id . '/purchasable_products?lite=true';
@@ -84,6 +95,7 @@ function get_purchasable_products_and_store_in_session($user_id = "") {
     
     ample_connect_log("Stored " . count($final_ids) . " purchasable product IDs in session");
 
+    $fetch_in_progress = false; // Release lock on success
     return true;
 }
 
@@ -211,6 +223,13 @@ function get_shipping_rates_and_store_in_session($user_id = "") {
 // Function to ger an Order Details
 function get_order_from_api_and_update_session($user_id = "") {
 
+    // Prevent multiple simultaneous calls to this function
+    static $fetch_in_progress = false;
+    if ($fetch_in_progress) {
+        ample_connect_log("Order fetch already in progress, skipping");
+        return false;
+    }
+
     if ($user_id == "")
         $user_id = get_current_user_id();
 
@@ -221,6 +240,9 @@ function get_order_from_api_and_update_session($user_id = "") {
         return array();
     }
 
+    // Set the lock
+    $fetch_in_progress = true;
+
     // ample_connect_log("Get order id from api user id: " . $user_id . " client id: " . $client_id);
 
     $api_url = add_query_arg(array('client_id' => $client_id), AMPLE_CONNECT_API_BASE_URL . '/v1/portal/orders/current_order');
@@ -228,6 +250,7 @@ function get_order_from_api_and_update_session($user_id = "") {
     
     store_current_order_to_session($data, $user_id);
 
+    $fetch_in_progress = false; // Release lock on success
     return true;
 }
 
