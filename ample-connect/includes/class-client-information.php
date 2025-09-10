@@ -14,6 +14,13 @@ class  Client_Information {
             return false;
         }
 
+        // Prevent multiple simultaneous calls to this function
+        static $fetch_in_progress = false;
+        if ($fetch_in_progress) {
+            ample_connect_log("Client information fetch already in progress, skipping");
+            return false;
+        }
+
         $user_id = get_current_user_id();
 
         // Get the client id of the customer
@@ -22,15 +29,20 @@ class  Client_Information {
             return false;
         }
 
+        // Set the lock
+        $fetch_in_progress = true;
+        
         $client_url = AMPLE_CONNECT_WOO_CLIENT_URL . $client_id;
         $client = ample_request($client_url);
 
         if (empty($client)) {
+            $fetch_in_progress = false; // Release lock on error
             return false;
         }
 
         // Safety check: ensure $client is an array and has prescriptions key
         if (!is_array($client) || !isset($client['prescriptions'])) {
+            $fetch_in_progress = false; // Release lock on error
             return false;
         }
 
@@ -67,6 +79,7 @@ class  Client_Information {
             update_user_meta($user_id, 'client_display_id', $client['registration']['id']);
         }
         
+        $fetch_in_progress = false; // Release lock on success
         return true;
     }
 

@@ -3366,6 +3366,7 @@ li.category-concentrates .swatch-item.selected {
   padding: 5px 10px;
   font-weight: bold;
   line-height: 24px;
+  min-height: 82px;
 }
 .prodcard-tags p {
   margin-bottom: 0;
@@ -3381,6 +3382,9 @@ li.category-concentrates .swatch-item.selected {
 .woocommerce ul.products li.product a {
   display: flex !important;
   flex-direction: column;
+}
+.woocommerce ul.products li.product a .ratingIcon {
+  display: none;
 }
 .woocommerce-loop-product__buttons {
   display: none;

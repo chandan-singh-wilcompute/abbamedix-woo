@@ -138,13 +138,236 @@ function handle_response($response, $log = false) {
         $user_id = get_current_user_id();
         clear_customer_cart($user_id);
     } else if (isset($body['error_code']) && $body['error_code'] != "policies.apply_failed" && $body['error_code'] != "orders.cannot_modify_after_purchase") {
+        // Use comprehensive error parsing for better user messages
+        $parsed_message = parse_ample_error_message(
+            $body['error_code'], 
+            $body['error_message'] ?? $body['message'] ?? null, 
+            $body
+        );
+        
         wp_send_json_error([
-            'message' => 'Document not found.',
+            'message' => $parsed_message,
             'error_code' => $body['error_code']
         ]);
     }
 
     return $body;
+}
+
+// Comprehensive error message parser for Ample API responses
+function parse_ample_error_message($error_code, $error_message, $response) {
+    // Check for constraint information in the response
+    $constraints = $response['constraints'] ?? [];
+    
+    // Parse by error code first (most specific)
+    if ($error_code) {
+        switch ($error_code) {
+            // Order validation errors
+            case 'orders.quantity_must_be_greater_than_zero':
+                return 'Quantity must be greater than 0.';
+                
+            case 'orders.sku_not_found':
+            case 'clients.sku_not_found':
+                return 'The selected product is no longer available.';
+                
+            case 'orders.no_price_set_for_sku':
+                return "This product doesn't have a price set. Please contact support.";
+                
+            // Inventory and availability errors  
+            case 'orders.not_enough_product_available':
+                if (isset($constraints['available_quantity'])) {
+                    return "Only {$constraints['available_quantity']} units available for this product.";
+                }
+                return 'Not enough product available.';
+                
+            case 'orders.product_not_available':
+                return 'This product is currently not available.';
+                
+            case 'orders.sku_discontinued':
+                return 'This product has been discontinued.';
+                
+            // Gram limit errors
+            case 'orders.grams_per_day_limit_reached':
+                if (isset($constraints['grams_per_day_limit'])) {
+                    return "Daily limit of {$constraints['grams_per_day_limit']} grams reached.";
+                }
+                return 'Daily gram limit reached.';
+                
+            case 'orders.monthly_gram_limit_reached':
+                if (isset($constraints['monthly_gram_limit'])) {
+                    return "Monthly limit of {$constraints['monthly_gram_limit']} grams reached.";
+                }
+                return 'Monthly gram limit reached.';
+                
+            case 'orders.remaining_grams_exceeded':
+                if (isset($constraints['remaining_grams'])) {
+                    return "Only {$constraints['remaining_grams']} grams remaining on your prescription.";
+                }
+                return 'Prescription gram limit exceeded.';
+                
+            case 'orders.total_grams_exceeds_limit':
+                if (isset($constraints['max_grams']) && isset($constraints['current_grams'])) {
+                    $remaining = $constraints['max_grams'] - $constraints['current_grams'];
+                    return "Adding this item would exceed your limit. You have {$remaining} grams remaining.";
+                }
+                return 'Total gram limit would be exceeded.';
+                
+            // Bottle and container limits
+            case 'orders.bottle_limit_reached':
+                if (isset($constraints['bottle_limit'])) {
+                    return "Maximum of {$constraints['bottle_limit']} bottles allowed per order.";
+                }
+                return 'Bottle limit reached for this order.';
+                
+            case 'orders.max_bottles_per_sku_reached':
+                if (isset($constraints['max_bottles_per_sku'])) {
+                    return "Maximum of {$constraints['max_bottles_per_sku']} bottles allowed for this product.";
+                }
+                return 'Maximum bottles per product reached.';
+                
+            case 'orders.container_limit_reached':
+                return 'Container limit reached for this order.';
+                
+            // Prescription and authorization errors
+            case 'orders.prescription_expired':
+                if (isset($constraints['expiry_date'])) {
+                    return "Your prescription expired on {$constraints['expiry_date']}. Please renew your prescription.";
+                }
+                return 'Your prescription has expired. Please renew to continue ordering.';
+                
+            case 'orders.prescription_not_active':
+                return 'Your prescription is not active. Please contact support.';
+                
+            case 'orders.client_not_authorized':
+                return 'You are not authorized to place orders. Please contact support.';
+                
+            case 'orders.client_account_suspended':
+                return 'Your account has been suspended. Please contact support.';
+                
+            // Payment and pricing errors
+            case 'orders.insufficient_funds':
+                if (isset($constraints['available_balance'])) {
+                    return "Insufficient funds. Available balance: \${$constraints['available_balance']}.";
+                }
+                return 'Insufficient funds in your account.';
+                
+            case 'orders.price_changed':
+                if (isset($constraints['new_price'])) {
+                    return "Product price has changed to \${$constraints['new_price']}. Please refresh and try again.";
+                }
+                return 'Product price has changed. Please refresh the page.';
+                
+            case 'orders.discount_no_longer_valid':
+                return 'The applied discount is no longer valid.';
+                
+            // Order state errors
+            case 'orders.already_placed':
+                return 'This order has already been placed.';
+                
+            case 'orders.cannot_modify_after_purchase':
+                return 'Cannot modify order after purchase.';
+                
+            case 'orders.order_locked':
+                return 'This order is currently locked for processing.';
+                
+            case 'orders.order_cancelled':
+                return 'This order has been cancelled.';
+                
+            // Category and product type restrictions
+            case 'orders.category_not_allowed':
+                if (isset($constraints['allowed_categories'])) {
+                    return "This product category is not allowed. Allowed categories: " . implode(', ', $constraints['allowed_categories']);
+                }
+                return 'This product category is not allowed for your account.';
+                
+            case 'orders.product_type_restricted':
+                return 'This product type is restricted for your account.';
+                
+            case 'orders.concentration_too_high':
+                if (isset($constraints['max_concentration'])) {
+                    return "Maximum allowed concentration is {$constraints['max_concentration']}%.";
+                }
+                return 'Product concentration exceeds your limit.';
+                
+            // Geographic and delivery restrictions
+            case 'orders.delivery_not_available':
+                return 'Delivery is not available to your location.';
+                
+            case 'orders.outside_delivery_zone':
+                return 'Your address is outside our delivery zone.';
+                
+            case 'orders.pickup_required':
+                return 'This order requires in-store pickup.';
+                
+            // Regulatory and compliance errors
+            case 'orders.regulatory_limit_exceeded':
+                return 'This order exceeds regulatory purchasing limits.';
+                
+            case 'orders.age_verification_required':
+                return 'Age verification is required to complete this order.';
+                
+            case 'orders.license_verification_failed':
+                return 'License verification failed. Please contact support.';
+                
+            // Session and timing errors
+            case 'orders.session_expired':
+                return 'Your session has expired. Please refresh the page and try again.';
+                
+            case 'orders.too_many_requests':
+                return 'Too many requests. Please wait a moment and try again.';
+                
+            case 'orders.ordering_window_closed':
+                if (isset($constraints['next_window'])) {
+                    return "Ordering window is closed. Next window opens: {$constraints['next_window']}.";
+                }
+                return 'Ordering window is currently closed.';
+                
+            // Generic policy and business rule errors
+            case 'policies.apply_failed':
+                return 'Unable to apply pricing policies. Please try again.';
+                
+            case 'orders.business_rules_violation':
+                return 'This action violates business rules. Please contact support.';
+                
+            case 'orders.minimum_order_not_met':
+                if (isset($constraints['minimum_amount'])) {
+                    return "Minimum order amount of \${$constraints['minimum_amount']} not met.";
+                }
+                return 'Minimum order amount not met.';
+                
+            case 'orders.maximum_order_exceeded':
+                if (isset($constraints['maximum_amount'])) {
+                    return "Maximum order amount of \${$constraints['maximum_amount']} exceeded.";
+                }
+                return 'Maximum order amount exceeded.';
+                
+            // System and server errors
+            case 'orders.system_error':
+                return 'A system error occurred. Please try again later.';
+                
+            case 'orders.maintenance_mode':
+                return 'System is under maintenance. Please try again later.';
+                
+            case 'orders.service_unavailable':
+                return 'Service is temporarily unavailable. Please try again later.';
+        }
+    }
+    
+    // Fall back to original error message if no specific handling
+    return $error_message ?: 'An error occurred while processing your request.';
+}
+
+// Helper function to get parsed error message from API response without triggering wp_send_json_error
+function get_parsed_ample_error($response) {
+    if (!is_array($response) || !isset($response['error_code'])) {
+        return null;
+    }
+    
+    return parse_ample_error_message(
+        $response['error_code'], 
+        $response['error_message'] ?? $response['message'] ?? null, 
+        $response
+    );
 }
 
 

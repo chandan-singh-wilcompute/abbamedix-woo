@@ -84,6 +84,7 @@ class Ample_Session_Cache {
                 'credit_cards',
                 'status',
                 'session_initialized',
+                'initialization_timestamp',
                 'prescriptions',
                 'current_prescription',
                 'applicable_discount_codes',

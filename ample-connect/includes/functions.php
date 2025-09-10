@@ -35,27 +35,67 @@ function setup_session_for_user_once() {
         return;
     }
 
+    // More robust prevention using session cache instead of just static variable
     static $already_run = false;
-    if ($already_run) return;
+    if ($already_run) {
+        ample_connect_log("Setup session blocked by static variable");
+        return;
+    }
+    
+    // Also check if initialization is currently in progress (cross-request protection)
+    $initialization_in_progress = Ample_Session_Cache::get('initialization_in_progress');
+    if ($initialization_in_progress && (time() - $initialization_in_progress) < 30) {
+        ample_connect_log("Session initialization in progress (started " . (time() - $initialization_in_progress) . " seconds ago), skipping");
+        return;
+    }
+    
+    // Set lock before proceeding
+    Ample_Session_Cache::set('initialization_in_progress', time());
     $already_run = true;
 
     setup_session_for_user();
+    
+    // Remove lock after completion
+    Ample_Session_Cache::set('initialization_in_progress', null);
 }
 // add_action('template_redirect', 'setup_session_for_user_once');
 add_action('wp', 'setup_session_for_user_once');
 
 function setup_session_for_user() {
     ample_connect_log("Setup session for user called");
-    // User must be logged in
     
     $user = wp_get_current_user();
+
+    // Global lock to prevent multiple simultaneous API calls
+    static $api_initialization_in_progress = false;
+    if ($api_initialization_in_progress) {
+        ample_connect_log("Session initialization already in progress, skipping");
+        return;
+    }
 
     // Check if session is initialized and has required data
     $session_initialized = Ample_Session_Cache::get('session_initialized');
     $purchasable_products = Ample_Session_Cache::get('purchasable_products');
+    $initialization_timestamp = Ample_Session_Cache::get('initialization_timestamp');
+
+    // Prevent re-initialization if it was done recently (within last 5 minutes)
+    if ($session_initialized && $initialization_timestamp && (time() - $initialization_timestamp) < 300) {
+        ample_connect_log("Session recently initialized, skipping re-initialization");
+        
+        // Still check for order if user is approved but has no order
+        $order_id = Ample_Session_Cache::get('order_id', false);
+        $status = Ample_Session_Cache::get('status', 'Lead');
+        if ($status == "Approved" && !$order_id) {
+            $api_initialization_in_progress = true;
+            get_order_from_api_and_update_session($user->ID);
+            $api_initialization_in_progress = false;
+        }
+        return;
+    }
 
     // Re-initialize if session is missing or incomplete
     if (!$session_initialized || !$purchasable_products) {
+        $api_initialization_in_progress = true;
         ample_connect_log("Re-initializing session data for user: " . $user->ID);
         
         Client_Information::fetch_information();
@@ -63,13 +103,18 @@ function setup_session_for_user() {
         get_purchasable_products_and_store_in_session($user->ID);
         // get_order_from_api_and_update_session($user->ID);
         // get_shipping_rates_and_store_in_session($user->ID);
+        
         Ample_Session_Cache::set('session_initialized', true);
+        Ample_Session_Cache::set('initialization_timestamp', time());
+        $api_initialization_in_progress = false;
     }
 
     $order_id = Ample_Session_Cache::get('order_id', false);
     $status = Ample_Session_Cache::get('status', 'Lead');
     if ($status == "Approved" && !$order_id) {
+        $api_initialization_in_progress = true;
         get_order_from_api_and_update_session($user->ID);
+        $api_initialization_in_progress = false;
     }
 }
 
@@ -1832,7 +1877,6 @@ function attach_api_data_to_order($order, $data) {
 // 2. Ajax Endpoint to return current grams
 add_action('wp_ajax_get_gram_quota_data', 'get_gram_quota_data');
 add_action('wp_ajax_nopriv_get_gram_quota_data', 'get_gram_quota_data');
-
 function get_gram_quota_data() {
     // Check if session is available for AJAX requests
     if (!Ample_Session_Cache::is_session_available()) {
@@ -1867,44 +1911,36 @@ function get_gram_quota_data() {
     $availble_to_order = Ample_Session_Cache::get('available_to_order', 0);
 
     if ($details) {
+        ample_connect_log("Policy details found in session.");
         $policy_available_grams = floatval($details['policy_remaining']);
         $current_gram_used = floatval($details['current_order_coverage']);
-    } else {
-        $policy_available_grams = 0;
-        $current_gram_used = 0;
-        ample_connect_log("Policy details not found in session for get_gram_quota_data");
-    }
-
-    // if ($availble_to_order > 0) {
-    //     $total = 0;
-    //     if ( WC()->cart ) {
-    //         foreach ( WC()->cart->get_cart() as $cart_item ) {
-    //             $product = $cart_item['data']; // WC_Product object
-    //             $quantity = $cart_item['quantity'];
-
-    //             // Make sure 'rx_reduction' meta exists
-    //             $rx_reduction = floatval( $product->get_meta('RX Reduction') );
-
-    //             $total += $rx_reduction * $quantity;
-    //         }
-    //     }
-
-    //     ample_connect_log('current gram - ' . $current_gram_used . ' Total - ' . $total);
-    //     $prescription_available_grams = $availble_to_order - $total;
-    //     Ample_Session_Cache::set('current_on_cart', $total);
-
-    // } else {
-    //     $prescription_available_grams = 0;
-    //     ample_connect_log("Available to order is 0 or not set in session for get_gram_quota_data");
-    // }
-
-    if ($availble_to_order > 0) {
         $prescription_available_grams = $availble_to_order - $current_gram_used;
         Ample_Session_Cache::set('current_on_cart', $current_gram_used);
+    } else if ($availble_to_order > 0) {
+        ample_connect_log("Policy details not found in session for get_gram_quota_data");
+        $total = 0;
+        if ( WC()->cart ) {
+            foreach ( WC()->cart->get_cart() as $cart_item ) {
+                $product = $cart_item['data']; // WC_Product object
+                $quantity = $cart_item['quantity'];
+
+                // Make sure 'rx_reduction' meta exists
+                $rx_reduction = floatval( $product->get_meta('RX Reduction') );
+
+                $total += $rx_reduction * $quantity;
+            }
+        }
+        
+        $prescription_available_grams = $availble_to_order - $total;
+        Ample_Session_Cache::set('current_on_cart', $total);
+        $policy_available_grams = 0;
+
     } else {
+        $policy_available_grams = 0;
         $prescription_available_grams = 0;
     }
 
+    $prescription_available_grams = max(0, $prescription_available_grams);
 
     wp_send_json([
         'policy_grams' => $policy_available_grams,
@@ -2263,3 +2299,224 @@ add_action( 'template_redirect', function() {
         exit;
     }
 });
+
+
+// checkout related code
+// ---- 1) Server-side: copy billing -> shipping in user meta if empty (runs before checkout render)
+add_action( 'woocommerce_before_checkout_form', function() {
+    if ( ! is_user_logged_in() ) return;
+
+    $user_id = get_current_user_id();
+    $map = [
+        'shipping_first_name' => 'billing_first_name',
+        'shipping_last_name'  => 'billing_last_name',
+        'shipping_phone'      => 'billing_phone',
+        'shipping_address_1'  => 'billing_address_1',
+    ];
+
+    foreach ( $map as $ship_key => $bill_key ) {
+        $ship_val = get_user_meta( $user_id, $ship_key, true );
+        if ( empty( $ship_val ) ) {
+            $bill_val = get_user_meta( $user_id, $bill_key, true );
+            if ( ! empty( $bill_val ) ) {
+                update_user_meta( $user_id, $ship_key, $bill_val );
+            }
+        }
+    }
+}, 5 );
+
+// ---- 2) Fallback: ensure checkout field values come from user meta if present
+add_filter( 'woocommerce_checkout_get_value', function( $value, $input ) {
+    if ( is_user_logged_in() ) {
+        $user_id = get_current_user_id();
+        $saved = get_user_meta( $user_id, $input, true );
+        if ( ! empty( $saved ) ) {
+            return $saved;
+        }
+    }
+    return $value;
+}, 10, 2 );
+
+// ---- 3) Client-side: enqueue inline JS that copies billing inputs to shipping inputs and
+// re-runs after checkout updates (robust for Fluid Checkout)
+add_action( 'wp_enqueue_scripts', function() {
+    if ( ! is_checkout() || is_order_received_page() ) return;
+
+    wp_register_script( 'fc-copy-billing', false, ['jquery'], '1.0', true );
+    wp_enqueue_script( 'fc-copy-billing' );
+
+    $js = <<<'JS'
+(function($){
+  function copyBillingToShipping() {
+    // mappings: billing -> shipping
+    var maps = [
+      {b: '[name="billing_first_name"]', s: '[name="shipping_first_name"]'},
+      {b: '[name="billing_last_name"]',  s: '[name="shipping_last_name"]'},
+      {b: '[name="billing_phone"]',      s: '[name="shipping_phone"]'},
+      {b: '[name="billing_first_name"]',  s: '[name="shipping_address_1"]'}
+    ];
+
+    maps.forEach(function(m){
+      var billingVal = $(m.b).val();
+      var $s = $(m.s);
+      if ( billingVal && $s.length && !$s.val() ) {
+        $s.val(billingVal).trigger('change');
+      }
+    });
+  }
+
+  $(function(){
+    // Run once on load
+    copyBillingToShipping();
+
+    // Re-run when WooCommerce triggers an updated_checkout event
+    $(document.body).on('updated_checkout', copyBillingToShipping);
+
+    // Capture delegated changes on billing fields (works with Fluid Checkout DOM replacement)
+    $(document.body).on('change input', '[name^="billing_"], [name="account_first_name"], [name^="form-field-"]', function(){
+      // small delay to allow other scripts to run first (autocomplete etc.)
+      setTimeout(copyBillingToShipping, 30);
+    });
+
+    // MutationObserver fallback: when the checkout form area changes, try again
+    var target = document.querySelector('form.checkout') || document.querySelector('#checkout-app') || document.body;
+    if ( target && window.MutationObserver ) {
+      var obs = new MutationObserver(function() { copyBillingToShipping(); });
+      obs.observe(target, { childList: true, subtree: true });
+    }
+  });
+})(jQuery);
+JS;
+
+    wp_add_inline_script( 'fc-copy-billing', $js );
+});
+
+// Auto-fill checkout fields with user data
+function autofill_checkout_fields($fields) {
+    if (!is_user_logged_in()) {
+        return $fields;
+    }
+    
+    $current_user = wp_get_current_user();
+    $user_id = $current_user->ID;
+    
+    // Get user meta data
+    $phone_number = get_user_meta($user_id, 'billing_phone', true);
+    $date_of_birth = get_user_meta($user_id, 'date_of_birth', true);
+    
+    // Get most recent order address
+    $recent_address = get_most_recent_order_address($user_id);
+    
+    // Auto-fill billing fields
+    if (empty($fields['billing']['billing_first_name']['default'])) {
+        $fields['billing']['billing_first_name']['default'] = $current_user->first_name;
+    }
+    if (empty($fields['billing']['billing_last_name']['default'])) {
+        $fields['billing']['billing_last_name']['default'] = $current_user->last_name;
+    }
+    if (empty($fields['billing']['billing_email']['default'])) {
+        $fields['billing']['billing_email']['default'] = $current_user->user_email;
+    }
+    if (empty($fields['billing']['billing_phone']['default']) && $phone_number) {
+        $fields['billing']['billing_phone']['default'] = $phone_number;
+    }
+    
+    // Auto-fill shipping fields with recent order data
+    if ($recent_address) {
+        if (empty($fields['shipping']['shipping_first_name']['default'])) {
+            $fields['shipping']['shipping_first_name']['default'] = $recent_address['first_name'] ?: $current_user->first_name;
+        }
+        if (empty($fields['shipping']['shipping_last_name']['default'])) {
+            $fields['shipping']['shipping_last_name']['default'] = $recent_address['last_name'] ?: $current_user->last_name;
+        }
+        if (empty($fields['shipping']['shipping_address_1']['default'])) {
+            $fields['shipping']['shipping_address_1']['default'] = $recent_address['address_1'];
+        }
+        if (empty($fields['shipping']['shipping_address_2']['default'])) {
+            $fields['shipping']['shipping_address_2']['default'] = $recent_address['address_2'];
+        }
+        if (empty($fields['shipping']['shipping_city']['default'])) {
+            $fields['shipping']['shipping_city']['default'] = $recent_address['city'];
+        }
+        if (empty($fields['shipping']['shipping_postcode']['default'])) {
+            $fields['shipping']['shipping_postcode']['default'] = $recent_address['postcode'];
+        }
+        if (empty($fields['shipping']['shipping_state']['default'])) {
+            $fields['shipping']['shipping_state']['default'] = $recent_address['state'];
+        }
+        if (empty($fields['shipping']['shipping_country']['default'])) {
+            $fields['shipping']['shipping_country']['default'] = $recent_address['country'];
+        }
+    }
+    
+    return $fields;
+}
+add_filter('woocommerce_checkout_fields', 'autofill_checkout_fields');
+
+// Get user address data for AJAX requests
+function get_user_address_data_for_checkout() {
+    if (!is_user_logged_in()) {
+        wp_send_json_error('User not logged in');
+        return;
+    }
+    
+    $current_user = wp_get_current_user();
+    $user_id = $current_user->ID;
+    
+    // Get user meta data
+    $phone_number = get_user_meta($user_id, 'billing_phone', true);
+    $recent_address = get_most_recent_order_address($user_id);
+    
+    $data = array(
+        'billing_first_name' => $current_user->first_name,
+        'billing_last_name' => $current_user->last_name,
+        'billing_email' => $current_user->user_email,
+        'billing_phone' => $phone_number,
+    );
+    
+    // Add shipping data from recent order
+    if ($recent_address) {
+        $data = array_merge($data, array(
+            'shipping_first_name' => $recent_address['first_name'] ?: $current_user->first_name,
+            'shipping_last_name' => $recent_address['last_name'] ?: $current_user->last_name,
+            'shipping_address_1' => $recent_address['address_1'],
+            'shipping_address_2' => $recent_address['address_2'],
+            'shipping_city' => $recent_address['city'],
+            'shipping_postcode' => $recent_address['postcode'],
+            'shipping_state' => $recent_address['state'],
+            'shipping_country' => $recent_address['country'],
+        ));
+    }
+    
+    wp_send_json_success($data);
+}
+add_action('wp_ajax_get_user_address_data_for_checkout', 'get_user_address_data_for_checkout');
+add_action('wp_ajax_nopriv_get_user_address_data_for_checkout', 'get_user_address_data_for_checkout');
+
+// Helper function to get most recent order address
+function get_most_recent_order_address($user_id) {
+    $orders = wc_get_orders(array(
+        'customer_id' => $user_id,
+        'limit' => 1,
+        'status' => array('wc-completed', 'wc-processing', 'wc-on-hold'),
+        'orderby' => 'date',
+        'order' => 'DESC'
+    ));
+    
+    if (empty($orders)) {
+        return null;
+    }
+    
+    $order = $orders[0];
+    
+    return array(
+        'first_name' => $order->get_shipping_first_name(),
+        'last_name' => $order->get_shipping_last_name(),
+        'address_1' => $order->get_shipping_address_1(),
+        'address_2' => $order->get_shipping_address_2(),
+        'city' => $order->get_shipping_city(),
+        'postcode' => $order->get_shipping_postcode(),
+        'state' => $order->get_shipping_state(),
+        'country' => $order->get_shipping_country(),
+    );
+}

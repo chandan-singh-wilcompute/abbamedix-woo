@@ -4,11 +4,71 @@ if (!defined('ABSPATH')) {
 }
 require_once plugin_dir_path(__FILE__) . '/customer-functions.php';
 
+// Note: parse_ample_error_message function is now available in utility.php
+
+/**
+ * Add to cart with Ample API BEFORE adding to WooCommerce cart
+ * This ensures systems stay in sync and respects Ample's business constraints
+ * Uses the real add_to_order endpoint to validate constraints and add the item
+ */
+function add_to_ample_before_woocommerce($order_id, $sku_id, $quantity) {
+    try {
+        $user_id = get_current_user_id();
+        $client_id = get_user_meta($user_id, 'client_id', true);
+        
+        if (!$client_id) {
+            return 'Client ID not found.';
+        }
+
+        // Use the real add_to_order endpoint to validate constraints BEFORE WooCommerce
+        $url = AMPLE_CONNECT_PORTAL_URL . "/orders/{$order_id}/add_to_order";
+        $body = array(
+            'quantity' => $quantity,
+            'sku_id' => $sku_id,
+            'client_id' => $client_id
+        );
+        
+        // ample_connect_log("API-First Validation: Checking constraints with Ample add_to_order - Order: {$order_id}, SKU: {$sku_id}, Qty: {$quantity}");
+        
+        // Make API call to Ample's add_to_order endpoint 
+        $validation_response = ample_request($url, 'PUT', $body);
+        
+        
+        // Validate the API response first
+        if (!is_array($validation_response)) {
+            if (is_string($validation_response) && strpos($validation_response, '<!DOCTYPE html>') !== false) {
+                return 'API endpoint not found. Please contact support.';
+            }
+            return 'Invalid response from order system. Please try again.';
+        }
+        
+        // Check for Ample API errors in the response
+        if (isset($validation_response['error_code']) || isset($validation_response['error'])) {
+            $error_code = $validation_response['error_code'] ?? null;
+            $error_message = $validation_response['error'] ?? $validation_response['message'] ?? 'Unknown error';
+            
+            
+            // Use comprehensive error parsing function from utility.php
+            return get_parsed_ample_error($validation_response);
+        }
+        
+        // Update session with the successful API response
+        if (array_key_exists('id', $validation_response)) {
+            $user_id = get_current_user_id();
+            store_current_order_to_session($validation_response, $user_id);
+        }
+        
+        return true;
+        
+    } catch (Exception $e) {
+        return 'Add to order failed due to system error.';
+    }
+}
+
 add_filter('woocommerce_add_to_cart_validation', 'custom_add_to_cart_validation', 10, 5);
 function custom_add_to_cart_validation($passed, $product_id, $quantity, $variation_id = 0, $variations = array()) {
     
     if (is_user_logged_in()) {
-        // $allowed_skus = get_purchasable_products();
         $allowed_skus = Ample_Session_Cache::get('purchasable_products');
         
         if (!empty($allowed_skus)) {
@@ -43,27 +103,13 @@ function custom_add_to_cart_validation($passed, $product_id, $quantity, $variati
         return false;
     }
     
-    // OPTIMIZED: Use cached product IDs instead of database query
-    $allowed_product_ids = ample_get_cached_purchasable_product_ids();
-    
-    if (empty($allowed_product_ids) || (count($allowed_product_ids) === 1 && $allowed_product_ids[0] === 0)) {
-        wc_add_notice('This product cannot be added to the cart.', 'error');
-        return false;
-    }
-    
-    // Quick array lookup instead of database query
-    if (!in_array($product_id, $allowed_product_ids)) {
-        wc_add_notice('This product cannot be added to the cart.', 'error');
-        return false;
-    }
 
-    // OPTIMIZED: Get package size efficiently
+    // Get package size efficiently
     $current_product = wc_get_product($variation_id ?: $product_id);
     $current_item_gram = ((float)$current_product->get_meta('RX Reduction')) * $quantity;
 
-    ample_connect_log("current item gram - " . $current_item_gram);
 
-    // OPTIMIZED: Calculate cart total package size more efficiently
+    // Calculate cart total package size efficiently
     $current_on_cart = Ample_Session_Cache::get('current_on_cart', 0);
     if ($current_on_cart == 0) {
 
@@ -83,16 +129,11 @@ function custom_add_to_cart_validation($passed, $product_id, $quantity, $variati
         $current_on_cart = $total;
     }
     
-    ample_connect_log("current available - " . $current_on_cart);
     $total_grams = $current_item_gram + $current_on_cart;
-    ample_connect_log("total - " . $total_grams);
-    // $order = get_order_id_from_api();
     $order_id = Ample_Session_Cache::get('order_id');
 
     if ($order_id) {
-        // $get_available_to_order = Client_Information::get_available_to_order();
         $available_to_order  = Ample_Session_Cache::get('available_to_order');
-        ample_connect_log("availablee to order - " . $available_to_order);
         
         if ($available_to_order < $total_grams) {
             wc_add_notice('There is not enough room on the prescription to cover your purchase quantity.', 'error');
@@ -103,49 +144,119 @@ function custom_add_to_cart_validation($passed, $product_id, $quantity, $variati
         return false;
     }
 
-    return $passed;
-}
-
-add_action('woocommerce_add_to_cart', 'custom_add_to_order', 10, 6);
-function custom_add_to_order($cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data) {
-    // Validate session is available
-    if (!Ample_Session_Cache::is_session_available()) {
-        return;
-    }
+    // API-First Validation - Validate with Ample BEFORE allowing WooCommerce to proceed
     $current_product = wc_get_product($variation_id ?: $product_id);
     $sku = $current_product->get_sku();
     $sku_array = explode("-", $sku);
     $sku_id = $sku_array[1] ?? null;
     
-    if (!$sku_id) {
-        ample_connect_log("Invalid SKU format for product ID: " . ($variation_id ?: $product_id));
-        return;
-    }
-
-    $order_id = Ample_Session_Cache::get('order_id');
-    $order_items = Ample_Session_Cache::get('order_items');
-    
-    if ($order_id) {
-        try {
-            
-            $found_in_cart = false;
-            foreach ($order_items as $a_item) {
-                if (isset($a_item['sku_id']) && $a_item['sku_id'] == $sku_id) {
-                    $found_in_cart = true;
-                    break;
-                }
-            }
-
-            if (!$found_in_cart) {
-                add_to_order($order_id, $sku_id, $quantity);
-            }
-        } catch (Exception $e) {
-            ample_connect_log('Exception during add to order: ' . $e->getMessage());
+    if ($sku_id && $order_id) {
+        $api_add_result = add_to_ample_before_woocommerce($order_id, $sku_id, $quantity);
+        
+        if ($api_add_result !== true) {
+            $error_message = is_string($api_add_result) ? $api_add_result : 'Cannot add item due to order constraints.';
+            wc_add_notice($error_message, 'error');
+            return false;
         }
-    } else {
-        ample_connect_log('No order_id available during add to cart');
     }
+
+    return $passed;
 }
+
+// COMMENTED OUT: This hook is redundant since API-first validation already handles adding items to Ample
+// The woocommerce_add_to_cart_validation hook now does everything this hook was doing
+// add_action('woocommerce_add_to_cart', 'custom_add_to_order', 10, 6);
+// function custom_add_to_order($cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data) {
+//     // Validate session is available
+//     if (!Ample_Session_Cache::is_session_available()) {
+//         return;
+//     }
+//     
+//     $current_product = wc_get_product($variation_id ?: $product_id);
+//     $sku = $current_product->get_sku();
+//     $sku_array = explode("-", $sku);
+//     $sku_id = $sku_array[1] ?? null;
+//     
+//     if (!$sku_id) {
+//         ample_connect_log("Invalid SKU format for product ID: " . ($variation_id ?: $product_id));
+//         return;
+//     }
+
+//     $order_id = Ample_Session_Cache::get('order_id');
+//     
+//     if (!$order_id) {
+//         ample_connect_log('No order_id available during add to cart');
+//         return;
+//     }
+
+//     // OPTIMIZATION: Since we now do API-first validation, we might have already added the item to Ample
+//     // Check if this item was already processed during validation to avoid duplicate API calls
+//     if (Ample_Validation_Tracker::is_processed($sku_id, $quantity)) {
+//         ample_connect_log("API-First: Item {$sku_id} was already processed during validation, skipping duplicate API call");
+//         
+//         // No need to refresh session - it was already updated during the API-first validation
+//         return;
+//     }
+
+//     // Fallback for cases where API-first validation was bypassed
+//     // This should rarely happen since we do API-first validation
+//     ample_connect_log("FALLBACK: API-first validation was bypassed, adding item directly to Ample order: SKU {$sku_id}, Qty: {$quantity}");
+//     
+//     try {
+//         $result = add_to_order($order_id, $sku_id, $quantity);
+//         
+//         // Mark this item as processed to avoid future duplicates
+//         Ample_Validation_Tracker::mark_processed($sku_id, $quantity);
+//         
+//         ample_connect_log("Fallback add_to_order completed for SKU {$sku_id}");
+//     } catch (Exception $e) {
+//         ample_connect_log('Exception during fallback add to order: ' . $e->getMessage());
+//     }
+// }
+
+// COMMENTED OUT: Tracking system no longer needed since we removed the redundant hook
+// /**
+//  Simple tracker for items processed during API-first validation
+//  This prevents duplicate API calls between validation and cart addition phases
+// class Ample_Validation_Tracker {
+//     private static $processed_items = array();
+//     
+//     public static function mark_processed($sku_id, $quantity) {
+//         $item_key = $sku_id . '_' . $quantity;
+//         self::$processed_items[$item_key] = true;
+//         ample_connect_log("TRACKING: Marked {$item_key} as processed. Current items: " . implode(', ', array_keys(self::$processed_items)));
+//         
+//         // Also store in session for persistence across hooks
+//         $session_processed = Ample_Session_Cache::get('processed_items', []);
+//         $session_processed[$item_key] = time();
+//         Ample_Session_Cache::set('processed_items', $session_processed);
+//     }
+//     
+//     public static function is_processed($sku_id, $quantity) {
+//         $item_key = $sku_id . '_' . $quantity;
+//         
+//         // Check static array first
+//         $static_check = isset(self::$processed_items[$item_key]);
+//         
+//         // Also check session storage
+//         $session_processed = Ample_Session_Cache::get('processed_items', []);
+//         $session_check = isset($session_processed[$item_key]) && (time() - $session_processed[$item_key]) < 60; // 60 second expiry
+//         
+//         $result = $static_check || $session_check;
+//         ample_connect_log("TRACKING: Checking {$item_key} - Static: " . ($static_check ? 'YES' : 'NO') . ", Session: " . ($session_check ? 'YES' : 'NO') . ", Result: " . ($result ? 'PROCESSED' : 'NOT_PROCESSED'));
+//         
+//         return $result;
+//     }
+//     
+//     public static function clear_all() {
+//         self::$processed_items = array();
+//     }
+// }
+
+// // Helper function to track items processed during validation
+// function mark_validation_item_processed($sku_id, $quantity) {
+//     Ample_Validation_Tracker::mark_processed($sku_id, $quantity);
+// }
 
 
 
@@ -324,7 +435,7 @@ add_action('woocommerce_after_cart_item_quantity_update', 'cart_item_quantity_up
 function cart_item_quantity_update_ample_after($cart_item_key, $quantity, $old_quantity, $cart) {
     error_log('Ample Connect: Alternative hook fired - cart_item_key: ' . $cart_item_key . ', quantity: ' . $quantity . ', old_quantity: ' . $old_quantity);
     
-    ample_connect_log("cart_item_quantity_update_ample_after");
+    // ample_connect_log("cart_item_quantity_update_ample_after");
     // Skip if quantity didn't actually change
     if ($quantity === $old_quantity) {
         return;
@@ -456,7 +567,6 @@ function ample_conditional_login_status_filtering() {
 // TEMPORARILY DISABLED FOR DEBUG - add_action('woocommerce_product_query', 'filter_products_based_on_login_status');
 function filter_products_based_on_login_status($query) {
     if (is_user_logged_in()) {
-        // $allowed_skus = get_purchasable_products();
         $allowed_skus = Ample_Session_Cache::get('purchasable_products');
         if (!empty($allowed_skus)) {
             $allowed_ids = get_product_ids_by_skus($allowed_skus);
@@ -499,7 +609,7 @@ function apply_individual_api_discounts_to_cart($cart) {
     }
     $discounts_cart_hash = $current_hash;
 
-    ample_connect_log("Applying individual API discounts to cart");
+    // ample_connect_log("Applying individual API discounts to cart");
     
     // Apply API discounts to individual cart items from order_items session
     foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
@@ -518,7 +628,7 @@ function apply_individual_api_discounts_to_cart($cart) {
                     $label .= ' (' . implode(', ', $notes) . ')';
                 }
                 $cart->add_fee($label, -$total_discount);
-                ample_connect_log("Applied individual discount: $total_discount for " . $cart_item['data']->get_name());
+                // ample_connect_log("Applied individual discount: $total_discount for " . $cart_item['data']->get_name());
             }
         }
     }

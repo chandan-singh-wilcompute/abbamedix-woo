@@ -3487,33 +3487,33 @@ add_shortcode('logos_grid', 'custom_logos_grid_shortcode');
 /**
  * Make checkout fields read-only (not editable) but still visible and submitted.
  */
-add_filter( 'woocommerce_form_field', function( $field, $key, $args, $value ) {
-    // Apply only to billing, shipping and order notes (not payment/shipping methods)
-    if ( strpos( $key, 'billing_' ) === 0 || strpos( $key, 'shipping_' ) === 0 || $key === 'order_comments' ) {
+// add_filter( 'woocommerce_form_field', function( $field, $key, $args, $value ) {
+//     // Apply only to billing, shipping and order notes (not payment/shipping methods)
+//     if ( strpos( $key, 'billing_' ) === 0 || strpos( $key, 'shipping_' ) === 0 || $key === 'order_comments' ) {
 
-        // For input/text/textarea fields → set readonly
-        if ( in_array( $args['type'], [ 'text', 'email', 'tel', 'textarea', 'number', 'postcode' ] ) ) {
-            $field = str_replace( '<input', '<input readonly="readonly"', $field );
-            $field = str_replace( '<textarea', '<textarea readonly="readonly"', $field );
-        }
+//         // For input/text/textarea fields → set readonly
+//         if ( in_array( $args['type'], [ 'text', 'email', 'tel', 'textarea', 'number', 'postcode' ] ) ) {
+//             $field = str_replace( '<input', '<input readonly="readonly"', $field );
+//             $field = str_replace( '<textarea', '<textarea readonly="readonly"', $field );
+//         }
 
-        // For selects (country, state) → replace with text + hidden input
-        if ( $args['type'] === 'select' ) {
-            $label = ! empty( $args['label'] ) ? '<label class="">' . esc_html( $args['label'] ) . '</label>' : '';
-            $display_value = $args['options'][$value] ?? $value;
+//         // For selects (country, state) → replace with text + hidden input
+//         if ( $args['type'] === 'select' ) {
+//             $label = ! empty( $args['label'] ) ? '<label class="">' . esc_html( $args['label'] ) . '</label>' : '';
+//             $display_value = $args['options'][$value] ?? $value;
 
-            $field  = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) . '" id="' . esc_attr( $key ) . '_field">';
-            $field .= $label;
-            $field .= '<span class="readonly-field">' . esc_html( $display_value ) . '</span>';
-            $field .= '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
-            $field .= '</p>';
-        }
-    }
-    return $field;
-}, 10, 4 );
+//             $field  = '<p class="form-row ' . esc_attr( implode( ' ', $args['class'] ) ) . '" id="' . esc_attr( $key ) . '_field">';
+//             $field .= $label;
+//             $field .= '<span class="readonly-field">' . esc_html( $display_value ) . '</span>';
+//             $field .= '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
+//             $field .= '</p>';
+//         }
+//     }
+//     return $field;
+// }, 10, 4 );
 
 // Remove Additional Notes from checkout
-add_filter( 'woocommerce_enable_order_notes_field', '__return_false' );
+// add_filter( 'woocommerce_enable_order_notes_field', '__return_false' );
 
 
 // Redirect default reset link to custom page
@@ -3587,7 +3587,3 @@ function abba_get_base_categories() {
     }
     return [];
 }
-
-
-
-
