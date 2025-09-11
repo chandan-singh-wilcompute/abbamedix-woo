@@ -1557,7 +1557,56 @@ add_shortcode('product-filter-category', 'abbamedix_parent_product_category_chec
 
 
 
-// custom product filter
+/**
+ * Custom Product Filter Shortcode Handler
+ * 
+ * Generates a comprehensive product filtering interface with dropdown menus for
+ * medical cannabis product attributes. Renders filter dropdowns for size,
+ * dominance, terpenes, and brands to enhance product discovery on shop pages.
+ * 
+ * This function creates the HTML structure for the custom filter system that
+ * integrates with WooCommerce product pages and supports AJAX-based filtering
+ * for improved user experience in medical cannabis e-commerce.
+ * 
+ * Key Features:
+ * - Size filter dropdown with cannabis-specific sizing options
+ * - Dominance filter (indica/sativa/hybrid) for strain categorization
+ * - Terpenes multi-select for medical effects targeting
+ * - Brand filter for manufacturer/grower selection
+ * - Category filter (hidden by default per ABBA Issue #51)
+ * - Bootstrap-compatible responsive design
+ * - Integration with existing healfio theme styling
+ * 
+ * Filter Categories:
+ * - Size: Product sizing options via [product_sizes] shortcode
+ * - Dominance: Cannabis strain types via [product_dominance] shortcode  
+ * - Terpenes: Medical compounds via [terpene_checkboxes] shortcode
+ * - Brands: Product manufacturers via [brand_checkboxes] shortcode
+ * - Categories: Product categories via [category_checkboxes] shortcode (hidden)
+ * 
+ * Note: Category filter is hidden due to URL base category conflicts (ABBA Issue #51).
+ * The functionality is preserved and can be restored by removing style="display: none;"
+ * 
+ * @return string HTML output for the complete filter interface
+ * 
+ * @since 1.0.0
+ * @package HealfioChild
+ * 
+ * @uses ob_start() For output buffering
+ * @uses ob_get_clean() To return buffered output
+ * @uses do_shortcode() To render nested filter shortcodes
+ * 
+ * @see [product_sizes] shortcode for size filtering options
+ * @see [product_dominance] shortcode for strain dominance filtering  
+ * @see [terpene_checkboxes] shortcode for terpene multi-select
+ * @see [brand_checkboxes] shortcode for brand filtering
+ * @see [category_checkboxes] shortcode for category filtering (hidden)
+ * 
+ * @example Usage as shortcode: [my_custom_filter]
+ * @example Direct function call: echo my_custom_product_filter();
+ * 
+ * @issues ABBA-51 Category filter hidden due to URL routing conflicts
+ */
 function my_custom_product_filter() {
     ob_start();
     ?>
@@ -1614,6 +1663,7 @@ function my_custom_product_filter() {
 					<?php echo do_shortcode('[category_checkboxes]'); ?>
 					</div>
 			</div>
+
 		</div>
     <?php
     return ob_get_clean();
@@ -3512,8 +3562,8 @@ add_shortcode('logos_grid', 'custom_logos_grid_shortcode');
 //     return $field;
 // }, 10, 4 );
 
-// Remove Additional Notes from checkout
-// add_filter( 'woocommerce_enable_order_notes_field', '__return_false' );
+// Force enable Additional Notes on checkout
+add_filter( 'woocommerce_enable_order_notes_field', '__return_true' );
 
 
 // Redirect default reset link to custom page
@@ -3587,3 +3637,152 @@ function abba_get_base_categories() {
     }
     return [];
 }
+
+/**
+ * Add JavaScript to sort size variation buttons from smallest to largest
+ *
+ * Injects client-side JavaScript that automatically sorts product size variation
+ * buttons in logical ascending order. Addresses ABBA Issue #64 where larger
+ * sizes (10g) were appearing before smaller sizes (5g) in product variation swatches.
+ *
+ * Features:
+ * - Comprehensive unit support with proper conversions
+ * - Weight units: mg, g, kg, oz, lb (sorted by actual weight)
+ * - Volume units: ml, l (sorted by actual volume)
+ * - Smart categorization: weight units appear before volume units
+ * - Real-time sorting: runs on page load and after AJAX operations
+ * - Selective loading: only loads on product-filter pages for performance
+ *
+ * @since 1.0.0
+ * @version 1.0.0
+ * @author ABBA Development Team
+ *
+ * @uses jQuery For DOM manipulation and event handling
+ * @uses WooCommerce For product variation swatch structure (.shop-variation-swatches)
+ *
+ * @hook wp_footer Outputs JavaScript in footer for proper DOM readiness
+ * @priority 10 Default priority for footer scripts
+ *
+ * @example
+ * // Original swatch order: "10g", "5g", "355ml", "1ml"  
+ * // After sorting: "5g", "10g", "1ml", "355ml"
+ *
+ * @return void Outputs JavaScript directly to page
+ */
+function abba_sort_size_variations_script() {
+    ?>
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        /**
+         * Sort size variation swatches within product cards
+         * 
+         * Iterates through all product variation containers and sorts size buttons
+         * from smallest to largest using unit conversion for accurate comparison.
+         * 
+         * @function sortSizeVariations
+         * @memberof jQuery.ready
+         * @since 1.0.0
+         * 
+         * @example
+         * // Before: [10g, 5g, 355ml, 1ml]
+         * // After:  [5g, 10g, 1ml, 355ml] 
+         * 
+         * @returns {void}
+         */
+        function sortSizeVariations() {
+            $('.shop-variation-swatches').each(function() {
+                var $container = $(this);
+                // Target the actual swatch elements: .swatch-item.text-swatch with size text
+                var $swatchesContainer = $container.find('.swatches');
+                var $variations = $swatchesContainer.find('.swatch-item.text-swatch').filter(function() {
+                    var text = $(this).text().trim();
+                    // Support common cannabis/pharmaceutical units: mg, g, kg, ml, l, oz, lb
+                    return text.match(/^\d+(\.\d+)?\s*(mg|g|kg|ml|l|oz|lb)$/i);
+                });
+                
+                if ($variations.length > 1) {
+                    // Convert to array and sort by numeric size value
+                    var sortedVariations = $variations.toArray().sort(function(a, b) {
+                        var textA = $(a).text().trim();
+                        var textB = $(b).text().trim();
+                        
+                        // Extract number and unit for each
+                        var matchA = textA.match(/(\d+(?:\.\d+)?)\s*(mg|g|kg|ml|l|oz|lb)/i);
+                        var matchB = textB.match(/(\d+(?:\.\d+)?)\s*(mg|g|kg|ml|l|oz|lb)/i);
+                        
+                        if (!matchA || !matchB) return 0;
+                        
+                        var sizeA = parseFloat(matchA[1]);
+                        var sizeB = parseFloat(matchB[1]);
+                        var unitA = matchA[2].toLowerCase();
+                        var unitB = matchB[2].toLowerCase();
+                        
+                        /**
+                         * Convert size values to comparable base units
+                         * 
+                         * Converts all units to a common base for accurate sorting:
+                         * - Weight units converted to grams (base range: 0.001-453592)
+                         * - Volume units converted to ml + 10000 offset (base range: 10000+)
+                         * This ensures weight units always sort before volume units.
+                         * 
+                         * @function getBaseValue
+                         * @param {number} size - Numeric size value (e.g., 5, 10, 3.5)
+                         * @param {string} unit - Unit identifier (mg|g|kg|ml|l|oz|lb)
+                         * @returns {number} Converted base value for comparison
+                         * 
+                         * @example
+                         * getBaseValue(5, 'g')    // returns 5
+                         * getBaseValue(1, 'kg')   // returns 1000  
+                         * getBaseValue(355, 'ml') // returns 10355
+                         */
+                        function getBaseValue(size, unit) {
+                            switch(unit) {
+                                // Weight units (convert to grams)
+                                case 'mg': return size * 0.001;
+                                case 'g': return size;
+                                case 'kg': return size * 1000;
+                                case 'oz': return size * 28.3495; // ounces to grams
+                                case 'lb': return size * 453.592; // pounds to grams
+                                
+                                // Volume units (convert to ml, offset by 10000 to separate from weight)
+                                case 'ml': return size + 10000;
+                                case 'l': return (size * 1000) + 10000; // liters to ml + offset
+                                
+                                default: return size;
+                            }
+                        }
+                        
+                        var baseA = getBaseValue(sizeA, unitA);
+                        var baseB = getBaseValue(sizeB, unitB);
+                        
+                        return baseA - baseB; // Sort by converted base values
+                    });
+                    
+                    // Reorder DOM elements within the swatches container
+                    $.each(sortedVariations, function(index, element) {
+                        $swatchesContainer.append($(element));
+                    });
+                    
+                    // Size variations sorted successfully
+                }
+            });
+        }
+        
+        // Sort variations on page load
+        setTimeout(sortSizeVariations, 1000);
+        
+        // Sort variations after AJAX filtering/sorting operations
+        $(document).on('ample_products_updated ample_sorting_complete', function() {
+            setTimeout(sortSizeVariations, 500);
+        });
+    });
+    </script>
+    <?php
+}
+
+// Only add this script on product filter pages
+add_action('wp_footer', function() {
+    if (is_page() && (strpos($_SERVER['REQUEST_URI'], 'product-filter') !== false)) {
+        abba_sort_size_variations_script();
+    }
+});

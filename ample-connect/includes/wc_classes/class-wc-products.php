@@ -483,7 +483,7 @@ class WC_Products {
 
         
         // Debug logging
-        ample_connect_log("Product ID: {$product_id}, Has Stock: " . ($has_stock ? 'true' : 'false') . ", Final Status: " . ($has_stock ? 'instock' : 'outofstock'));
+        // ample_connect_log("Product ID: {$product_id}, Has Stock: " . ($has_stock ? 'true' : 'false') . ", Final Status: " . ($has_stock ? 'instock' : 'outofstock'));
         
     
         $this->assign_product_to_dynamic_category($product_id, $parent_category, $child_category);
@@ -547,7 +547,7 @@ class WC_Products {
         $tmp_file = download_url($image_url);
         if (is_wp_error($tmp_file)) {
             // ample_connect_log("Image download failed");
-            error_log('Image download failed: ' . $tmp_file->get_error_message());
+            // error_log('Image download failed: ' . $tmp_file->get_error_message());
             return false;
         }
     

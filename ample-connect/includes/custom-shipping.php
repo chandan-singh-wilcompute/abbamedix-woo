@@ -1,35 +1,62 @@
-<?php
-if (!defined('ABSPATH')) {
-    exit; // Exit if accessed directly
-}
-require_once plugin_dir_path(__FILE__) . '/customer-functions.php';
+<?php 
+if (!defined('ABSPATH')) exit;
 
-// Register the custom shipping method
 function custom_shipping_api_init() {
+
     if (!class_exists('WC_Custom_Shipping_Method')) {
         class WC_Custom_Shipping_Method extends WC_Shipping_Method {
-            
-            public function __construct() {
+            public function __construct($instance_id = 0) {
+                
                 $this->id                 = 'custom_shipping_api';
+                $this->instance_id        = absint($instance_id);
                 $this->method_title       = __('Custom Shipping API', 'woocommerce');
                 $this->method_description = __('Retrieve shipping rates from an external API', 'woocommerce');
-                $this->supports = array(
-                    'no-shipping-cache' // 🚀 disables caching
+                $this->supports           = array(
+                    'shipping-zones',
+                    'instance-settings',
                 );
+
                 $this->init();
             }
 
             function init() {
-
                 $this->init_form_fields();
                 $this->init_settings();
+
+                $this->enabled = $this->get_option('enabled');
+                $this->title   = $this->get_option('title');
+
                 add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
+            }
+
+            public function init_form_fields() {
+                $this->form_fields = array(
+                    'enabled' => array(
+                        'title'   => __('Enable', 'woocommerce'),
+                        'type'    => 'checkbox',
+                        'label'   => __('Enable this shipping method', 'woocommerce'),
+                        'default' => 'yes',
+                    ),
+                    'title' => array(
+                        'title'       => __('Title', 'woocommerce'),
+                        'type'        => 'text',
+                        'description' => __('Title shown at checkout.', 'woocommerce'),
+                        'default'     => __('Custom Shipping API', 'woocommerce'),
+                    ),
+                );
             }
 
             public function calculate_shipping($package = array()) {
                 if (is_checkout()) {
                     get_shipping_rates_and_store_in_session();
                 }
+                // get_shipping_rates_and_store_in_session();
+                // if (is_checkout()) {
+                //     get_shipping_rates_and_store_in_session();
+                // } else {
+
+                //     get_shipping_rates_and_store_in_session();
+                // }
                 
                 $shipping_options = [];
 
@@ -38,7 +65,6 @@ function custom_shipping_api_init() {
                 // }
 
                 $shipping_options = Ample_Session_Cache::get('custom_shipping_rates');
-                // $shipping_options = get_shipping_rates_and_store_in_session();
 
                 // Add placeholder
                 $this->add_rate([

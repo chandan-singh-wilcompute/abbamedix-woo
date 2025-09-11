@@ -17,7 +17,7 @@ class  Client_Information {
         // Prevent multiple simultaneous calls to this function
         static $fetch_in_progress = false;
         if ($fetch_in_progress) {
-            ample_connect_log("Client information fetch already in progress, skipping");
+            // ample_connect_log("Client information fetch already in progress, skipping");
             return false;
         }
 

@@ -1315,3 +1315,26 @@ form[name="checkout"] a[aria-label="Change: My contact"], form[name="checkout"] 
     text-decoration: none;
     cursor: default;
 }
+
+/* 
+ * Hide search forms on all pages except product-filter page
+ * This prevents confusion between WordPress post search and product search
+ * Only show product search on the dedicated product-filter page
+ * 
+ * Target: Hide .search-form on all pages EXCEPT those with .page-template-product-filter class
+ */
+body:not(.page-template-product-filter) .search-form {
+    display: none !important;
+}
+
+body:not(.page-template-product-filter) form[role="search"] {
+    display: none !important;
+}
+
+body:not(.page-template-product-filter) .header-search {
+    display: none !important;
+}
+
+body:not(.page-template-product-filter) .search-toggle {
+    display: none !important;
+}
