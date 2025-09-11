@@ -56,7 +56,7 @@ $status = Ample_Session_Cache::get('status', false);
 			<div class="group1">
 				<h5 class="mt-0">PERSONAL INFORMATION</h5>
 				<p><strong>Client Name:</strong> <?php echo esc_html($current_user->display_name); ?></p>
-				<p><strong>Client ID:</strong> <?php echo esc_html($user_display_id ?: $user_ample_id); ?></p>
+				<p><strong>Client ID:</strong> <?php echo esc_html($user_ample_id); ?></p>
 				<p><strong>Phone Number:</strong> <?php echo esc_html($phone_number); ?></p>
 				<p><strong>Date of Birth:</strong> <?php echo esc_html($date_of_birth); ?></p>
 				<p><strong>Email Address:</strong> <?php echo esc_html($current_user->user_email); ?></p>
