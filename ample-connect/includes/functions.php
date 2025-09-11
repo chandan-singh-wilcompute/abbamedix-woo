@@ -1901,7 +1901,7 @@ add_action('wp_ajax_nopriv_get_gram_quota_data', 'get_gram_quota_data');
 function get_gram_quota_data() {
     // Check if session is available for AJAX requests
     if (!Ample_Session_Cache::is_session_available()) {
-        ample_connect_log("Session not available during AJAX request for get_gram_quota_data");
+        // ample_connect_log("Session not available during AJAX request for get_gram_quota_data");
         
         // Try to initialize session for logged-in users
         if (is_user_logged_in()) {
@@ -1932,44 +1932,37 @@ function get_gram_quota_data() {
     $availble_to_order = Ample_Session_Cache::get('available_to_order', 0);
 
     if ($details) {
+        // ample_connect_log("Policy details found in session.");
         $policy_available_grams = floatval($details['policy_remaining']);
         $current_gram_used = floatval($details['current_order_coverage']);
-    } else {
-        $policy_available_grams = 0;
-        $current_gram_used = 0;
-        ample_connect_log("Policy details not found in session for get_gram_quota_data");
-    }
-
-    // if ($availble_to_order > 0) {
-    //     $total = 0;
-    //     if ( WC()->cart ) {
-    //         foreach ( WC()->cart->get_cart() as $cart_item ) {
-    //             $product = $cart_item['data']; // WC_Product object
-    //             $quantity = $cart_item['quantity'];
-
-    //             // Make sure 'rx_reduction' meta exists
-    //             $rx_reduction = floatval( $product->get_meta('RX Reduction') );
-
-    //             $total += $rx_reduction * $quantity;
-    //         }
-    //     }
-
-    //     ample_connect_log('current gram - ' . $current_gram_used . ' Total - ' . $total);
-    //     $prescription_available_grams = $availble_to_order - $total;
-    //     Ample_Session_Cache::set('current_on_cart', $total);
-
-    // } else {
-    //     $prescription_available_grams = 0;
-    //     ample_connect_log("Available to order is 0 or not set in session for get_gram_quota_data");
-    // }
-
-    if ($availble_to_order > 0) {
         $prescription_available_grams = $availble_to_order - $current_gram_used;
         Ample_Session_Cache::set('current_on_cart', $current_gram_used);
+    } else if ($availble_to_order > 0) {
+        // ample_connect_log("Policy details not found in session for get_gram_quota_data");
+        $total = 0;
+        if ( WC()->cart ) {
+            foreach ( WC()->cart->get_cart() as $cart_item ) {
+                $product = $cart_item['data']; // WC_Product object
+                $quantity = $cart_item['quantity'];
+
+                // Make sure 'rx_reduction' meta exists
+                $rx_reduction = floatval( $product->get_meta('RX Reduction') );
+
+                $total += $rx_reduction * $quantity;
+            }
+        }
+        
+        $prescription_available_grams = $availble_to_order - $total;
+        Ample_Session_Cache::set('current_on_cart', $total);
+        $policy_available_grams = 0;
+
     } else {
+        $policy_available_grams = 0;
         $prescription_available_grams = 0;
     }
 
+    $prescription_available_grams = max(0, $prescription_available_grams);
+    $policy_available_grams = max(0, $policy_available_grams);
 
     wp_send_json([
         'policy_grams' => $policy_available_grams,
