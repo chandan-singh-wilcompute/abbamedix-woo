@@ -143,14 +143,6 @@
               <?php if (is_user_logged_in()) : ?>
                   <li><a href="<?php echo esc_url(home_url('/my-account/')); ?>">My Profile</a></li>
                   <li><a href="<?php echo esc_url(home_url('/my-account/orders/')); ?>">My Orders</a></li>
-                  <!-- Example: Future implementation for order status
-                  <li>
-                      <?php
-                      // $hreff = esc_url(home_url('/my-account/view-order/' . $order->id));
-                      // echo '<a href="' . $hreff . '" class="button check-status thankyou-button">Check Status</a>';
-                      ?>
-                  </li>
-                  -->
                   <li><a href="<?php echo esc_url(wp_logout_url(home_url())); ?>">Logout</a></li>
               <?php else : ?>
                   <li><a href="<?php echo esc_url(home_url('/my-account/')); ?>">Login</a></li>

@@ -65,15 +65,6 @@
     jQuery(document.body).on('updated_wc_div', function () {
         fetchQuota();
     });
-
-    // setTimeout(function () {
-    //     const checkbox = document.querySelector('input.apply-policy-discount[value="134"]');
-    //     if (checkbox) {
-    //         checkbox.checked = true;
-    //         checkbox.dispatchEvent(new Event('change', { bubbles: true })); // Trigger change event
-    //     }
-    // }, 500);
-
 })();
 
 // Run only if the URL path includes "/product-filter/"

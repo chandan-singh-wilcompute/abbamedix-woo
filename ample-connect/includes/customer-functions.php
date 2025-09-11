@@ -44,7 +44,7 @@ function get_purchasable_products_and_store_in_session($user_id = "") {
     // Prevent multiple simultaneous calls to this function
     static $fetch_in_progress = false;
     if ($fetch_in_progress) {
-        ample_connect_log("Purchasable products fetch already in progress, skipping");
+        // ample_connect_log("Purchasable products fetch already in progress, skipping");
         return false;
     }
 
@@ -93,7 +93,7 @@ function get_purchasable_products_and_store_in_session($user_id = "") {
     $final_ids = !empty($allowed_product_ids) ? $allowed_product_ids : [0];
     Ample_Session_Cache::set('purchasable_product_ids', $final_ids);
     
-    ample_connect_log("Stored " . count($final_ids) . " purchasable product IDs in session");
+    // ample_connect_log("Stored " . count($final_ids) . " purchasable product IDs in session");
 
     $fetch_in_progress = false; // Release lock on success
     return true;
@@ -176,7 +176,8 @@ function get_shipping_rates_and_store_in_session($user_id = "") {
 
     // If cart is empty, don't call API
     if ( WC()->cart->is_empty() ) {
-        Ample_Session_Cache::delete('custom_shipping_rates'); // optional: clear stored rates
+        // ample_connect_log("Cart is empty, clearing shipping rates");
+        Ample_Session_Cache::delete('custom_shipping_rates');
         return;
     }
 
@@ -186,37 +187,46 @@ function get_shipping_rates_and_store_in_session($user_id = "") {
     
     // Get the client id of the customer
     $client_id = get_user_meta($user_id, "client_id", true);
+    // ample_connect_log("Client ID: " . $client_id);
 
     if (!$client_id) {
+        // ample_connect_log("No client_id found for user: " . $user_id);
         return array();
     }
 
     if (!Ample_Session_Cache::has('order_id')) {
+        // ample_connect_log("No order_id in session, fetching from API");
         get_order_from_api_and_update_session($user_id);
     }
 
     $order_id = Ample_Session_Cache::get('order_id');
+    // ample_connect_log("Order ID: " . $order_id);
+
+    if (!$order_id) {
+        // ample_connect_log("No order_id available, cannot get shipping rates");
+        return;
+    }
 
     $url = AMPLE_CONNECT_PORTAL_URL . "/orders/{$order_id}/shipping_rates"; 
     $api_url = add_query_arg(['client_id' => $client_id], $url);
+    // ample_connect_log("Shipping rates API URL: " . $api_url);
 
     $data = ample_request($api_url);
+    // ample_connect_log("Shipping rates API response:");
+    // ample_connect_log($data);
 
-    // echo '<pre>';
-    // echo 'shipping rates api data';
-    // print_r($data);
-    // echo '</pre>';
     $shipping_options = [];
     if(is_array($data) && !array_key_exists("error", $data)) {
         $shipping_options = array_merge(...array_values($data));
+        // ample_connect_log("Processed shipping options:");
+        // ample_connect_log($shipping_options);
+    } else {
+        ample_connect_log("Shipping rates API returned error or invalid data");
     }
-    
-    // ample_connect_log("Shipping methods - \n");
-    // ample_connect_log($shipping_options);
 
     Ample_Session_Cache::set('custom_shipping_rates', $shipping_options);
+    // ample_connect_log("Stored " . count($shipping_options) . " shipping options in session");
 
-    // return $shipping_options;
     return;
 }
 
@@ -226,7 +236,7 @@ function get_order_from_api_and_update_session($user_id = "") {
     // Prevent multiple simultaneous calls to this function
     static $fetch_in_progress = false;
     if ($fetch_in_progress) {
-        ample_connect_log("Order fetch already in progress, skipping");
+        // ample_connect_log("Order fetch already in progress, skipping");
         return false;
     }
 
@@ -509,7 +519,7 @@ function change_item_quantity($order_id, $order_item_id, $updated_quantity) {
     if (isset($trace[1])) {
         $caller = $trace[1];
         $caller_info = (isset($caller['class']) ? $caller['class'] . '::' : '') . $caller['function'] . '()';
-        ample_connect_log("change item quantity was called by: " . $caller_info);
+        // ample_connect_log("change item quantity was called by: " . $caller_info);
     }
 
     $user_id = get_current_user_id();

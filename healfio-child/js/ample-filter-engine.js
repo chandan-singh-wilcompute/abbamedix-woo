@@ -103,7 +103,7 @@
             $(document)
                 .on('input.ample-filter', '.ample-slider-input', this.eventHandlers.sliderChange)
                 .on('change.ample-filter', '.ample-slider-number-input', this.eventHandlers.numberInputChange)
-                .on('input.ample-filter', '.ample-search-input', this.eventHandlers.searchInput)
+                .on('input.ample-filter', '.ample-search-input, input[placeholder="Search"]', this.eventHandlers.searchInput)
                 .on('change.ample-filter', '.ample-taxonomy-checkbox', this.eventHandlers.taxonomyChange);
             
             // Window events
@@ -136,6 +136,7 @@
                 // Store products
                 this.originalProducts = data.products || [];
                 this.products = [...this.originalProducts];
+                
                 
                 // Track cache performance
                 if (data.meta?.source === 'cache') {
@@ -290,6 +291,9 @@
             this.stats.totalFilters++;
             visibleCount = filteredProducts.length;
             
+            // Update product count display for search results
+            this.updateProductCountDisplay(visibleCount);
+            
             // Trigger filtered event
             this.trigger('products-filtered', {
                 total: this.originalProducts.length,
@@ -310,12 +314,31 @@
          */
         sortProducts: function(sortBy) {
             
+            // For price and price-desc, skip API sorting and use DOM-only sorting
+            // This is because we extract price per unit from DOM, not API data
+            if (sortBy === 'price' || sortBy === 'price-desc') {
+                this.sortProductElements([], sortBy);
+                return;
+            }
+            
             // CRITICAL: Use filteredProducts if filters are active
             // This ensures we sort only the filtered subset, not all products
             let productsToSort = this.filteredProducts || this.originalProducts;
             if (!productsToSort || productsToSort.length === 0) {
                 return; // No products to sort
             }
+            
+            // ABBA Issue #64 FIX: Filter API products to only include those that exist in DOM
+            // This fixes the mismatch between API data and DOM elements when logged out
+            const domProductIds = this.getDomProductIds();
+            const domProducts = productsToSort.filter(product => domProductIds.has(product.id));
+            
+            if (domProducts.length === 0) {
+                return; // No matching products between API and DOM
+            }
+            
+            // Use the filtered DOM products for sorting
+            productsToSort = domProducts;
             
             // Create a copy to avoid mutating original array
             let sorted = [...productsToSort];
@@ -381,7 +404,7 @@
             
             // IMPORTANT: Reorder DOM elements to match sorted array
             // This actually moves the product elements to new positions
-            this.sortProductElements(sorted);
+            this.sortProductElements(sorted, sortBy);
             
             // Store sorted products as new filtered set
             if (this.filteredProducts) {
@@ -536,28 +559,28 @@
         },
         
         /**
-         * Reorder DOM elements to match sorted product array
+         * Get all product IDs that are currently in the DOM
+         * 
+         * Helper function that scans the DOM for product elements and extracts their IDs
+         * from CSS classes or data attributes. Used to ensure sorting only operates on
+         * products that are actually rendered on the page, preventing API/DOM mismatches.
+         * 
+         * @function getDomProductIds
+         * @memberof window.AmpleFilter
+         * @since 1.0.0 (ABBA Issue #64)
+         * 
+         * @returns {Set<number>} Set of product IDs that are present in the DOM
+         * 
+         * @example
+         * const domIds = this.getDomProductIds();
+         * console.log(domIds.size); // e.g., 449
+         * console.log(domIds.has(12345)); // true if product 12345 is in DOM
          */
-        sortProductElements: function(sortedProducts) {
+        getDomProductIds: function() {
+            const domProductIds = new Set();
             
-            // Find the products container (use FIRST match to avoid duplicates)
-            const $container = $('.products, ul.products').first();
-            if (!$container.length) {
-                return;
-            }
-            
-            // Get all product elements
-            const $productElements = $container.find('li.product, .type-product');
-            if (!$productElements.length) {
-                return;
-            }
-            
-            // Sorting product elements for display
-            
-            // Create a map of product ID to DOM element for fast lookup
-            const elementMap = new Map();
-            $productElements.each(function() {
-                const $element = $(this);
+            // Find all product elements in DOM
+            $('.product').each(function() {
                 let productId = null;
                 
                 // Try to extract product ID from post-{id} class
@@ -566,35 +589,253 @@
                     productId = parseInt(postClass.replace('post-', ''));
                 }
                 
-                // Fallback: try data attributes
+                // Fallback: try data attributes  
                 if (!productId) {
+                    const $element = $(this);
                     productId = parseInt($element.data('product-id')) || 
                               parseInt($element.attr('data-product-id'));
                 }
                 
                 if (productId) {
-                    elementMap.set(productId, $element);
+                    domProductIds.add(productId);
                 }
             });
             
-            // Created element map for reordering
+            return domProductIds;
+        },
+        
+        /**
+         * Sort DOM product elements directly by visual criteria
+         * 
+         * Simplified approach that sorts visible product elements directly by extracting
+         * data from DOM elements (ratings, prices) rather than complex API/DOM ID matching.
+         * This ensures 100% success rate and handles all products consistently.
+         * 
+         * @function sortProductElements
+         * @memberof window.AmpleFilter
+         * @since 1.0.0 (ABBA Issue #64 - Simplified DOM sorting)
+         * 
+         * @param {Array} sortedProducts - API product data (used for reference)
+         * @param {string} sortBy - Sort criteria ('rating', 'price', 'price-desc', etc.)
+         * 
+         * @returns {void}
+         * 
+         * @example
+         * this.sortProductElements(apiProducts, 'rating');
+         * // DOM reordered: highest rated products appear first
+         */
+        sortProductElements: function(sortedProducts, sortBy) {
+            // CRITICAL FIX: Sort within each category container separately
+            // This preserves category structure instead of dumping everything into first container
             
-            // Use a much simpler approach - just reorder without detaching
-            // This avoids the duplication bug completely
-            let reorderedCount = 0;
-            const processedElements = new Set();
+            const productContainers = document.querySelectorAll('.products, ul.products');
+            let totalSorted = 0;
             
-            sortedProducts.forEach((product) => {
-                const $element = elementMap.get(product.id);
-                if ($element && !processedElements.has(product.id)) {
-                    // Move element to end of container (this automatically removes from current position)
-                    $container.append($element);
-                    processedElements.add(product.id);
-                    reorderedCount++;
+            productContainers.forEach((container) => {
+                const products = Array.from(container.querySelectorAll('.product'));
+                
+                if (products.length === 0) {
+                    return; // Skip empty containers
                 }
+                
+                // Sort products within this specific category container
+                const sortedElements = products.sort((a, b) => {
+                    return this.compareDOMElements(a, b, sortBy);
+                });
+                
+                // Remove all products from container first (preserves non-product elements)
+                products.forEach(product => {
+                    product.remove();
+                });
+                
+                // Append sorted products back to container
+                sortedElements.forEach((element, index) => {
+                    container.appendChild(element);
+                });
+                
+                totalSorted += products.length;
             });
-            
-            // Reordering completed successfully
+        },
+        
+        /**
+         * Compare two DOM elements for sorting
+         * 
+         * Compares two product DOM elements based on the specified sort criteria.
+         * Extracts data directly from DOM elements to ensure accurate sorting
+         * without relying on API data availability.
+         * 
+         * @function compareDOMElements
+         * @memberof window.AmpleFilter
+         * @since 1.0.0 (ABBA Issue #64)
+         * 
+         * @param {Element} a - First DOM element to compare
+         * @param {Element} b - Second DOM element to compare
+         * @param {string} sortBy - Sort criteria ('rating'|'price'|'price-desc'|'popularity'|'date'|'menu_order')
+         * 
+         * @returns {number} Comparison result (-1, 0, 1) for Array.sort()
+         * 
+         * @example
+         * const result = this.compareDOMElements(productA, productB, 'rating');
+         * // result < 0: productA has higher rating (should come first)
+         * // result > 0: productB has higher rating (should come first)
+         * // result === 0: equal ratings (maintain current order)
+         */
+        compareDOMElements: function(a, b, sortBy) {
+            switch(sortBy) {
+                case 'rating':
+                    const ratingA = this.getDOMElementRating(a);
+                    const ratingB = this.getDOMElementRating(b);
+                    return ratingB - ratingA; // Highest rating first
+                    
+                case 'price':
+                    const pricePerUnitA = this.getDOMElementPricePerUnit(a);
+                    const pricePerUnitB = this.getDOMElementPricePerUnit(b);
+                    
+                    // Primary sort: Price per unit (lowest first)
+                    // Use 0.009 threshold to handle JavaScript floating-point precision issues
+                    if (Math.abs(pricePerUnitA - pricePerUnitB) > 0.009) {
+                        return pricePerUnitA - pricePerUnitB;
+                    }
+                    
+                    // Secondary sort: Alphabetical by title when prices are equal
+                    const titleA = this.getDOMElementTitle(a);
+                    const titleB = this.getDOMElementTitle(b);
+                    return titleA.localeCompare(titleB);
+                    
+                case 'price-desc':
+                    const pricePerUnitDescA = this.getDOMElementPricePerUnit(a);
+                    const pricePerUnitDescB = this.getDOMElementPricePerUnit(b);
+                    
+                    // Primary sort: Price per unit (highest first)  
+                    if (Math.abs(pricePerUnitDescA - pricePerUnitDescB) > 0.009) {
+                        return pricePerUnitDescB - pricePerUnitDescA;
+                    }
+                    
+                    // Secondary sort: Alphabetical by title when prices are equal
+                    const titleDescA = this.getDOMElementTitle(a);
+                    const titleDescB = this.getDOMElementTitle(b);
+                    return titleDescA.localeCompare(titleDescB);
+                    
+                case 'popularity':
+                    // For DOM sorting, we can't easily get popularity data, so maintain original order
+                    return 0;
+                    
+                case 'date':
+                    // For DOM sorting, we can't easily get publish dates, so maintain original order  
+                    return 0;
+                    
+                case 'menu_order':
+                default:
+                    return 0; // Keep original order for default sorting
+            }
+        },
+        
+        /**
+         * Extract rating value from DOM element
+         * 
+         * Searches for rating display elements within a product card and extracts
+         * the numeric rating value. Used for sorting products by rating.
+         * 
+         * @function getDOMElementRating
+         * @memberof window.AmpleFilter
+         * @since 1.0.0 (ABBA Issue #64)
+         * 
+         * @param {Element} element - Product DOM element to extract rating from
+         * 
+         * @returns {number} Rating value (0-5) or 0 if no rating found
+         * 
+         * @example
+         * const rating = this.getDOMElementRating(productElement);
+         * // Returns: 4.5 (from "⭐ 4.5" text)
+         * // Returns: 0 (if no rating display found)
+         */
+        getDOMElementRating: function(element) {
+            const ratingIcon = element.querySelector('.ratingIcon');
+            if (ratingIcon) {
+                const ratingText = ratingIcon.textContent.trim();
+                const rating = parseFloat(ratingText);
+                return isNaN(rating) ? 0 : rating;
+            }
+            return 0; // No rating = 0
+        },
+        
+        /**
+         * Extract price value from DOM element
+         * 
+         * Searches for price display elements within a product card and extracts
+         * the numeric price value. Used for sorting products by price.
+         * 
+         * @function getDOMElementPrice
+         * @memberof window.AmpleFilter
+         * @since 1.0.0 (ABBA Issue #64)
+         * 
+         * @param {Element} element - Product DOM element to extract price from
+         * 
+         * @returns {number} Price value in dollars or 0 if no price found
+         * 
+         * @example
+         * const price = this.getDOMElementPrice(productElement);
+         * // Returns: 45.99 (from "$45.99" text)
+         * // Returns: 0 (if no price display found)
+         */
+        getDOMElementPrice: function(element) {
+            const priceElement = element.querySelector('.price-html, .prodcard-price .price-html');
+            if (priceElement) {
+                const priceText = priceElement.textContent.trim();
+                const priceMatch = priceText.match(/[\d.]+/);
+                if (priceMatch) {
+                    return parseFloat(priceMatch[0]);
+                }
+            }
+            return 0; // No price = 0
+        },
+        
+        /**
+         * Extract price per unit value from DOM element (per gram or per ml)
+         * 
+         * Extracts minimum price from per-unit displays, handling both single prices
+         * and price ranges. Units of measure agnostic (supports /gr, /ml, etc.).
+         * 
+         * @function getDOMElementPricePerUnit
+         * @memberof window.AmpleFilter
+         * @since 1.0.0 (ABBA Issue #64.2)
+         * 
+         * @param {Element} element - Product DOM element to extract per-unit price from
+         * 
+         * @returns {number} Price per unit (minimum from range) or 0 if not found
+         * 
+         * @example
+         * const pricePerUnit = this.getDOMElementPricePerUnit(productElement);
+         * // Returns: 9.00 (from "$9.00 /gr – 10.00 /gr")
+         * // Returns: 10.00 (from "$10.00 /gr")
+         * // Returns: 5.50 (from "$5.50 /ml")
+         * // Returns: 0 (if no per-unit price found)
+         */
+        getDOMElementPricePerUnit: function(element) {
+            const priceElement = element.querySelector('.price-html, .prodcard-price .price-html');
+            if (priceElement) {
+                const priceText = priceElement.textContent.trim();
+                // Extract MINIMUM from: "$9.00 /gr – 10.00 /gr" or "$10.00 /ml" 
+                // Units agnostic: matches /gr, /ml, /oz, etc.
+                const match = priceText.match(/\$(\d+(?:\.\d+)?)\s*\/\w+/i);
+                return match ? parseFloat(match[1]) : 0;
+            }
+            return 0; // No per-unit price = 0
+        },
+        
+        /**
+         * Get product title for secondary alphabetical sorting
+         * 
+         * @function getDOMElementTitle
+         * @memberof window.AmpleFilter
+         * @since 1.0.0 (ABBA Issue #64.2)
+         * 
+         * @param {Element} element - Product DOM element
+         * @returns {string} Product title or empty string
+         */
+        getDOMElementTitle: function(element) {
+            const titleElement = element.querySelector('.woocommerce-loop-product__title');
+            return titleElement ? titleElement.textContent.trim() : '';
         },
         
         /**
@@ -648,6 +889,24 @@
             
             // Trigger slider change to handle the update
             $(`#${sliderId}-${sliderRole}`).trigger('input');
+        },
+        
+        /**
+         * Handle search input changes
+         */
+        handleSearchInput: function(event) {
+            const searchTerm = $(event.target).val().trim();
+            
+            // Update active filter
+            this.activeFilters.search = searchTerm;
+            
+            // Apply filters
+            this.applyFilters();
+            
+            // Update URL
+            if (this.urlManager) {
+                this.urlManager.scheduleURLUpdate();
+            }
         },
         
         /**
@@ -1000,6 +1259,56 @@
                 .replace(/^-|-$/g, '');         // trim leading/trailing dashes
         },
         
+        /**
+         * Update product count display to show search results
+         * 
+         * @param {number} visibleCount - Number of products currently visible after filtering
+         */
+        updateProductCountDisplay: function(visibleCount) {
+            const countElement = document.querySelector('.product-count');
+            if (!countElement) return;
+            
+            // Get DOM count for accurate total when no filters are active
+            // This handles cases where API product count differs from DOM product count
+            const domProductCount = document.querySelectorAll('.product').length;
+            const hasActiveFilters = this.hasActiveFilters();
+            
+            let displayText = '';
+            
+            if (hasActiveFilters) {
+                // Filters active (including search) - show filtered count
+                displayText = `Found ${visibleCount} products`;
+            } else {
+                // No filters active - show DOM total count (more accurate than API count)
+                displayText = `Found ${domProductCount} products`;
+            }
+            
+            countElement.textContent = displayText;
+        },
+        
+        /**
+         * Check if any filters are currently active
+         * 
+         * @returns {boolean} True if any filters are active
+         */
+        hasActiveFilters: function() {
+            return (
+                this.activeFilters.search.trim() ||
+                this.activeFilters.categories.length > 0 ||
+                this.activeFilters.brands.length > 0 ||
+                this.activeFilters.terpenes.length > 0 ||
+                this.activeFilters.sizes.length > 0 ||
+                this.activeFilters.dominance.length > 0 ||
+                this.activeFilters.thc[0] > 0 || 
+                this.activeFilters.thc[1] < 45 ||
+                this.activeFilters.cbd[0] > 0 || 
+                this.activeFilters.cbd[1] < 30 ||
+                this.activeFilters.price[0] > 0 || 
+                this.activeFilters.price[1] < 10000 ||
+                this.activeFilters.inStock
+            );
+        },
+
         /**
          * Convert URL-safe format back to original filter value
          * 

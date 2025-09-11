@@ -100,7 +100,7 @@ function debug_shop_products_on_load() {
 }
 
 // Hook into template_redirect to run early in the page load
-add_action('template_redirect', 'debug_shop_products_on_load');
+// add_action('template_redirect', 'debug_shop_products_on_load');
 
 /**
  * Alternative: Debug products via AJAX for real-time debugging
@@ -114,7 +114,7 @@ function debug_products_ajax_endpoint() {
     
     wp_die('Product debug logged to ample-log.log');
 }
-add_action('wp_ajax_debug_products', 'debug_products_ajax_endpoint');
+// add_action('wp_ajax_debug_products', 'debug_products_ajax_endpoint');
 
 /**
  * Add debug button to admin bar for easy triggering
@@ -133,4 +133,4 @@ function add_debug_products_admin_bar($wp_admin_bar) {
         )
     ));
 }
-add_action('admin_bar_menu', 'add_debug_products_admin_bar', 100);
+// add_action('admin_bar_menu', 'add_debug_products_admin_bar', 100);

@@ -951,7 +951,7 @@ body.elementor-page-9 > .elementor-motion-effects-container > .elementor-motion-
   top: 0;
   left: 0;
   width: 100%;
-  height: 91%;
+  height: 92%;
   background: rgba(0, 0, 0, 0.6);
   content: 'Out of stock';
   font-size: 24px;
@@ -3371,6 +3371,59 @@ li.category-concentrates .swatch-item.selected {
 .prodcard-tags p {
   margin-bottom: 0;
 }
+
+/* Rating display in top-right corner - positioned on product image */
+li.product .ratingIcon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(4px);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 15;
+    /* Only show if it has content */
+    min-width: auto;
+    /* Ensure it's positioned relative to the product item, not the group div */
+    pointer-events: none;
+}
+
+li .ratingIcon .bi-star-fill {
+    color: #ffc107;
+    font-size: 12px;
+}
+
+/* Ensure product card has relative positioning for rating icon overlay */
+li .group {
+    position: relative;
+}
+
+/* Ensure the entire product list item is positioned for the rating overlay */
+ul.products li.product {
+    position: relative;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    li.product .ratingIcon {
+        font-size: 10px;
+        padding: 3px 6px;
+        top: 6px;
+        right: 6px;
+    }
+    
+    li.product .ratingIcon .bi-star-fill {
+        font-size: 11px;
+    }
+}
+
 .woocommerce ul.products li.product .woocommerce-loop-product__title {
   font-size: 20px;
   line-height: 30px;
@@ -3382,9 +3435,6 @@ li.category-concentrates .swatch-item.selected {
 .woocommerce ul.products li.product a {
   display: flex !important;
   flex-direction: column;
-}
-.woocommerce ul.products li.product a .ratingIcon {
-  display: none;
 }
 .woocommerce-loop-product__buttons {
   display: none;

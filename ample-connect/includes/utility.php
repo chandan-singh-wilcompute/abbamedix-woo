@@ -14,7 +14,7 @@ function get_ample_api_token($expired = false) {
 
 // Handle API requests
 function ample_request($endpoint, $method = 'GET', $data = [], $headers = [], $log = true) {
-    ample_connect_log("ample request called");
+    // ample_connect_log("ample request called");
     // echo '<pre>';
     // echo print_r($endpoint);
     // echo '</pre>';
@@ -48,7 +48,7 @@ function ample_request($endpoint, $method = 'GET', $data = [], $headers = [], $l
     // echo '</pre>';
 
     if ($api_data == "Token_Expired") {
-        ample_connect_log("Token Expired");
+        // ample_connect_log("Token Expired");
         $response = api_call($endpoint, $method, $data, $headers, $log, true);
 
         if ($log)
@@ -138,15 +138,8 @@ function handle_response($response, $log = false) {
         $user_id = get_current_user_id();
         clear_customer_cart($user_id);
     } else if (isset($body['error_code']) && $body['error_code'] != "policies.apply_failed" && $body['error_code'] != "orders.cannot_modify_after_purchase") {
-        // Use comprehensive error parsing for better user messages
-        $parsed_message = parse_ample_error_message(
-            $body['error_code'], 
-            $body['error_message'] ?? $body['message'] ?? null, 
-            $body
-        );
-        
         wp_send_json_error([
-            'message' => $parsed_message,
+            'message' => 'Document not found.',
             'error_code' => $body['error_code']
         ]);
     }
@@ -154,7 +147,68 @@ function handle_response($response, $log = false) {
     return $body;
 }
 
-// Comprehensive error message parser for Ample API responses
+
+// Generate unique username
+function custom_registration_generate_unique_username ($username)
+{
+    $original_username = $username;
+    $counter = 1;
+
+    while (username_exists($username)) {
+        $username = $original_username . $counter;
+        $counter++;
+    }
+
+    return $username;
+}
+
+
+// Function to clear cart to the particular customer
+function clear_customer_cart( $customer_id ) {
+    ample_connect_log("clear cart got called! customer id is: " . $customer_id);
+
+    if ( ! $customer_id ) {
+        return false;
+    }
+
+    // 1. Delete persistent cart (saved carts)
+    $blog_id = get_current_blog_id();
+    delete_user_meta( $customer_id, '_woocommerce_persistent_cart_' . $blog_id );
+
+    // 2. Delete active session
+    global $wpdb;
+    $table = $wpdb->prefix . 'woocommerce_sessions';
+    $wpdb->delete(
+        $table,
+        array( 'session_key' => (string) $customer_id ),
+        array( '%s' )
+    );
+
+    // 3. Clear cart immediately if this is the current logged-in user
+    if ( is_user_logged_in() && get_current_user_id() == $customer_id && function_exists('WC') && WC()->cart ) {
+        WC()->cart->empty_cart();
+        WC()->session->set('cart', []); // make sure it's flushed
+    }
+
+    return true;
+}
+
+function get_product_id_by_sku( $sku ) {
+    global $wpdb;
+
+    $product_id = wc_get_product_id_by_sku( $sku );
+
+    return $product_id ? intval( $product_id ) : false;
+}
+
+/**
+ * Parse Ample API error responses into user-friendly messages
+ * 
+ * @param string|null $error_code Ample error code
+ * @param string $error_message Raw error message from Ample
+ * @param array $response Full API response with constraints/limits
+ * @return string User-friendly error message
+ */
 function parse_ample_error_message($error_code, $error_message, $response) {
     // Check for constraint information in the response
     $constraints = $response['constraints'] ?? [];
@@ -289,26 +343,6 @@ function parse_ample_error_message($error_code, $error_message, $response) {
                 }
                 return 'Product concentration exceeds your limit.';
                 
-            // Geographic and delivery restrictions
-            case 'orders.delivery_not_available':
-                return 'Delivery is not available to your location.';
-                
-            case 'orders.outside_delivery_zone':
-                return 'Your address is outside our delivery zone.';
-                
-            case 'orders.pickup_required':
-                return 'This order requires in-store pickup.';
-                
-            // Regulatory and compliance errors
-            case 'orders.regulatory_limit_exceeded':
-                return 'This order exceeds regulatory purchasing limits.';
-                
-            case 'orders.age_verification_required':
-                return 'Age verification is required to complete this order.';
-                
-            case 'orders.license_verification_failed':
-                return 'License verification failed. Please contact support.';
-                
             // Session and timing errors
             case 'orders.session_expired':
                 return 'Your session has expired. Please refresh the page and try again.';
@@ -316,37 +350,9 @@ function parse_ample_error_message($error_code, $error_message, $response) {
             case 'orders.too_many_requests':
                 return 'Too many requests. Please wait a moment and try again.';
                 
-            case 'orders.ordering_window_closed':
-                if (isset($constraints['next_window'])) {
-                    return "Ordering window is closed. Next window opens: {$constraints['next_window']}.";
-                }
-                return 'Ordering window is currently closed.';
-                
-            // Generic policy and business rule errors
-            case 'policies.apply_failed':
-                return 'Unable to apply pricing policies. Please try again.';
-                
-            case 'orders.business_rules_violation':
-                return 'This action violates business rules. Please contact support.';
-                
-            case 'orders.minimum_order_not_met':
-                if (isset($constraints['minimum_amount'])) {
-                    return "Minimum order amount of \${$constraints['minimum_amount']} not met.";
-                }
-                return 'Minimum order amount not met.';
-                
-            case 'orders.maximum_order_exceeded':
-                if (isset($constraints['maximum_amount'])) {
-                    return "Maximum order amount of \${$constraints['maximum_amount']} exceeded.";
-                }
-                return 'Maximum order amount exceeded.';
-                
             // System and server errors
             case 'orders.system_error':
                 return 'A system error occurred. Please try again later.';
-                
-            case 'orders.maintenance_mode':
-                return 'System is under maintenance. Please try again later.';
                 
             case 'orders.service_unavailable':
                 return 'Service is temporarily unavailable. Please try again later.';
@@ -368,58 +374,4 @@ function get_parsed_ample_error($response) {
         $response['error_message'] ?? $response['message'] ?? null, 
         $response
     );
-}
-
-
-// Generate unique username
-function custom_registration_generate_unique_username ($username)
-{
-    $original_username = $username;
-    $counter = 1;
-
-    while (username_exists($username)) {
-        $username = $original_username . $counter;
-        $counter++;
-    }
-
-    return $username;
-}
-
-
-// Function to clear cart to the particular customer
-function clear_customer_cart( $customer_id ) {
-    ample_connect_log("clear cart got called! customer id is: " . $customer_id);
-
-    if ( ! $customer_id ) {
-        return false;
-    }
-
-    // 1. Delete persistent cart (saved carts)
-    $blog_id = get_current_blog_id();
-    delete_user_meta( $customer_id, '_woocommerce_persistent_cart_' . $blog_id );
-
-    // 2. Delete active session
-    global $wpdb;
-    $table = $wpdb->prefix . 'woocommerce_sessions';
-    $wpdb->delete(
-        $table,
-        array( 'session_key' => (string) $customer_id ),
-        array( '%s' )
-    );
-
-    // 3. Clear cart immediately if this is the current logged-in user
-    if ( is_user_logged_in() && get_current_user_id() == $customer_id && function_exists('WC') && WC()->cart ) {
-        WC()->cart->empty_cart();
-        WC()->session->set('cart', []); // make sure it's flushed
-    }
-
-    return true;
-}
-
-function get_product_id_by_sku( $sku ) {
-    global $wpdb;
-
-    $product_id = wc_get_product_id_by_sku( $sku );
-
-    return $product_id ? intval( $product_id ) : false;
 }
